@@ -8,20 +8,21 @@
 ## 目录
 
 1. [整体架构](#1-整体架构)
-2. [第一步：SSH 登录现有服务器](#2-第一步ssh-登录现有服务器)
-3. [第二步：确认 DNS 解析](#3-第二步确认-dns-解析)
-4. [第三步：安装基础软件](#4-第三步安装基础软件)
-5. [第四步：克隆代码并生成密钥](#5-第四步克隆代码并生成密钥)
-6. [第五步：配置 .env 环境变量](#6-第五步配置-env-环境变量)
-7. [第六步：启动 Docker 容器](#7-第六步启动-docker-容器)
-8. [第七步：配置 Nginx 反向代理与 HTTPS](#8-第七步配置-nginx-反向代理与-https)
-9. [第八步：初始化数据库](#9-第八步初始化数据库)
-10. [第九步：飞书开放平台配置](#10-第九步飞书开放平台配置)
-11. [第十步：验证测试](#11-第十步验证测试)
-12. [第十一步：生产加固](#12-第十一步生产加固)
-13. [第十二步：发布上线](#12-第十二步发布上线)
-14. [常见问题排错](#13-常见问题排错)
-15. [附录：快速命令汇总](#14-附录快速命令汇总)
+2. [第〇步：正式上线前临时测试](#2-第〇步正式上线前临时测试)
+3. [第一步：SSH 登录现有服务器](#3-第一步ssh-登录现有服务器)
+4. [第二步：确认 DNS 解析](#4-第二步确认-dns-解析)
+5. [第三步：安装基础软件](#5-第三步安装基础软件)
+6. [第四步：克隆代码并生成密钥](#6-第四步克隆代码并生成密钥)
+7. [第五步：配置 .env 环境变量](#7-第五步配置-env-环境变量)
+8. [第六步：启动 Docker 容器](#8-第六步启动-docker-容器)
+9. [第七步：配置 Nginx 反向代理与 HTTPS](#9-第七步配置-nginx-反向代理与-https)
+10. [第八步：初始化数据库](#10-第八步初始化数据库)
+11. [第九步：飞书开放平台配置](#11-第九步飞书开放平台配置)
+12. [第十步：验证测试](#12-第十步验证测试)
+13. [第十一步：生产加固](#13-第十一步生产加固)
+14. [第十二步：发布上线](#14-第十二步发布上线)
+15. [常见问题排错](#15-常见问题排错)
+16. [附录：快速命令汇总](#16-附录快速命令汇总)
 
 ---
 
@@ -69,7 +70,197 @@
 
 ---
 
-## 2. 第一步：SSH 登录现有服务器
+## 2. 第〇步：正式上线前临时测试
+
+> 在正式域名上线前，先用临时域名 `test.anariev.com` 完整走一遍部署流程，确认无误后再切到正式域名。
+
+### 2.1 添加临时 DNS 记录
+
+阿里云控制台 → 云解析 DNS → `anariev.com` → 解析设置 → 添加记录：
+
+| 记录类型 | 主机记录 | 记录值 | TTL |
+|---------|---------|--------|-----|
+| A | `test` | `47.77.217.192` | 600 (10分钟) |
+
+1 分钟后验证：
+
+```bash
+nslookup test.anariev.com
+# 应返回 47.77.217.192
+```
+
+### 2.2 SSH 登录服务器，部署代码
+
+```bash
+ssh root@47.77.217.192
+
+# 创建项目目录
+mkdir -p /home/dylan/dylan_zhao/C_ProjectDeploy && cd /home/dylan/dylan_zhao/C_ProjectDeploy
+
+# 克隆代码
+git clone https://gitee.com/anari-energy/product_develop_management.git .
+
+# 生成密钥 (每步输出都记下来)
+openssl rand -hex 32   # SECRET_KEY
+openssl rand -base64 24 # 数据库密码
+openssl rand -base64 16 # Redis 密码
+openssl rand -hex 16   # MinIO AK
+openssl rand -hex 16   # MinIO SK
+
+# 配置 .env
+cp .env.example .env
+nano .env
+```
+
+**.env 内容 (飞书凭证用真实的，域名用临时测试的)：**
+
+```bash
+SECRET_KEY=<上面第1步生成的64位字符串>
+ENVIRONMENT=production
+DEBUG=false
+
+DATABASE_URL=postgresql+asyncpg://pdm:<数据库密码>@postgres:5432/pdm
+POSTGRES_USER=pdm
+POSTGRES_PASSWORD=<数据库密码>
+
+REDIS_URL=redis://:<Redis密码>@redis:6379/0
+
+MINIO_ACCESS_KEY=<MinIO AK>
+MINIO_SECRET_KEY=<MinIO SK>
+MINIO_BUCKET=pdm-test
+
+FEISHU_APP_ID=cli_aaa074bbba789cb6
+FEISHU_APP_SECRET=FwzQDBDawaP930p7Fo6e8gWazXTXqGFv
+FEISHU_ENCRYPT_KEY=lWv9qQ1aSsDz2X3Gvm68UgZ4FZRnhU74
+FEISHU_REDIRECT_URI=https://test.anariev.com/auth/callback
+
+CORS_ORIGINS=["https://test.anariev.com"]
+```
+
+保存后启动：
+
+```bash
+docker compose up -d --build
+docker compose ps  # 确认 5 个容器均为 Up
+curl http://localhost:8000/api/health  # {"status":"ok","database":"ok"}
+docker compose exec backend alembic upgrade head
+```
+
+### 2.3 配置临时 Nginx + HTTPS
+
+```bash
+nano /etc/nginx/sites-available/pdm-test
+```
+
+写入以下内容：
+
+```nginx
+server {
+    listen 80;
+    server_name test.anariev.com;
+    client_max_body_size 100m;
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_intercept_errors on;
+        error_page 404 = @fallback;
+    }
+    location @fallback {
+        proxy_pass http://127.0.0.1:3000/index.html;
+    }
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 120s;
+    }
+    location /files/ {
+        proxy_pass http://127.0.0.1:9000;
+        proxy_set_header Host $host;
+    }
+}
+```
+
+```bash
+# 启用站点
+ln -s /etc/nginx/sites-available/pdm-test /etc/nginx/sites-enabled/
+nginx -t && systemctl reload nginx
+
+# 申请临时 HTTPS 证书
+certbot --nginx -d test.anariev.com
+# 按提示: 输入邮箱 → A(同意条款) → N(不接收邮件)
+# 看到 "Congratulations!" 表示成功
+
+# 验证
+curl https://test.anariev.com/api/health
+# {"status":"ok","database":"ok"}
+```
+
+### 2.4 临时修改飞书开放平台配置
+
+飞书开放平台 (https://open.feishu.cn) → 安纳瑞PDM 应用：
+
+```
+1. 左侧「安全设置」→「重定向 URL」
+   临时添加: https://test.anariev.com/auth/callback
+   (原来的正式地址保留不动，追加一行即可)
+
+2. 左侧「事件订阅」→「请求网址」
+   改为: https://test.anariev.com/api/v1/callbacks/feishu/event
+   (测试完后改回来)
+
+3. 点击「保存」
+```
+
+### 2.5 执行测试
+
+```
+1. 浏览器打开 https://test.anariev.com
+2. 点击「飞书登录」→ 扫码授权
+3. 进入 Dashboard → 创建产品 → 创建项目 → 提交审批
+4. 飞书客户端审批通过 → 确认系统状态更新
+5. 创建任务分配用户 → 确认收到飞书消息
+6. 上传固件、创建认证 → 全流程验证
+```
+
+### 2.6 测试完毕，切回正式域名
+
+```
+1. 删除临时 DNS:
+   阿里云 DNS → 删除 test 的 A 记录
+
+2. 添加正式 DNS (如果还没有):
+   pdm.anariev.com A → 47.77.217.192
+
+3. SSH 服务器修改 .env:
+   nano /home/dylan/dylan_zhao/C_ProjectDeploy/.env
+   改 FEISHU_REDIRECT_URI=https://pdm.anariev.com/auth/callback
+   改 CORS_ORIGINS=["https://pdm.anariev.com"]
+   保存后: docker compose restart backend
+
+4. 创建正式 Nginx 配置:
+   nano /etc/nginx/sites-available/pdm
+   (内容参考第七步，server_name 改为 pdm.anariev.com)
+   ln -s /etc/nginx/sites-available/pdm /etc/nginx/sites-enabled/
+   certbot --nginx -d pdm.anariev.com
+
+5. 飞书开放平台:
+   事件订阅 URL 改回 https://pdm.anariev.com/api/v1/callbacks/feishu/event
+   重定向 URL 去掉 test 那个 (或保留，不影响)
+   保存
+
+6. docker compose restart backend
+```
+
+---
+
+## 3. 第一步：SSH 登录现有服务器
 
 > 服务器已就绪，无需购买新实例。
 
@@ -219,15 +410,15 @@ git --version
 
 ```bash
 # 创建项目根目录
-mkdir -p /opt/pdm
+mkdir -p /home/dylan/dylan_zhao/C_ProjectDeploy
 
 # 进入项目目录
-cd /opt/pdm
+cd /home/dylan/dylan_zhao/C_ProjectDeploy
 
 # 确认当前目录
 pwd
 # 预期输出:
-# /opt/pdm
+# /home/dylan/dylan_zhao/C_ProjectDeploy
 ```
 
 ### 5.2 从 Gitee 克隆代码
@@ -236,7 +427,7 @@ pwd
 # 克隆代码仓库
 git clone https://gitee.com/anariev/product_develop_management.git .
 
-# 注意末尾的「 . 」表示克隆到当前目录 (/opt/pdm)
+# 注意末尾的「 . 」表示克隆到当前目录 (/home/dylan/dylan_zhao/C_ProjectDeploy)
 
 # 看到类似输出:
 # Cloning into '.'...
@@ -307,7 +498,7 @@ openssl rand -hex 16
 ### 6.1 复制模板文件
 
 ```bash
-cd /opt/pdm
+cd /home/dylan/dylan_zhao/C_ProjectDeploy
 
 # 复制模板
 cp .env.example .env
@@ -428,7 +619,7 @@ grep "<" .env
 ### 7.1 构建并启动所有服务
 
 ```bash
-cd /opt/pdm
+cd /home/dylan/dylan_zhao/C_ProjectDeploy
 
 # 启动所有容器 (首次需要构建镜像，约 3-5 分钟)
 docker compose up -d --build
@@ -635,7 +826,7 @@ curl https://pdm.anariev.com/api/health
 ### 9.1 执行数据库迁移
 
 ```bash
-cd /opt/pdm
+cd /home/dylan/dylan_zhao/C_ProjectDeploy
 
 # 在 backend 容器内运行 alembic 迁移
 docker compose exec backend alembic upgrade head
@@ -877,7 +1068,7 @@ asyncio.run(check())
 7. 如果 Code 不是 PROJECT_REVIEW，记下来，
    然后修改服务器上的代码:
    ssh 登录服务器后:
-   nano /opt/pdm/backend/app/integrations/feishu/approval.py
+   nano /home/dylan/dylan_zhao/C_ProjectDeploy/backend/app/integrations/feishu/approval.py
    找到第 16 行附近 "approval_code": 改为你的实际 Code
    修改后: docker compose restart backend
 ```
@@ -999,7 +1190,7 @@ asyncio.run(check())
 现在回到 SSH 终端，把之前保存的三个飞书凭证填入 `.env`：
 
 ```bash
-cd /opt/pdm
+cd /home/dylan/dylan_zhao/C_ProjectDeploy
 
 # 编辑 .env
 nano .env
@@ -1144,7 +1335,7 @@ mkdir -p /backup
 crontab -e
 
 # 在打开的文件中添加以下两行:
-0 2 * * * docker compose -f /opt/pdm/docker-compose.yml exec -T postgres pg_dump -U pdm pdm | gzip > /backup/pdm_$(date +\%Y\%m\%d).sql.gz
+0 2 * * * docker compose -f /home/dylan/dylan_zhao/C_ProjectDeploy/docker-compose.yml exec -T postgres pg_dump -U pdm pdm | gzip > /backup/pdm_$(date +\%Y\%m\%d).sql.gz
 0 3 * * * find /backup -name "pdm_*.sql.gz" -mtime +30 -delete
 
 # 保存退出 (vim: Esc → :wq → Enter)
@@ -1155,7 +1346,7 @@ crontab -e
 确认 `docker-compose.yml` 中所有服务都有 `restart: unless-stopped`：
 
 ```bash
-grep restart /opt/pdm/docker-compose.yml
+grep restart /home/dylan/dylan_zhao/C_ProjectDeploy/docker-compose.yml
 # 如果没有显示 restart 行，需要手动添加 (当前版本已配置)
 ```
 
@@ -1210,16 +1401,16 @@ docker run -d \
 
 ```bash
 # 查看所有容器状态
-docker compose -f /opt/pdm/docker-compose.yml ps
+docker compose -f /home/dylan/dylan_zhao/C_ProjectDeploy/docker-compose.yml ps
 
 # 查看后端日志
-docker compose -f /opt/pdm/docker-compose.yml logs backend --tail=50
+docker compose -f /home/dylan/dylan_zhao/C_ProjectDeploy/docker-compose.yml logs backend --tail=50
 
 # 重启所有服务
-docker compose -f /opt/pdm/docker-compose.yml restart
+docker compose -f /home/dylan/dylan_zhao/C_ProjectDeploy/docker-compose.yml restart
 
 # 更新代码
-cd /opt/pdm
+cd /home/dylan/dylan_zhao/C_ProjectDeploy
 git pull
 docker compose up -d --build
 docker compose exec backend alembic upgrade head
@@ -1369,7 +1560,7 @@ docker compose down -v
 ### 15.3 更新系统
 
 ```bash
-cd /opt/pdm
+cd /home/dylan/dylan_zhao/C_ProjectDeploy
 git pull
 docker compose up -d --build
 docker compose exec backend alembic upgrade head
@@ -1409,7 +1600,7 @@ curl -fsSL https://get.docker.com | bash
 apt install docker-compose-plugin nginx certbot python3-certbot-nginx git -y
 
 # 2. 克隆代码
-mkdir -p /opt/pdm && cd /opt/pdm
+mkdir -p /home/dylan/dylan_zhao/C_ProjectDeploy && cd /home/dylan/dylan_zhao/C_ProjectDeploy
 git clone https://gitee.com/anariev/product_develop_management.git .
 
 # 3. 生成密钥 (保存输出!)
