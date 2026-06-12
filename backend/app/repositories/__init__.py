@@ -1,0 +1,7 @@
+from app.repositories.certification_repo import CertificationRepository
+from app.repositories.design_repo import DesignFileRepository
+from app.repositories.firmware_repo import FirmwareUpgradeTaskRepository, FirmwareVersionRepository
+from app.repositories.product_repo import LifecycleChangeLogRepository, ProductRepository
+from app.repositories.project_repo import ProjectRepository
+from app.repositories.supplier_repo import OutsourceTaskRepository, SupplierRepository
+from app.repositories.user_repo import UserRepository
