@@ -9,9 +9,11 @@
 
 | 文档 | 说明 |
 |------|------|
+| [飞书部署指南](FEISHU_DEPLOYMENT_GUIDE.md) | 🚀 完整部署上架流程 (服务器部署 + 飞书配置 + 验证测试) |
+| [飞书配置手册](FEISHU_SETUP.md) | 飞书开放平台应用配置实操 (30 分钟) |
 | [架构设计](architecture/overview.md) | 系统架构、技术栈、数据模型、API 设计 |
 | [开发排期](DEVELOPMENT_PLAN.md) | Phase 1-4 排期、里程碑、风险与加速策略 |
-| [部署计划](DEPLOYMENT.md) | 环境规划、部署步骤、上线 Checklist |
+| [部署计划](DEPLOYMENT.md) | 环境规划、部署步骤、CI/CD、上线 Checklist |
 
 ## 阶段文档
 
