@@ -8,9 +8,9 @@
 ## 目录
 
 1. [整体架构](#1-整体架构)
-2. [第一步：购买阿里云 ECS 服务器](#2-第一步购买阿里云-ecs-服务器)
-3. [第二步：配置阿里云 DNS 域名解析](#3-第二步配置阿里云-dns-域名解析)
-4. [第三步：SSH 登录服务器并安装基础软件](#4-第三步ssh-登录服务器并安装基础软件)
+2. [第一步：SSH 登录现有服务器](#2-第一步ssh-登录现有服务器)
+3. [第二步：确认 DNS 解析](#3-第二步确认-dns-解析)
+4. [第三步：安装基础软件](#4-第三步安装基础软件)
 5. [第四步：克隆代码并生成密钥](#5-第四步克隆代码并生成密钥)
 6. [第五步：配置 .env 环境变量](#6-第五步配置-env-环境变量)
 7. [第六步：启动 Docker 容器](#7-第六步启动-docker-容器)
@@ -30,9 +30,9 @@
 ### 1.1 部署后的最终效果
 
 ```
-员工手机打开飞书 → 工作台 → 点「纳研PDM」→ 浏览器打开系统
+员工手机打开飞书 → 工作台 → 点「安纳瑞PDM」→ 浏览器打开系统
                                               ↓
-                              https://pdm.anari.com (阿里云服务器)
+                              https://pdm.anariev.com (阿里云服务器)
 ```
 
 ```
@@ -65,159 +65,69 @@
 
 | 域名 | 用途 | 说明 |
 |------|------|------|
-| `pdm.anari.com` | 系统访问入口 + API | 员工浏览器访问、飞书回调 |
+| `pdm.anariev.com` | 系统访问入口 + API | 员工浏览器访问、飞书回调 |
 
 ---
 
-## 2. 第一步：购买阿里云 ECS 服务器
+## 2. 第一步：SSH 登录现有服务器
 
-> 如果公司已有可用的阿里云服务器，跳过这一步，直接进入第二步。
+> 服务器已就绪，无需购买新实例。
 
-### 2.1 登录阿里云控制台
+### 2.1 服务器信息
 
-```
-1. 浏览器打开 https://www.aliyun.com
-2. 点击右上角「登录」
-3. 使用公司阿里云主账号或 RAM 子账号登录
-4. 登录后进入「阿里云管理控制台」
-```
+| 项目 | 值 |
+|------|-----|
+| 公网 IP | `47.77.217.192` |
+| 系统 | Ubuntu (阿里云 ECS) |
+| 域名 | `pdm.anariev.com` (已解析) |
+| 官网 | `www.anariev.com` |
 
-### 2.2 创建 ECS 实例
+### 2.2 确认安全组端口
 
-```
-1. 控制台顶部搜索框输入「ECS」，点击「云服务器 ECS」
-2. 点击左侧菜单「实例」
-3. 点击右上角「创建实例」
+登录阿里云控制台 → ECS → 安全组 → 确认以下端口已开放：
 
-4. 在创建页面，按以下参数填写：
+| 端口 | 协议 | 用途 |
+|------|------|------|
+| 22 | TCP | SSH 登录 |
+| 80 | TCP | HTTP (证书验证) |
+| 443 | TCP | HTTPS (系统访问) |
 
-   ┌─────────────────────────────────────────────────────────┐
-   │ 参数                  │ 选择值                          │
-   ├─────────────────────────────────────────────────────────┤
-   │ 付费方式              │ 包年包月 (如需长期使用)          │
-   │                       │ 或 按量付费 (测试用)             │
-   │ 地域                  │ 选择离公司最近的 (如 华东1杭州)   │
-   │ 网络及可用区          │ 默认即可                        │
-   │ 实例规格              │ 建议: ecs.c6.xlarge (4C8G)      │
-   │                       │ 最低: ecs.c6.large (2C4G)       │
-   │ 镜像                  │ Ubuntu 22.04 64位               │
-   │ 系统盘                │ 高效云盘 100GB                  │
-   │ 公网 IP               │ ✅ 分配公网 IPv4 地址           │
-   │ 带宽计费              │ 按固定带宽, 5Mbps               │
-   │ 登录凭证              │ ○ 自定义密码                   │
-   │ 登录密码              │ 输入密码 (至少8位，含大小写+数字)│
-   │ 实例名称              │ pdm-server                      │
-   └─────────────────────────────────────────────────────────┘
+> ⚠️ 不要开放 5432、6379、9000。这些仅容器内通信。
 
-5. 其他选项保持默认，点击右下角「确认订单」
-6. 勾选「同意服务条款」，点击「去支付」
-7. 支付完成后，点击「管理控制台」返回实例列表
-```
-
-### 2.3 查看服务器公网 IP
-
-```
-1. 等待实例状态变为「运行中」(约 1-3 分钟)
-2. 点击实例 ID，进入实例详情
-3. 在「实例信息」区域找到「公网 IP」
-4. 把这个 IP 记录下来，格式如: 47.96.xxx.xxx
-```
-
-### 2.4 配置安全组（防火墙规则）
-
-```
-1. 在实例详情页，点击「安全组」标签
-2. 点击安全组 ID，进入安全组详情
-3. 点击「入方向」→「手动添加」
-
-   逐条添加以下规则：
-
-   ┌──────────┬──────────┬──────────────┬──────────────────┐
-   │ 优先级   │ 协议类型  │ 端口范围      │ 授权对象          │
-   ├──────────┼──────────┼──────────────┼──────────────────┤
-   │ 1        │ TCP      │ 22/22        │ 0.0.0.0/0 (SSH) │
-   │ 1        │ TCP      │ 80/80        │ 0.0.0.0/0 (HTTP)│
-   │ 1        │ TCP      │ 443/443      │ 0.0.0.0/0 (HTTPS)│
-   └──────────┴──────────┴──────────────┴──────────────────┘
-
-   注意: 5432 (PostgreSQL)、6379 (Redis)、9000 (MinIO) 不要开放！
-         这些端口只在服务器内部通信，不必暴露到公网。
-
-4. 点击「保存」
-```
-
----
-
-## 3. 第二步：配置阿里云 DNS 域名解析
-
-> 前提：公司已有域名（如 `anari.com`）托管在阿里云 DNS，且账号有管理权限。
-
-### 3.1 进入 DNS 解析控制台
-
-```
-1. 阿里云控制台顶部搜索框输入「DNS」，点击「云解析 DNS」
-2. 在域名列表中找到 anari.com (或公司自己的域名)
-3. 点击域名右边的「解析设置」
-```
-
-### 3.2 添加 A 记录
-
-```
-1. 点击「添加记录」按钮
-
-2. 填写以下信息：
-
-   ┌─────────────────────────────────────────────────────────┐
-   │ 记录类型:    A                                          │
-   │ 主机记录:    pdm                                        │
-   │   (这表示创建 pdm.anari.com 这个子域名)                  │
-   │                                                         │
-   │ 解析线路:    默认                                       │
-   │ 记录值:      47.96.xxx.xxx  (你的服务器公网 IP)          │
-   │ TTL:        600 (10分钟)                                │
-   └─────────────────────────────────────────────────────────┘
-
-3. 点击「确定」
-```
-
-### 3.3 验证 DNS 解析是否生效
-
-> 注意：DNS 解析生效需要 1-10 分钟。可以等后续步骤完成后再验证。
+### 2.3 SSH 登录
 
 ```bash
-# 在你的本地电脑上运行 (不是在服务器上)
-ping pdm.anari.com
-
-# 看到类似输出说明解析成功:
-# 64 bytes from 47.96.xxx.xxx: icmp_seq=1 ttl=64 time=5.23 ms
+ssh root@47.77.217.192
 ```
 
-> 如果 ping 不通：回到阿里云 ECS 安全组，确认 ICMP 协议已开放（或不用 ping，直接用 `nslookup pdm.anari.com` 检查 DNS 是否指向正确 IP）。
+首次登录输入 `yes` 确认指纹，然后输入服务器密码。
 
 ---
 
-## 4. 第三步：SSH 登录服务器并安装基础软件
+## 3. 第二步：确认 DNS 解析
 
-### 4.1 SSH 登录
+> DNS 已配置完成。
 
-在你的本地电脑（Mac/Linux 用终端，Windows 用 PowerShell 或 Putty）上：
+### 3.1 当前 DNS 记录
+
+| 主机记录 | 类型 | 值 | 状态 |
+|---------|------|-----|------|
+| `pdm` | A | 47.77.217.192 | ✅ 已生效 |
+| `www` | A | — | ✅ 官网 |
+
+### 3.2 验证解析
 
 ```bash
-# 替换 <服务器IP> 为你的服务器公网 IP
-ssh root@<服务器IP>
+nslookup pdm.anariev.com
+# 应返回 47.77.217.192
 
-# 示例:
-ssh root@47.96.123.456
+ping pdm.anariev.com
+# 应收到响应
 ```
 
-首次登录会提示：
+---
 
-```
-The authenticity of host '47.96.123.456' can't be established.
-Are you sure you want to continue connecting (yes/no)?
-```
-
-输入 `yes` 并回车。然后输入创建服务器时设置的密码。
+## 4. 第三步：安装基础软件
 
 ### 4.2 更新系统包
 
@@ -324,7 +234,7 @@ pwd
 
 ```bash
 # 克隆代码仓库
-git clone https://gitee.com/anari-energy/product_develop_management.git .
+git clone https://gitee.com/anariev/product_develop_management.git .
 
 # 注意末尾的「 . 」表示克隆到当前目录 (/opt/pdm)
 
@@ -422,7 +332,7 @@ nano .env
 # ==========================================
 # 应用配置
 # ==========================================
-APP_NAME=纳研PDM
+APP_NAME=安纳瑞PDM
 ENVIRONMENT=production
 DEBUG=false
 
@@ -457,20 +367,18 @@ MINIO_ROOT_USER=7a3b5c2d9e1f4a6b
 MINIO_ROOT_PASSWORD=c8d2e4f6a8b0c2d4
 
 # ==========================================
-# 飞书开放平台凭证 (第九步获取后填入)
+# 飞书开放平台凭证 (已获取，直接填入)
 # ==========================================
-# 暂时留空，等飞书应用配置完成后填入
-FEISHU_APP_ID=
-FEISHU_APP_SECRET=
-FEISHU_ENCRYPT_KEY=
+FEISHU_APP_ID=cli_aaa074bbba789cb6
+FEISHU_APP_SECRET=FwzQDBDawaP930p7Fo6e8gWazXTXqGFv
+FEISHU_ENCRYPT_KEY=lWv9qQ1aSsDz2X3Gvm68UgZ4FZRnhU74
 FEISHU_BASE_URL=https://open.feishu.cn/open-apis
-FEISHU_REDIRECT_URI=https://pdm.anari.com/auth/callback
-FEISHU_VERIFICATION_TOKEN=
+FEISHU_REDIRECT_URI=https://pdm.anariev.com/auth/callback
 
 # ==========================================
 # CORS
 # ==========================================
-CORS_ORIGINS=["https://pdm.anari.com","http://localhost:3000","http://localhost:5173"]
+CORS_ORIGINS=["https://pdm.anariev.com","http://localhost:3000","http://localhost:5173"]
 
 # ==========================================
 # JWT
@@ -600,13 +508,13 @@ curl -I http://localhost:3000
 nano /etc/nginx/sites-available/pdm
 ```
 
-将以下内容完整复制粘贴到文件中（**把 `pdm.anari.com` 替换为你的实际域名**）：
+将以下内容完整复制粘贴到文件中（**把 `pdm.anariev.com` 替换为你的实际域名**）：
 
 ```nginx
 # HTTP → 先让 HTTP 能访问，后面会自动升级到 HTTPS
 server {
     listen 80;
-    server_name pdm.anari.com;
+    server_name pdm.anariev.com;
 
     # 固件文件上传限制 100MB
     client_max_body_size 100m;
@@ -675,16 +583,16 @@ systemctl reload nginx
 
 ### 8.4 申请免费 HTTPS 证书 (Let's Encrypt)
 
-> ⚠️ 前提条件: DNS 解析已生效（第二步），`pdm.anari.com` 已指向服务器 IP。
-> 可以先用 `ping pdm.anari.com` 确认。
+> ⚠️ 前提条件: DNS 解析已生效（第二步），`pdm.anariev.com` 已指向服务器 IP。
+> 可以先用 `ping pdm.anariev.com` 确认。
 
 ```bash
 # 运行 Certbot 自动获取并配置 HTTPS 证书
-certbot --nginx -d pdm.anari.com
+certbot --nginx -d pdm.anariev.com
 
 # 交互步骤:
 # 1. 输入你的邮箱 (用于证书到期提醒):
-#    例如: dylan@anari-energy.com
+#    例如: dylan@anariev.com
 #    按 Enter
 
 # 2. 同意服务条款:
@@ -698,7 +606,7 @@ certbot --nginx -d pdm.anari.com
 # 等待约 10 秒，看到:
 # Congratulations! Your certificate has been saved.
 # Deploying certificate
-# Successfully deployed certificate for pdm.anari.com
+# Successfully deployed certificate for pdm.anariev.com
 
 # 你的 Nginx 配置已被自动添加 HTTPS 设置。
 ```
@@ -707,14 +615,14 @@ certbot --nginx -d pdm.anari.com
 
 ```bash
 # 从服务器本地测试 HTTPS
-curl -I https://pdm.anari.com
+curl -I https://pdm.anariev.com
 
 # 预期输出:
 # HTTP/2 200
 # server: nginx
 
 # 测试 API
-curl https://pdm.anari.com/api/health
+curl https://pdm.anariev.com/api/health
 
 # 预期输出:
 # {"status":"ok","database":"ok","version":"0.2.0","environment":"production"}
@@ -804,9 +712,9 @@ asyncio.run(check())
 
 3. 弹窗中填写：
    ┌─────────────────────────────────────┐
-   │ 应用名称:  纳研PDM                    │
+   │ 应用名称:  安纳瑞PDM                    │
    │                                     │
-   │ 应用描述:  安纳瑞能源产品研发管理平台   │
+   │ 应用描述:  安纳瑞产品研发管理平台   │
    │           覆盖产品立项、研发、认证、    │
    │           量产、退市全流程             │
    │                                     │
@@ -864,10 +772,10 @@ asyncio.run(check())
 4. 添加后，在「网页应用」配置区填写：
    ┌──────────────────────────────────────┐
    │ 桌面端主页:                           │
-   │ https://pdm.anari.com                │
+   │ https://pdm.anariev.com                │
    │                                      │
    │ 移动端主页:                           │
-   │ https://pdm.anari.com                │
+   │ https://pdm.anariev.com                │
    └──────────────────────────────────────┘
 
 5. 点击页面底部的「保存」
@@ -880,7 +788,7 @@ asyncio.run(check())
 
 2. 在「重定向 URL」配置区，添加以下地址 (一行一个):
 
-   https://pdm.anari.com/auth/callback
+   https://pdm.anariev.com/auth/callback
 
    如果还需要本地开发调试，追加:
    http://localhost:3000/auth/callback
@@ -900,7 +808,7 @@ asyncio.run(check())
 
 4. 添加后，在机器人配置区填写：
    ┌──────────────────────────────────────┐
-   │ 机器人名称:  纳研助手                  │
+   │ 机器人名称:  PDM助手                  │
    │                                      │
    │ 机器人描述:  PDM 研发任务分配通知、     │
    │             认证到期提醒、项目审批结果   │
@@ -1028,7 +936,7 @@ asyncio.run(check())
 
 3. 在「请求网址」输入框中填写:
 
-   https://pdm.anari.com/api/v1/callbacks/feishu/event
+   https://pdm.anariev.com/api/v1/callbacks/feishu/event
 
    注意: 必须是 HTTPS，且这个 URL 必须可以被飞书服务器访问。
    如果你的服务器已经完成前面步骤 (Nginx + HTTPS)，
@@ -1119,7 +1027,7 @@ docker compose logs backend --tail=10
 ### 11.1 飞书 SSO 登录测试
 
 ```
-1. 在你自己的电脑浏览器上打开: https://pdm.anari.com
+1. 在你自己的电脑浏览器上打开: https://pdm.anariev.com
 
    预期: 看到登录页面，有一个「飞书登录」按钮
 
@@ -1129,7 +1037,7 @@ docker compose logs backend --tail=10
 
 3. 在飞书授权页面，点击「授权」
 
-   预期: 自动跳回 https://pdm.anari.com，进入 Dashboard 首页
+   预期: 自动跳回 https://pdm.anariev.com，进入 Dashboard 首页
          首页显示统计卡片: 活跃产品、活跃项目等
 
 4. 如果跳回后是空白页或报错:
@@ -1190,7 +1098,7 @@ docker compose logs backend --tail=10
 
    预期: 被分配人收到飞书消息通知
 
-   注意: 用户必须先在自己的飞书客户端搜索「纳研助手」机器人，
+   注意: 用户必须先在自己的飞书客户端搜索「PDM助手」机器人，
          并打开对话窗口，之后才能收到消息。
 ```
 
@@ -1198,10 +1106,10 @@ docker compose logs backend --tail=10
 
 | # | 验证项 | 操作 | 预期结果 |
 |---|--------|------|---------|
-| 1 | HTTPS 可访问 | 浏览器打开 `https://pdm.anari.com` | 显示登录页 |
-| 2 | API 健康检查 | `curl https://pdm.anari.com/api/health` | `{"status":"ok","database":"ok"}` |
+| 1 | HTTPS 可访问 | 浏览器打开 `https://pdm.anariev.com` | 显示登录页 |
+| 2 | API 健康检查 | `curl https://pdm.anariev.com/api/health` | `{"status":"ok","database":"ok"}` |
 | 3 | 飞书 SSO 登录 | 点击飞书登录 → 授权 → 回调 | 进入 Dashboard |
-| 4 | 飞书工作台可见 | 飞书客户端搜索「纳研PDM」 | 应用出现在工作台 |
+| 4 | 飞书工作台可见 | 飞书客户端搜索「安纳瑞PDM」 | 应用出现在工作台 |
 | 5 | 创建产品 | 新建产品 → 填写信息 → 保存 | 自动生成编号 |
 | 6 | 项目审批 | 创建项目 → 提交审批 → 飞书通过 | 项目状态自动更新 |
 | 7 | 消息通知 | 创建任务 → 分配用户 | 用户收到飞书消息 |
@@ -1262,8 +1170,8 @@ docker run -d \
   -v uptime-kuma-data:/app/data \
   louislam/uptime-kuma:1
 
-# 安装后浏览器打开: http://<服务器IP>:3001
-# 添加监控项: https://pdm.anari.com/api/health
+# 安装后浏览器打开: http://47.77.217.192:3001
+# 添加监控项: https://pdm.anariev.com/api/health
 ```
 
 ---
@@ -1276,9 +1184,9 @@ docker run -d \
 在飞书群发送通知:
 
 @所有人
-纳研PDM 产品研发管理平台已上线 🎉
+安纳瑞PDM 产品研发管理平台已上线 🎉
 
-访问地址: https://pdm.anari.com
+访问地址: https://pdm.anariev.com
 登录方式: 飞书扫码登录
 
 主要功能:
@@ -1291,7 +1199,7 @@ docker run -d \
 📊 分析 — Dashboard 数据看板
 
 使用方式:
-1. 飞书工作台搜索「纳研PDM」或浏览器打开链接
+1. 飞书工作台搜索「安纳瑞PDM」或浏览器打开链接
 2. 飞书扫码登录
 3. 开始使用
 
@@ -1329,7 +1237,7 @@ docker system df
 
 ```
 排查步骤:
-1. ping pdm.anari.com 看是否返回正确 IP
+1. ping pdm.anariev.com 看是否返回正确 IP
    → 如果不通，DNS 未生效或阿里云 DNS 配置有误
 2. ssh 登录服务器，检查 Nginx 是否运行:
    systemctl status nginx
@@ -1342,7 +1250,7 @@ docker system df
 ```
 排查:
 1. 检查飞书开放平台「安全设置」→「重定向 URL」
-   是否包含 https://pdm.anari.com/auth/callback
+   是否包含 https://pdm.anariev.com/auth/callback
 2. 检查 .env 中 FEISHU_REDIRECT_URI 是否一致
 3. 检查 Nginx HTTPS 证书是否有效
 ```
@@ -1352,7 +1260,7 @@ docker system df
 ```
 排查:
 1. 确认飞书事件订阅配置的 URL 可被外网访问:
-   curl -X POST https://pdm.anari.com/api/v1/callbacks/feishu/event \
+   curl -X POST https://pdm.anariev.com/api/v1/callbacks/feishu/event \
      -H "Content-Type: application/json" \
      -d '{"type":"url_verification","challenge":"test123"}'
    应返回: {"challenge":"test123"}
@@ -1369,7 +1277,7 @@ docker system df
 
 解决:
 1. 打开飞书客户端
-2. 在顶部搜索框搜索「纳研助手」
+2. 在顶部搜索框搜索「PDM助手」
 3. 点击机器人，进入对话窗口
 4. 随便发一句话 (如 "你好")
 5. 之后系统才能向该用户发送通知消息
@@ -1419,7 +1327,7 @@ docker compose exec postgres psql -U pdm -d pdm -c \
 docker compose exec postgres psql -U pdm -d pdm
 # 然后在 psql 中执行:
 # SELECT id, name, email, role FROM users;
-# UPDATE users SET role='admin' WHERE email='xxx@anari-energy.com';
+# UPDATE users SET role='admin' WHERE email='xxx@anariev.com';
 # \q
 ```
 
@@ -1474,7 +1382,7 @@ docker compose exec backend alembic upgrade head
 | 资源 | 规格 | 月费 (约) |
 |------|------|-----------|
 | 云服务器 ECS | 4C8G, 100G SSD | ¥300-600 |
-| 域名 | anari.com 子域名 | ¥0 (已有) |
+| 域名 | anariev.com 子域名 | ¥0 (已有) |
 | SSL 证书 | Let's Encrypt | ¥0 (免费) |
 | 飞书 | 企业已购 | ¥0 |
 | **合计** | | **¥300-600/月** |
@@ -1502,7 +1410,7 @@ apt install docker-compose-plugin nginx certbot python3-certbot-nginx git -y
 
 # 2. 克隆代码
 mkdir -p /opt/pdm && cd /opt/pdm
-git clone https://gitee.com/anari-energy/product_develop_management.git .
+git clone https://gitee.com/anariev/product_develop_management.git .
 
 # 3. 生成密钥 (保存输出!)
 openssl rand -hex 32   # SECRET_KEY
@@ -1523,17 +1431,17 @@ nano /etc/nginx/sites-available/pdm
 ln -s /etc/nginx/sites-available/pdm /etc/nginx/sites-enabled/
 rm -f /etc/nginx/sites-enabled/default
 nginx -t && systemctl reload nginx
-certbot --nginx -d pdm.anari.com
+certbot --nginx -d pdm.anariev.com
 
 # 7. 初始化数据库
 docker compose exec backend alembic upgrade head
 
 # 8. 验证
-curl https://pdm.anari.com/api/health
+curl https://pdm.anariev.com/api/health
 ```
 
 ---
 
 > **文档版本:** 2.0
 > **最后更新:** 2026-06-12
-> **技术支持:** Dylan | dylan@anari-energy.com
+> **技术支持:** Dylan | dylan@anariev.com
