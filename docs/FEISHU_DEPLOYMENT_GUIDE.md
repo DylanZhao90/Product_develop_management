@@ -1404,7 +1404,93 @@ certbot certificates
 
 ---
 
-## 15. 附录：快速命令汇总
+## 15. 附录
+
+### 15.1 设置首个管理员
+
+新用户飞书登录后默认是 `engineer` 角色。首个管理员通过数据库提升：
+
+```bash
+# 方法一: SQL 直接更新
+docker compose exec postgres psql -U pdm -d pdm -c \
+  "UPDATE users SET role='admin' WHERE email='你的飞书邮箱';"
+
+# 方法二: 进入 PostgreSQL 手动操作
+docker compose exec postgres psql -U pdm -d pdm
+# 然后在 psql 中执行:
+# SELECT id, name, email, role FROM users;
+# UPDATE users SET role='admin' WHERE email='xxx@anari-energy.com';
+# \q
+```
+
+### 15.2 日常维护命令
+
+```bash
+# 查看日志
+docker compose logs -f backend
+
+# 重启后端 (代码修改后)
+docker compose restart backend
+
+# 重新构建前端
+docker compose exec frontend npm run build
+
+# 进入后端容器调试
+docker compose exec backend bash
+
+# 运行测试
+docker compose exec backend pytest tests/ -v
+
+# 创建新数据库迁移 (修改模型后)
+docker compose exec backend alembic revision --autogenerate -m "描述"
+docker compose exec backend alembic upgrade head
+
+# 手动备份数据库
+docker compose exec postgres pg_dump -U pdm pdm > backup_$(date +%Y%m%d).sql
+
+# 恢复数据库
+docker compose exec -T postgres psql -U pdm pdm < backup_20260612.sql
+
+# 停止系统 (保留数据)
+docker compose down
+
+# 完全清除 (删除所有数据！)
+docker compose down -v
+```
+
+### 15.3 更新系统
+
+```bash
+cd /opt/pdm
+git pull
+docker compose up -d --build
+docker compose exec backend alembic upgrade head
+```
+
+### 15.4 成本参考
+
+#### 单机部署 (推荐起步方案)
+
+| 资源 | 规格 | 月费 (约) |
+|------|------|-----------|
+| 云服务器 ECS | 4C8G, 100G SSD | ¥300-600 |
+| 域名 | anari.com 子域名 | ¥0 (已有) |
+| SSL 证书 | Let's Encrypt | ¥0 (免费) |
+| 飞书 | 企业已购 | ¥0 |
+| **合计** | | **¥300-600/月** |
+
+#### 后续扩展 (K8s 集群)
+
+| 资源 | 规格 | 月费 (约) |
+|------|------|-----------|
+| K8s 集群 (3 节点) | 4C8G × 3 | ¥2000-4000 |
+| 托管 PostgreSQL | 2C4G, 100G | ¥500-1000 |
+| 托管 Redis | 2G 内存 | ¥200-400 |
+| 对象存储 (替代 MinIO) | 100G + 流量 | ¥100-300 |
+| 负载均衡 + 公网 IP | — | ¥200-400 |
+| **合计** | | **¥3000-6000/月** |
+
+### 15.5 快速命令汇总
 
 ```bash
 # ========== 完整部署流程 ==========
