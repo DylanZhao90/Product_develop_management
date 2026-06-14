@@ -13,28 +13,55 @@
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{font-size:16px}
 body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;transition:background var(--transition-base),color var(--transition-base);overflow-x:hidden}
+
 :root{--font-sans:'Inter',sans-serif;--transition-base:250ms cubic-bezier(0.4,0,0.2,1);--transition-fast:150ms cubic-bezier(0.4,0,0.2,1);--radius-sm:6px;--radius-md:10px;--radius-lg:16px;--radius-xl:24px;--shadow-drag:0 20px 60px rgba(0,0,0,0.15)}
-[data-theme="deep-space"]{--bg-primary:#0A0A0F;--bg-secondary:#111118;--bg-card:rgba(18,18,28,0.75);--bg-card-hover:rgba(28,28,42,0.85);--bg-glass:rgba(255,255,255,0.04);--text-primary:#F1F5F9;--text-secondary:#94A3B8;--text-muted:#475569;--accent:#3B82F6;--accent-gradient:linear-gradient(135deg,#3B82F6,#6366F1);--accent-glow:rgba(59,130,246,0.25);--success:#22C55E;--warning:#F59E0B;--error:#EF4444;--info:#6366F1;--border:1px solid rgba(59,130,246,0.12);--border-hover:1px solid rgba(59,130,246,0.3);--chart-grid:#1E293B;--chart-text:#94A3B8;--scrollbar-bg:#1E293B;--scrollbar-thumb:#334155}
-[data-theme="moonlight"]{--bg-primary:#F8FAFC;--bg-secondary:#F1F5F9;--bg-card:rgba(255,255,255,0.85);--bg-card-hover:rgba(255,255,255,0.95);--bg-glass:rgba(0,0,0,0.02);--text-primary:#0F172A;--text-secondary:#64748B;--text-muted:#94A3B8;--accent:#0F172A;--accent-gradient:linear-gradient(135deg,#0F172A,#334155);--accent-glow:rgba(15,23,42,0.12);--success:#16A34A;--warning:#D97706;--error:#DC2626;--info:#6366F1;--border:1px solid rgba(0,0,0,0.06);--border-hover:1px solid rgba(0,0,0,0.15);--chart-grid:#E2E8F0;--chart-text:#64748B;--scrollbar-bg:#E2E8F0;--scrollbar-thumb:#CBD5E1}
-[data-theme="cyber"]{--bg-primary:#000000;--bg-secondary:#0A0A0A;--bg-card:rgba(0,15,15,0.85);--bg-card-hover:rgba(0,25,25,0.92);--bg-glass:rgba(0,255,255,0.03);--text-primary:#00F0FF;--text-secondary:#00B8C9;--text-muted:#006666;--accent:#00F0FF;--accent-gradient:linear-gradient(135deg,#00F0FF,#FF00FF);--accent-glow:rgba(0,240,255,0.20);--success:#39FF14;--warning:#FFD700;--error:#FF0040;--info:#FF00FF;--border:1px solid rgba(0,240,255,0.15);--border-hover:1px solid rgba(0,240,255,0.4);--chart-grid:#003333;--chart-text:#00B8C9;--scrollbar-bg:#003333;--scrollbar-thumb:#006666}
+[data-theme="deep-space"]{--bg-primary:#0A0A0F;--bg-secondary:#111118;--bg-card:rgba(18,18,28,0.75);--bg-card-hover:rgba(28,28,42,0.85);--bg-glass:rgba(255,255,255,0.04);--text-primary:#F1F5F9;--text-secondary:#94A3B8;--text-muted:#475569;--accent:#3B82F6;--accent-gradient:linear-gradient(135deg,#3B82F6,#6366F1);--accent-glow:rgba(59,130,246,0.25);--success:#22C55E;--warning:#F59E0B;--error:#EF4444;--info:#6366F1;--border:1px solid rgba(59,130,246,0.12);--border-hover:1px solid rgba(59,130,246,0.3);--chart-grid:#1E293B;--chart-text:#94A3B8;--scrollbar-bg:#1E293B;--scrollbar-thumb:#334155;color-scheme:dark}
+[data-theme="moonlight"]{--bg-primary:#F8FAFC;--bg-secondary:#F1F5F9;--bg-card:rgba(255,255,255,0.92);--bg-card-hover:rgba(255,255,255,0.95);--bg-glass:rgba(0,0,0,0.02);--text-primary:#0F172A;--text-secondary:#475569;--text-muted:#94A3B8;--accent:#0F172A;--accent-gradient:linear-gradient(135deg,#0F172A,#334155);--accent-glow:rgba(15,23,42,0.12);--success:#16A34A;--warning:#D97706;--error:#DC2626;--info:#6366F1;--border:1px solid rgba(0,0,0,0.1);--border-hover:1px solid rgba(0,0,0,0.15);--chart-grid:#CBD5E1;--chart-text:#475569;--scrollbar-bg:#E2E8F0;--scrollbar-thumb:#CBD5E1;color-scheme:light}
+[data-theme="cyber"]{--bg-primary:#000000;--bg-secondary:#0A0A0A;--bg-card:rgba(0,15,15,0.85);--bg-card-hover:rgba(0,25,25,0.92);--bg-glass:rgba(0,255,255,0.03);--text-primary:#00F0FF;--text-secondary:#00B8C9;--text-muted:#006666;--accent:#00F0FF;--accent-gradient:linear-gradient(135deg,#00F0FF,#FF00FF);--accent-glow:rgba(0,240,255,0.20);--success:#39FF14;--warning:#FFD700;--error:#FF0040;--info:#FF00FF;--border:1px solid rgba(0,240,255,0.15);--border-hover:1px solid rgba(0,240,255,0.4);--chart-grid:#003333;--chart-text:#00B8C9;--scrollbar-bg:#003333;--scrollbar-thumb:#006666;color-scheme:dark}
+[data-theme="neon-pulse"]{--bg-primary:#000000;--bg-secondary:#060610;--bg-card:rgba(8,8,24,0.82);--bg-card-hover:rgba(12,12,40,0.90);--bg-glass:rgba(0,255,255,0.05);--text-primary:#FFFFFF;--text-secondary:#67E8F9;--text-muted:#0891B2;--accent:#06B6D4;--accent-gradient:linear-gradient(135deg,#06B6D4,#D946EF);--accent-glow:rgba(6,182,212,0.35);--success:#22C55E;--warning:#F59E0B;--error:#EF4444;--info:#A855F7;--border:1px solid rgba(6,182,212,0.20);--border-hover:1px solid rgba(6,182,212,0.45);--chart-grid:#1A1A2E;--chart-text:#67E8F9;--scrollbar-bg:#1A1A2E;--scrollbar-thumb:#2A2A4E;color-scheme:dark}
+[data-theme="matrix"]{--bg-primary:#000000;--bg-secondary:#050A05;--bg-card:rgba(5,15,5,0.82);--bg-card-hover:rgba(8,25,8,0.90);--bg-glass:rgba(0,255,0,0.04);--text-primary:#00FF41;--text-secondary:#00CC33;--text-muted:#006600;--accent:#00FF41;--accent-gradient:linear-gradient(135deg,#00FF41,#00CC33);--accent-glow:rgba(0,255,65,0.25);--success:#39FF14;--warning:#FFD700;--error:#FF0040;--info:#00FF41;--border:1px solid rgba(0,255,65,0.15);--border-hover:1px solid rgba(0,255,65,0.40);--chart-grid:#002200;--chart-text:#00CC33;--scrollbar-bg:#002200;--scrollbar-thumb:#004400;color-scheme:dark}
+[data-theme="obsidian"]{--bg-primary:#0B0D11;--bg-secondary:#111318;--bg-card:rgba(18,20,28,0.82);--bg-card-hover:rgba(26,30,40,0.90);--bg-glass:rgba(255,255,255,0.04);--text-primary:#F1F5F9;--text-secondary:#94A3B8;--text-muted:#4B5563;--accent:#60A5FA;--accent-gradient:linear-gradient(135deg,#60A5FA,#818CF8);--accent-glow:rgba(96,165,250,0.30);--success:#34D399;--warning:#FBBF24;--error:#F87171;--info:#818CF8;--border:1px solid rgba(148,163,184,0.15);--border-hover:1px solid rgba(148,163,184,0.35);--chart-grid:#1E293B;--chart-text:#94A3B8;--scrollbar-bg:#1E293B;--scrollbar-thumb:#334155;color-scheme:dark}
 ::-webkit-scrollbar{width:6px;height:6px}
 ::-webkit-scrollbar-track{background:var(--scrollbar-bg)}
 ::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);border-radius:3px}
+select, input, textarea{background:var(--bg-glass);color:var(--text-primary);border:var(--border);border-radius:var(--radius-sm);outline:none}
+select:focus, input:focus, textarea:focus{border:var(--border-hover)}
+select option{background:var(--bg-primary);color:var(--text-primary)}
 
 /* ═══════════════════════════════════ LAYOUT ═══════════════════════════════════ */
 .sidebar{position:fixed;left:0;top:0;bottom:0;width:64px;background:var(--bg-secondary);border-right:var(--border);display:flex;flex-direction:column;align-items:center;padding:16px 0;z-index:100;transition:var(--transition-base)}
-.sidebar-logo{width:36px;height:36px;border-radius:10px;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;box-shadow:0 0 20px var(--accent-glow);margin-bottom:24px;cursor:pointer;transition:transform var(--transition-fast)}
-.sidebar-logo:hover{transform:scale(1.08)}
+.sidebar.expanded{width:200px;align-items:stretch;padding:16px 8px}
+/* Logo — sidebar自适应 */
+.sidebar-logo{display:flex;align-items:center;justify-content:center;margin-bottom:16px;cursor:pointer;padding:10px 0;transition:all var(--transition-base);flex-shrink:0}
+.sidebar-logo .logo-icon,
+.sidebar-logo img{width:32px;height:32px;flex-shrink:0;display:block;object-fit:contain;border-radius:6px;transition:all var(--transition-base)}
+.sidebar-logo .logo-text{display:none;margin-left:12px;flex-direction:column;overflow:hidden}
+.sidebar-logo .logo-text .brand{font-size:18px;font-weight:800;color:var(--text-primary);letter-spacing:1px;line-height:1.2;white-space:nowrap}
+.sidebar-logo .logo-text .sub{font-size:10px;color:var(--text-muted);letter-spacing:2px;text-transform:uppercase}
+.sidebar.expanded .sidebar-logo{justify-content:flex-start;padding:12px 12px;margin-bottom:20px}
+.sidebar.expanded .sidebar-logo .logo-text{display:flex}
+.sidebar.expanded .sidebar-logo .logo-icon,
+.sidebar.expanded .sidebar-logo img{width:100px;height:100px}
 .sidebar-nav{display:flex;flex-direction:column;gap:4px;flex:1}
-.sidebar-btn{width:40px;height:40px;border-radius:10px;border:none;background:transparent;color:var(--text-muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition-fast);position:relative}
+.sidebar-btn{width:40px;height:40px;border-radius:10px;border:none;background:transparent;color:var(--text-muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition-fast);position:relative;gap:8px}
+.sidebar.expanded .sidebar-btn{width:100%;justify-content:flex-start;padding:0 10px}
 .sidebar-btn:hover{background:var(--bg-glass);color:var(--text-primary)}
 .sidebar-btn.active{background:var(--accent-glow);color:var(--accent)}
 .sidebar-btn.active::before{content:'';position:absolute;left:-12px;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--accent);border-radius:0 3px 3px 0;box-shadow:0 0 8px var(--accent-glow)}
+.sidebar.expanded .sidebar-btn.active::before{left:0}
 .sidebar-btn .badge{position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:var(--error);box-shadow:0 0 6px var(--error)}
+.sidebar.expanded .sidebar-btn .badge{right:8px}
+.sidebar-btn .label{display:none;font-size:13px;font-weight:500;white-space:nowrap}
+.sidebar.expanded .sidebar-btn .label{display:inline}
+.sidebar-toggle-btn{width:40px;height:40px;border-radius:10px;border:none;background:transparent;color:var(--text-muted);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition-fast);margin-top:4px}
+.sidebar-toggle-btn:hover{background:var(--bg-glass);color:var(--text-primary)}
+.sidebar.expanded .sidebar-toggle-btn{width:100%;justify-content:flex-start;padding:0 10px;gap:8px}
+.sidebar-toggle-btn .label{display:none;font-size:13px;font-weight:500;white-space:nowrap}
+.sidebar.expanded .sidebar-toggle-btn .label{display:inline}
 .main{margin-left:64px;padding:24px 32px;min-height:100vh;transition:var(--transition-base)}
+.main.expanded{margin-left:200px}
 
-/* ═══════════════════════════════════ COMMON ═══════════════════════════════════ */
-.page{display:none}.page.active{display:block}
+/* ═══════════════════ COMMON ═══════════════════ */
 .header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding:16px 24px;background:var(--bg-card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:var(--radius-lg);border:var(--border);transition:var(--transition-base)}
 .header-left{display:flex;align-items:center;gap:16px}
 .header-left h1{font-size:20px;font-weight:700;letter-spacing:-0.5px;background:var(--accent-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
@@ -49,10 +76,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .theme-btn:hover{color:var(--text-primary)}
 .theme-btn.active{background:var(--accent-gradient);color:#fff;box-shadow:0 0 16px var(--accent-glow)}
 
-/* Page header */
-.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
-.page-header h2{font-size:22px;font-weight:700;letter-spacing:-0.5px;margin:0}
-/* Page header */
+/* ═══════════════════ PAGE HEADER ═══════════════════ */
 .page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
 .page-header h2{font-size:22px;font-weight:700;letter-spacing:-0.5px;margin:0}
 .page-header p{font-size:14px;color:var(--text-secondary);margin:4px 0 0 0}
@@ -122,11 +146,37 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .form-select{width:100%;padding:8px 12px;border-radius:6px;border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none}
 .form-select:focus{border:var(--border-hover)}
 
+/* ═══════════════════ PAGE TRANSITIONS ═══════════════════ */
+.page{display:none;opacity:0;transform:translateY(12px);transition:opacity 0.35s cubic-bezier(0.4,0,0.2,1),transform 0.35s cubic-bezier(0.4,0,0.2,1)}
+.page.active{display:block;opacity:1;transform:translateY(0)}
+
+/* Skeleton shimmer */
+@keyframes shimmer{0%{background-position:-200px 0}100%{background-position:calc(200px + 100%) 0}}
+.skeleton{background:linear-gradient(90deg,var(--bg-glass) 25%,var(--accent-glow) 50%,var(--bg-glass) 75%);background-size:200px 100%;animation:shimmer 1.5s ease-in-out infinite;border-radius:var(--radius-sm)}
+.skeleton-text{height:14px;margin:8px 0;width:80%}
+.skeleton-card{height:120px;border-radius:var(--radius-lg);margin-bottom:16px}
+.skeleton-row{height:40px;margin:4px 0;width:100%}
+
+/* Progress bar (page loading indicator) */
+.page-progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:9998;background:transparent;pointer-events:none}
+.page-progress-bar{height:100%;width:0%;background:var(--accent-gradient);transition:width 0.5s cubic-bezier(0.4,0,0.2,1);box-shadow:0 0 12px var(--accent-glow)}
+
+/* Modal animation */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:none;align-items:center;justify-content:center}
+.modal-overlay.show{display:flex;animation:fadeIn 0.2s ease-out}
+.modal-overlay.show .modal{animation:modalIn 0.25s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(0.92) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)}}
+
+/* Empty state */
+.empty-state{text-align:center;padding:40px 20px;font-size:14px;color:var(--text-muted)}
+.empty-state-icon{font-size:48px;margin-bottom:12px;opacity:0.5}
+.empty-state-text{font-size:14px}
+
 /* ═══════════════════ LOGIN ═══════════════════ */
 .login-overlay{position:fixed;inset:0;background:var(--bg-primary);z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity 0.4s}
 .login-overlay.hidden{opacity:0;pointer-events:none}
 .login-box{width:400px;padding:40px;background:var(--bg-card);backdrop-filter:blur(24px);border-radius:var(--radius-xl);border:var(--border);box-shadow:0 0 60px var(--accent-glow)}
-.login-box .logo{width:48px;height:48px;border-radius:14px;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 16px;box-shadow:0 0 30px var(--accent-glow)}
+.login-box .logo{width:64px;height:64px;border-radius:14px;background:#0F172A;border:2px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 16px}
 .login-box h1{text-align:center;font-size:22px;font-weight:700;margin-bottom:4px}
 .login-box p{text-align:center;font-size:13px;color:var(--text-secondary);margin-bottom:28px}
 .login-box .form-group{margin-bottom:16px}
@@ -145,14 +195,21 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .login-box .test-account:hover{background:var(--accent-glow);color:var(--text-primary)}
 .login-box .test-account .role{font-size:10px;color:var(--text-muted)}
 
-/* Toast */
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg-card);backdrop-filter:blur(20px);color:var(--text-primary);padding:12px 24px;border-radius:12px;border:var(--border);z-index:999;font-size:14px;font-weight:500;box-shadow:var(--shadow-drag);animation:fadeInUp 0.3s ease-out}
+/* ═══════════════════ TOAST ═══════════════════ */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg-card);backdrop-filter:blur(20px);color:var(--text-primary);padding:12px 24px;border-radius:12px;border:var(--border);z-index:999;font-size:14px;font-weight:500;box-shadow:var(--shadow-drag);animation:fadeInUp 0.3s ease-out}
 
 /* Animations */
 @keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 .animate-in{animation:fadeInUp 0.4s ease-out both}
+
+/* Dashboard sub-tabs */
+.dashboard-tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--bg-glass);padding:4px;border-radius:var(--radius-md);border:var(--border);width:fit-content}
+.dashboard-tab{padding:8px 20px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--text-muted);transition:all var(--transition-fast)}
+.dashboard-tab:hover{color:var(--text-primary);background:var(--bg-glass)}
+.dashboard-tab.active{background:var(--accent-gradient);color:#fff;box-shadow:0 0 16px var(--accent-glow)}
+.dashboard-section{display:none}
+.dashboard-section.active{display:block}
 
 /* ═══════════════════════════════════ DASHBOARD SPECIFIC ═══════════════════════════════════ */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
@@ -265,14 +322,37 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .module-toggle.on::after{transform:translateX(18px)}
 .module-name{flex:1;font-size:13px;font-weight:500}
 .action-bar{display:flex;gap:8px;margin-bottom:16px;justify-content:flex-end}
+/* Approval Timeline */
+.approval-timeline{padding:4px 0}
+.approval-node{display:flex;gap:12px;padding:10px 0;border-bottom:var(--border);align-items:flex-start}
+.approval-node:last-child{border-bottom:none}
+.approval-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.approval-dot.approved{background:var(--success);box-shadow:0 0 8px var(--success)}
+.approval-dot.rejected{background:var(--error);box-shadow:0 0 8px var(--error)}
+.approval-dot.pending{background:var(--text-muted)}
+.approval-dot.active{background:var(--accent);box-shadow:0 0 12px var(--accent-glow);animation:pulse 1.5s infinite}
+.approval-info{flex:1}
+.approval-info .name{font-size:13px;font-weight:600}
+.approval-info .meta{font-size:11px;color:var(--text-muted);margin-top:1px}
+.approval-info .comment{font-size:12px;color:var(--text-secondary);margin-top:4px;padding:6px 10px;background:var(--bg-glass);border-radius:6px}
+.approval-actions{margin-top:8px;display:flex;gap:8px}
 </style>
 </head>
 <body>
 
+<!-- ═══════════════ PAGE LOADING PROGRESS ═══════════════ -->
+<div class="page-progress" id="pageProgress"><div class="page-progress-bar" id="pageProgressBar"></div></div>
+
 <!-- ═══════════════ LOGIN OVERLAY ═══════════════ -->
 <div class="login-overlay" id="loginOverlay">
   <div class="login-box">
-    <div class="logo">A</div>
+    <div class="logo" style="width:72px;height:72px;border-radius:16px;background:#0F172A;border:2px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
+      <svg viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:40px;height:40px">
+        <rect width="36" height="36" rx="8" fill="#3B82F6"/>
+        <path d="M18 6l-8 14h5l-2 8 10-15h-5l2-7H18z" fill="#fff"/>
+      </svg>
+      <img src="logo.png" alt="安纳瑞" style="display:none;width:44px;height:44px;object-fit:contain" />
+    </div>
     <h1>安纳瑞 PDM</h1>
     <p>产品开发生命周期管理系统</p>
     <div class="form-group">
@@ -311,7 +391,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     <div class="form-group"><label>角色</label>
       <select id="regRole"><option value="产品经理">产品经理</option><option value="项目经理">项目经理</option><option value="研发工程师">研发工程师</option><option value="硬件工程师">硬件工程师</option><option value="认证工程师">认证工程师</option></select>
     </div>
-    <div class="form-group"><label>邮箱</label><input id="regEmail" placeholder="email@annarui.com" /></div>
+    <div class="form-group"><label>邮箱</label><input id="regEmail" placeholder="email@anariev.com" /></div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
       <button class="btn btn-ghost" onclick="closeRegister()">取消</button>
       <button class="btn btn-primary" onclick="doRegister()">提交注册</button>
@@ -321,20 +401,30 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 
 <!-- ═══════════════ SIDEBAR ═══════════════ -->
 <nav class="sidebar">
-  <div class="sidebar-logo" title="安纳瑞 PDM">A</div>
-  <div class="sidebar-nav">
-    <button class="sidebar-btn active" data-page="dashboard" title="工作台">📊</button>
-    <button class="sidebar-btn" data-page="products" title="产品管理">📦</button>
-    <button class="sidebar-btn" data-page="projects" title="项目管理">📋</button>
-    <button class="sidebar-btn" data-page="design" title="设计协同">🎨</button>
-    <button class="sidebar-btn" data-page="suppliers" title="供应商">🤝</button>
-    <button class="sidebar-btn" data-page="lifecycle" title="生命周期">🔄</button>
-    <button class="sidebar-btn" data-page="firmware" title="固件管理"><span>⚡</span><span class="badge"></span></button>
-    <button class="sidebar-btn" data-page="analytics" title="数据分析">📈</button>
-    <button class="sidebar-btn" data-page="certifications" title="认证管理">🛡️</button>
-    <button class="sidebar-btn" data-page="admin" title="系统管理">⚙️</button>
+  <div class="sidebar-logo" title="安纳瑞 PDM">
+    <svg class="logo-icon" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="28" height="28" rx="6" fill="#3B82F6"/>
+      <path d="M14 5L8 16h4l-2 7 8-12h-4l2-7H14z" fill="#fff"/>
+    </svg>
+    <div class="logo-text">
+      <span class="brand">安纳瑞</span>
+      <span class="sub">PDM</span>
+    </div>
   </div>
-  <button class="sidebar-btn" data-page="settings" title="个人设置" style="margin-top:auto;">👤</button>
+  <div class="sidebar-nav">
+    <button class="sidebar-btn active" data-page="dashboard" title="工作台">📊<span class="label">工作台</span></button>
+    <button class="sidebar-btn" data-page="analytics" title="数据分析">📈<span class="label">数据分析</span></button>
+    <button class="sidebar-btn" data-page="products" title="产品管理">📦<span class="label">产品管理</span></button>
+    <button class="sidebar-btn" data-page="projects" title="项目管理">📋<span class="label">项目管理</span></button>
+    <button class="sidebar-btn" data-page="design" title="设计协同">🎨<span class="label">设计协同</span></button>
+    <button class="sidebar-btn" data-page="suppliers" title="供应商">🤝<span class="label">供应商</span></button>
+    <button class="sidebar-btn" data-page="lifecycle" title="生命周期">🔄<span class="label">生命周期</span></button>
+    <button class="sidebar-btn" data-page="firmware" title="固件管理"><span>⚡</span><span class="badge"></span><span class="label">固件管理</span></button>
+    <button class="sidebar-btn" data-page="certifications" title="认证管理">🛡️<span class="label">认证管理</span></button>
+    <button class="sidebar-btn" data-page="admin" title="系统管理">⚙️<span class="badge" id="adminBadge" style="display:none"></span><span class="label">系统管理</span></button>
+  </div>
+  <button class="sidebar-toggle-btn" id="sidebarToggle" title="展开侧边栏">▶<span class="label">收起侧边栏</span></button>
+  <button class="sidebar-btn" data-page="settings" title="个人设置" style="margin-top:4px;">👤<span class="label">个人设置</span></button>
 </nav>
 
 <!-- ═══════════════ HEADER ═══════════════ -->
@@ -342,7 +432,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   <header class="header">
     <div class="header-left">
       <h1 id="pageTitle">工作台</h1>
-      <span class="header-badge">v3.0</span>
+      <span class="header-badge">v3.7</span>
     </div>
     <div class="header-right">
       <input class="header-search" type="text" placeholder="搜索产品、项目、文件..." />
@@ -350,6 +440,9 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
         <button class="theme-btn active" data-theme-value="deep-space">🌌 Deep</button>
         <button class="theme-btn" data-theme-value="moonlight">🌙 Moon</button>
         <button class="theme-btn" data-theme-value="cyber">⚡ Cyber</button>
+        <button class="theme-btn" data-theme-value="neon-pulse">💜 Neon</button>
+        <button class="theme-btn" data-theme-value="matrix">💚 Matrix</button>
+        <button class="theme-btn" data-theme-value="obsidian">🔷 Obsidian</button>
       </div>
       <div style="display:flex;align-items:center;gap:10px">
         <span id="headerUser" style="font-size:13px;color:var(--text-secondary);font-weight:500;display:none"></span>
@@ -373,7 +466,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
       <div class="stat-card-icon" style="background:rgba(245,158,11,0.12);color:#FBBF24">⏳</div>
       <div class="label">待处理任务</div><div class="value">47</div>
     </div>
-    <div class="stat-card" onclick="navigateTo('analytics')">
+    <div class="stat-card" onclick="switchDashboardTab('analytics')">
       <div class="stat-card-icon" style="background:rgba(99,102,241,0.12);color:#818CF8">📈</div>
       <div class="label">完成率</div>
       <div class="value">76<small style="font-size:14px;font-weight:400">%</small></div>
@@ -384,6 +477,12 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     <button class="btn btn-ghost" onclick="resetLayout()">↺ 重置</button>
     <button class="btn btn-ghost" onclick="toggleModulesPanel()">☰ 模块管理</button>
   </div>
+  <!-- Dashboard sub-tabs: 概览 / 数据分析 -->
+  <div class="dashboard-tabs">
+    <button class="dashboard-tab active" data-dtab="overview" onclick="switchDashboardTab('overview')">📊 概览</button>
+    <button class="dashboard-tab" data-dtab="analytics" onclick="switchDashboardTab('analytics')">📈 数据分析</button>
+  </div>
+  <div class="dashboard-section active" id="dtab-overview">
   <div class="dashboard-grid" id="dashboardGrid">
     <div class="widget" data-id="widget-lifecycle">
       <div class="widget-header"><span class="drag-handle">⋮⋮</span><h3>产品生命周期分布</h3>
@@ -415,6 +514,22 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
       </div>
     </div>
   </div>
+  </div>   <!-- closes dtab-overview -->
+  <!-- Dashboard analytics section -->
+  <div class="dashboard-section" id="dtab-analytics">
+    <div class="page-header">
+      <div><h2>数据分析</h2><p>产品开发全链路数据洞察</p></div>
+      <select onchange="showToast('📊 切换时间段: ' + this.value)" style="padding:8px 12px;border-radius:var(--radius-md);border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none">
+        <option value="本月">本月</option><option value="本季度">本季度</option><option value="本年">本年</option>
+      </select>
+    </div>
+    <div class="grid-2">
+      <div class="card"><div class="card-title">📈 产品开发趋势</div><div class="chart-container" id="chart-analytics-trend"></div></div>
+      <div class="card"><div class="card-title">🥧 产品类型分布</div><div class="chart-container" id="chart-analytics-pie"></div></div>
+      <div class="card"><div class="card-title">📊 任务完成统计</div><div class="chart-container" id="chart-analytics-task"></div></div>
+      <div class="card"><div class="card-title">⚠️ 技术问题分布</div><div class="chart-container" id="chart-analytics-issue"></div></div>
+    </div>
+  </div>
 </div>
 
 <!-- ═══════════════ PAGE: PRODUCTS ═══════════════ -->
@@ -442,7 +557,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   <div class="page-header">
     <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
     <div><h2>项目管理</h2><p>研发项目看板与进度追踪</p></div>
-    <button class="btn btn-primary" onclick="showToast('📋 新建项目表单已打开 (演示)')">＋ 新建项目</button>
+    <button class="btn btn-primary" onclick="createProject()">＋ 新建项目</button>
   </div>
   <div class="grid-3" id="projectGrid"></div>
 </div>
@@ -452,7 +567,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   <div class="page-header">
     <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
     <div><h2>设计协同</h2><p>设计文件版本管理与协同</p></div>
-    <button class="btn btn-primary" onclick="showToast('📤 文件上传对话框已打开 (演示)')">📤 上传文件</button>
+    <button class="btn btn-primary" onclick="uploadDesignFile()">📤 上传文件</button>
   </div>
   <div class="grid-3" id="designGrid"></div>
 </div>
@@ -462,7 +577,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   <div class="page-header">
     <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
     <div><h2>供应商管理</h2><p>供应商资质与外协任务跟踪</p></div>
-    <button class="btn btn-primary" onclick="showToast('🤝 新建供应商表单已打开 (演示)')">＋ 新增供应商</button>
+    <button class="btn btn-primary" onclick="createSupplier()">＋ 新增供应商</button>
   </div>
   <div class="card">
     <table class="data-table">
@@ -516,29 +631,12 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   </div>
 </div>
 
-<!-- ═══════════════ PAGE: ANALYTICS ═══════════════ -->
-<div class="page" id="page-analytics">
-  <div class="page-header">
-    <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
-    <div><h2>数据分析</h2><p>产品开发全链路数据洞察</p></div>
-    <select onchange="showToast('📊 切换时间段: ' + this.value)" style="padding:8px 12px;border-radius:var(--radius-md);border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none">
-      <option value="本月">本月</option><option value="本季度">本季度</option><option value="本年">本年</option>
-    </select>
-  </div>
-  <div class="grid-2">
-    <div class="card"><div class="card-title">📈 产品开发趋势</div><div class="chart-container" id="chart-analytics-trend"></div></div>
-    <div class="card"><div class="card-title">🥧 产品类型分布</div><div class="chart-container" id="chart-analytics-pie"></div></div>
-    <div class="card"><div class="card-title">📊 任务完成统计</div><div class="chart-container" id="chart-analytics-task"></div></div>
-    <div class="card"><div class="card-title">⚠️ 技术问题分布</div><div class="chart-container" id="chart-analytics-issue"></div></div>
-  </div>
-</div>
-
 <!-- ═══════════════ PAGE: CERTIFICATIONS ═══════════════ -->
 <div class="page" id="page-certifications">
   <div class="page-header">
     <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
     <div><h2>认证管理</h2><p>产品认证证书跟踪与到期提醒</p></div>
-    <button class="btn btn-primary" onclick="showToast('🛡️ 新建认证记录表单已打开 (演示)')">＋ 新增认证</button>
+    <button class="btn btn-primary" onclick="createCertification()">＋ 新增认证</button>
   </div>
   <div class="card">
     <table class="data-table">
@@ -558,14 +656,64 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     <div class="card admin-section">
       <h3>👥 用户管理</h3>
       <div id="userList"></div>
-      <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="showToast('👤 邀请用户表单已打开 (演示)')">＋ 邀请用户</button>
+      <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="inviteUser()">＋ 邀请用户</button>
     </div>
     <div class="card admin-section">
       <h3>⚙️ 系统配置</h3>
-      <div class="admin-row"><div><div class="admin-label">飞书集成</div><div class="admin-desc">与飞书审批、日历、消息同步</div></div><button class="toggle-switch on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button></div>
-      <div class="admin-row"><div><div class="admin-label">邮件通知</div><div class="admin-desc">认证到期、任务分配自动通知</div></div><button class="toggle-switch on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button></div>
-      <div class="admin-row"><div><div class="admin-label">自动备份</div><div class="admin-desc">每日凌晨 3:00 自动备份数据库</div></div><button class="toggle-switch on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button></div>
-      <div class="admin-row"><div><div class="admin-label">灰度升级默认值</div><div class="admin-desc">新固件任务默认灰度比例 30%</div></div><button class="toggle-switch off" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button></div>
+      <div class="admin-row"><div><div class="admin-label">飞书集成</div><div class="admin-desc">与飞书审批、日历、消息同步</div></div><button class="toggle-switch on" data-setting="feishu_enabled" onclick="toggleSetting(this,'feishu_enabled')"></button></div>
+      <div class="admin-row"><div><div class="admin-label">邮件通知</div><div class="admin-desc">认证到期、任务分配自动通知</div></div><button class="toggle-switch on" data-setting="email_enabled" onclick="toggleSetting(this,'email_enabled')"></button></div>
+      <div class="admin-row"><div><div class="admin-label">自动备份</div><div class="admin-desc">每日凌晨 3:00 自动备份数据库</div></div><button class="toggle-switch on" data-setting="backup_enabled" onclick="toggleSetting(this,'backup_enabled')"></button></div>
+      <div class="admin-row"><div><div class="admin-label">灰度升级默认值</div><div class="admin-desc">新固件任务默认灰度比例 30%</div></div><button class="toggle-switch off" data-setting="grayrelease_enabled" onclick="toggleSetting(this,'grayrelease_enabled')"></button></div>
+      <div class="admin-row"><div><div class="admin-label">会话超时 (分钟)</div><div class="admin-desc">用户无操作自动登出时间</div></div><input class="form-input" style="width:80px" value="60" id="setting_timeout" data-setting="session_timeout" onchange="saveSetting('session_timeout',this.value)" /></div>
+      <div class="admin-row"><div><div class="admin-label">密码策略</div><div class="admin-desc">最小密码长度要求</div></div><select style="padding:6px 10px;border-radius:6px;border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none" data-setting="password_policy" id="setting_password_policy" onchange="saveSetting('password_policy',this.value)"><option value="6">6 位以上</option><option value="8">8 位以上</option><option value="10">10 位以上</option><option value="12">12 位以上</option></select></div>
+      <div class="admin-row"><div><div class="admin-label">维护模式</div><div class="admin-desc">禁止非管理员登录</div></div><button class="toggle-switch off" data-setting="maintenance_mode" onclick="toggleSetting(this,'maintenance_mode')"></button></div>
+      <div class="admin-row"><div><div class="admin-label">日志级别</div><div class="admin-desc">系统日志记录详细程度</div></div><select style="padding:6px 10px;border-radius:6px;border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none" data-setting="log_level" id="setting_log_level" onchange="saveSetting('log_level',this.value)"><option value="DEBUG">DEBUG</option><option value="INFO">INFO</option><option value="WARN">WARN</option><option value="ERROR">ERROR</option></select></div>
+    </div>
+    <div class="card admin-section">
+      <h3>🏷️ 产品配置</h3>
+      <div class="admin-row"><div><div class="admin-label">产品类型</div><div class="admin-desc">可用的产品分类</div></div></div>
+      <div id="admin_product_types" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
+      <div style="display:flex;gap:6px;margin-bottom:12px"><input class="form-input" style="flex:1" id="admin_new_type" placeholder="新增类型..." /><button class="btn btn-primary btn-sm" onclick="addProductType()">＋</button></div>
+      <div class="admin-row"><div><div class="admin-label">生命周期状态</div><div class="admin-desc">可用的产品生命周期阶段</div></div></div>
+      <div id="admin_lifecycle_statuses" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
+      <div style="display:flex;gap:6px;margin-bottom:12px"><input class="form-input" style="flex:1" id="admin_new_status" placeholder="新增状态..." /><button class="btn btn-primary btn-sm" onclick="addLifecycleStatus()">＋</button></div>
+      <div class="admin-row"><div><div class="admin-label">目标市场</div><div class="admin-desc">可用的销售区域</div></div></div>
+      <div id="admin_target_markets" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"></div>
+      <div style="display:flex;gap:6px"><input class="form-input" style="flex:1" id="admin_new_market" placeholder="新增市场..." /><button class="btn btn-primary btn-sm" onclick="addTargetMarket()">＋</button></div>
+    </div>
+    <div class="card admin-section">
+      <h3>👑 角色管理</h3>
+      <div id="adminRoleList"></div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="createRole()">＋ 新建角色</button>
+    </div>
+    <div class="card admin-section">
+      <h3>📋 审批流配置</h3>
+      <div id="adminWorkflowNodes"></div>
+      <div style="display:flex;gap:6px;margin-top:12px">
+        <button class="btn btn-primary btn-sm" onclick="addWorkflowNode()">＋ 新增节点</button>
+      </div>
+    </div>
+    <div class="card admin-section">
+      <h3>🖼️ Logo 管理</h3>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+        <div id="logoPreview" style="width:80px;height:80px;border-radius:12px;background:#0F172A;border:2px solid rgba(255,255,255,0.12);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0">
+          <img id="logoPreviewImg" src="logo.png" alt="当前Logo" style="width:52px;height:52px;object-fit:contain" />
+          <svg id="logoPreviewSvg" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:44px;height:44px;display:none">
+            <rect width="36" height="36" rx="8" fill="#3B82F6"/>
+            <path d="M18 6l-8 14h5l-2 8 10-15h-5l2-7H18z" fill="#fff"/>
+          </svg>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--text-primary)">当前 Logo</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:2px">建议尺寸: 385×321px, PNG/SVG</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="uploadLogo()">📤 上传新 Logo</button>
+        <button class="btn btn-ghost btn-sm" onclick="resetLogo()">↺ 恢复默认</button>
+      </div>
+      <input type="file" id="logoFileInput" accept="image/png,image/jpeg,image/svg+xml,image/webp" style="display:none" onchange="handleLogoFile(event)" />
+      <div id="logoUploadStatus" style="font-size:12px;color:var(--text-muted);margin-top:8px"></div>
     </div>
     <div class="card admin-section">
       <h3>📋 审计日志</h3>
@@ -593,15 +741,26 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     <button class="btn btn-ghost" onclick="saveSettings()">💾 保存设置</button>
   </div>
   <div class="card" style="margin-bottom:16px">
-    <div class="card-title">👤 个人信息</div>
-    <div style="display:flex;gap:24px;align-items:center;margin-bottom:20px">
-      <div style="width:64px;height:64px;border-radius:16px;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;font-weight:700">张</div>
-      <div><div style="font-size:17px;font-weight:600">张明远</div><div style="font-size:13px;color:var(--text-secondary)">产品经理 · zhangmy@annarui.com</div></div>
-    </div>
+  <div class="card-title">👤 个人信息</div>
+  <div style="display:flex;gap:24px;align-items:center;margin-bottom:20px">
+    <div id="settingsAvatar" style="width:64px;height:64px;border-radius:16px;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;font-weight:700">张</div>
+    <div><div id="settingsNameDisplay" style="font-size:17px;font-weight:600">张明远</div><div id="settingsInfoDisplay" style="font-size:13px;color:var(--text-secondary)">产品经理 · zhangmy@anariev.com</div></div>
+  </div>
     <div class="grid-2">
       <div class="form-group"><label>姓名</label><input value="张明远" /></div>
-      <div class="form-group"><label>邮箱</label><input value="zhangmy@annarui.com" /></div>
-      <div class="form-group"><label>角色</label><input value="产品经理" /></div>
+      <div class="form-group"><label>邮箱</label><input value="zhangmy@anariev.com" /></div>
+      <div class="form-group"><label>角色</label>
+        <select id="settingsRole" style="padding:6px 10px;border-radius:6px;border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none;width:100%">
+          <option value="产品经理">产品经理</option>
+          <option value="总经理">总经理</option>
+          <option value="技术总监">技术总监</option>
+          <option value="研发-硬件">研发-硬件</option>
+          <option value="研发-软件">研发-软件</option>
+          <option value="研发-系统">研发-系统</option>
+          <option value="技术支持">技术支持</option>
+          <option value="销售总监">销售总监</option>
+        </select>
+      </div>
       <div class="form-group"><label>电话</label><input value="+86 138-0000-0000" /></div>
     </div>
   </div>
@@ -609,11 +768,11 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     <div class="card-title">🎨 界面偏好</div>
     <div class="admin-row">
       <div><div class="admin-label">语言</div><div class="admin-desc">界面显示语言</div></div>
-      <select style="padding:6px 10px;border-radius:6px;border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none"><option>中文 (简体)</option><option>English</option></select>
+      <select id="langSelect" style="padding:6px 10px;border-radius:6px;border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none"><option value="zh">中文 (简体)</option><option value="en">English</option></select>
     </div>
     <div class="admin-row">
       <div><div class="admin-label">侧边栏模式</div><div class="admin-desc">图标模式 / 完整模式</div></div>
-      <select style="padding:6px 10px;border-radius:6px;border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none"><option>图标模式</option><option>完整模式</option></select>
+      <select id="sidebarModeSelect" style="padding:6px 10px;border-radius:6px;border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none"><option value="collapsed">图标模式</option><option value="expanded">完整模式</option></select>
     </div>
     <div class="admin-row">
       <div><div class="admin-label">通知偏好</div><div class="admin-desc">接收飞书消息通知</div></div>
@@ -650,7 +809,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 
 <!-- ═══════════════ DETAIL MODAL ═══════════════ -->
 <div class="modal-overlay" id="detailModal">
-  <div class="modal" style="width:560px">
+  <div class="modal" style="width:600px">
     <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
     <h3 id="detailModalTitle">详情</h3>
     <div id="detailModalBody"></div>
@@ -697,12 +856,42 @@ const PRODUCTS = [
   { code:'AC-110-JP', model:'ARC-3.3kW', type:'AC Charger', status:'on_sale', market:'JP' },
 ];
 const PROJECTS = [
-  { id:1, name:'DRC-150kW 超充桩研发', product:'DRC-150kW', status:'in_progress', progress:75, deadline:'2026-08', tasks:{total:24,done:18}, priority:'high' },
-  { id:2, name:'ARC-22kW 欧标升级', product:'ARC-22kW', status:'in_progress', progress:45, deadline:'2026-10', tasks:{total:16,done:7}, priority:'medium' },
-  { id:3, name:'PFC-3.3kW 便携产品', product:'PFC-3.3kW', status:'in_progress', progress:30, deadline:'2026-12', tasks:{total:20,done:6}, priority:'medium' },
-  { id:4, name:'ARC-7.2kW 美国认证', product:'ARC-7.2kW', status:'pending_approval', progress:100, deadline:'2026-07', tasks:{total:8,done:8}, priority:'high' },
-  { id:5, name:'DRC-350kW 兆瓦级充电', product:'DRC-350kW', status:'pending_approval', progress:10, deadline:'2027-03', tasks:{total:32,done:3}, priority:'low' },
-  { id:6, name:'ARC-3.3kW 日本市场', product:'ARC-3.3kW', status:'completed', progress:100, deadline:'2026-05', tasks:{total:12,done:12}, priority:'low' },
+  { id:1, name:'DRC-150kW 超充桩研发', product:'DRC-150kW', status:'in_progress', progress:75, deadline:'2026-08', tasks:{total:24,done:18}, priority:'high', lifecycleStage:'design', currentNode:-1, createdBy:'张明远', createdAt:'2026-04-01', approvals:[
+    { nodeId:'node1', status:'approved', approver:'孙越', comment:'方案可行，同意立项', date:'2026-04-05' },
+    { nodeId:'node2', status:'approved', approver:'Dylan', comment:'技术方案通过，研发资源已调配', date:'2026-04-08' },
+    { nodeId:'node3', status:'approved', approver:'Kerry', comment:'预算审批通过，成本可控', date:'2026-04-10' },
+    { nodeId:'node4', status:'approved', approver:'Kerry', comment:'批准立项，正式启动研发', date:'2026-04-12' },
+  ]},
+  { id:2, name:'ARC-22kW 欧标升级', product:'ARC-22kW', status:'in_progress', progress:45, deadline:'2026-10', tasks:{total:16,done:7}, priority:'medium', lifecycleStage:'prototype', currentNode:-1, createdBy:'孙越', createdAt:'2026-02-10', approvals:[
+    { nodeId:'node1', status:'approved', approver:'孙越', comment:'欧标升级需求明确，同意', date:'2026-02-15' },
+    { nodeId:'node2', status:'approved', approver:'Dylan', comment:'技术方案已评审通过', date:'2026-02-18' },
+    { nodeId:'node3', status:'approved', approver:'Kerry', comment:'预算在年度计划内', date:'2026-02-20' },
+    { nodeId:'node4', status:'approved', approver:'Kerry', comment:'批准立项', date:'2026-02-22' },
+  ]},
+  { id:3, name:'PFC-3.3kW 便携产品', product:'PFC-3.3kW', status:'in_review', progress:30, deadline:'2026-12', tasks:{total:20,done:6}, priority:'medium', lifecycleStage:'requirement', currentNode:1, createdBy:'张明远', createdAt:'2026-06-01', approvals:[
+    { nodeId:'node1', status:'approved', approver:'孙越', comment:'便携产品市场前景良好，同意', date:'2026-06-05' },
+    { nodeId:'node2', status:'pending', approver:'', comment:'', date:'' },
+    { nodeId:'node3', status:'pending', approver:'', comment:'', date:'' },
+    { nodeId:'node4', status:'pending', approver:'', comment:'', date:'' },
+  ]},
+  { id:4, name:'ARC-7.2kW 美国认证', product:'ARC-7.2kW', status:'in_progress', progress:100, deadline:'2026-07', tasks:{total:8,done:8}, priority:'high', lifecycleStage:'certification', currentNode:-1, createdBy:'孙越', createdAt:'2026-01-05', approvals:[
+    { nodeId:'node1', status:'approved', approver:'孙越', comment:'认证需求明确，同意立项', date:'2026-01-08' },
+    { nodeId:'node2', status:'approved', approver:'Dylan', comment:'技术资料齐全，通过', date:'2026-01-10' },
+    { nodeId:'node3', status:'approved', approver:'Kerry', comment:'认证预算已审批', date:'2026-01-12' },
+    { nodeId:'node4', status:'approved', approver:'Kerry', comment:'批准，加速推进美国市场', date:'2026-01-14' },
+  ]},
+  { id:5, name:'DRC-350kW 兆瓦级充电', product:'DRC-350kW', status:'in_review', progress:10, deadline:'2027-03', tasks:{total:32,done:3}, priority:'low', lifecycleStage:'requirement', currentNode:0, createdBy:'张明远', createdAt:'2026-06-14', approvals:[
+    { nodeId:'node1', status:'pending', approver:'', comment:'', date:'' },
+    { nodeId:'node2', status:'pending', approver:'', comment:'', date:'' },
+    { nodeId:'node3', status:'pending', approver:'', comment:'', date:'' },
+    { nodeId:'node4', status:'pending', approver:'', comment:'', date:'' },
+  ]},
+  { id:6, name:'ARC-3.3kW 日本市场', product:'ARC-3.3kW', status:'completed', progress:100, deadline:'2026-05', tasks:{total:12,done:12}, priority:'low', lifecycleStage:'completed', currentNode:-1, createdBy:'孙越', createdAt:'2025-11-01', approvals:[
+    { nodeId:'node1', status:'approved', approver:'孙越', comment:'日本市场需求明确', date:'2025-11-05' },
+    { nodeId:'node2', status:'approved', approver:'Dylan', comment:'基于现有平台改造，可行', date:'2025-11-08' },
+    { nodeId:'node3', status:'approved', approver:'Kerry', comment:'成本核算通过', date:'2025-11-10' },
+    { nodeId:'node4', status:'approved', approver:'Kerry', comment:'批准，目标日本市场', date:'2025-11-12' },
+  ]},
 ];
 const DESIGN_FILES = [
   { name:'ARC-7.2kW 外壳 v3', type:'STEP', version:3, author:'李工', updated:'2026-06-10', icon:'📐' },
@@ -736,11 +925,11 @@ const CERTS = [
   { product:'PF-7.4-US', type:'FCC', number:'FCC-2025-0508', issuer:'FCC', issued:'2025-05-08', expiry:'2028-05-08', status:'valid' },
 ];
 const USERS = [
-  { name:'李明', role:'硬件工程师', email:'lim@annarui.com', status:'在线' },
-  { name:'王芳', role:'嵌入式工程师', email:'wangf@annarui.com', status:'在线' },
-  { name:'陈强', role:'项目经理', email:'chenq@annarui.com', status:'离线' },
-  { name:'张明远', role:'产品经理', email:'zhangmy@annarui.com', status:'在线' },
-  { name:'刘洋', role:'认证工程师', email:'liuy@annarui.com', status:'忙碌' },
+  { name:'李明', role:'硬件工程师', email:'lim@anariev.com', status:'在线' },
+  { name:'王芳', role:'嵌入式工程师', email:'wangf@anariev.com', status:'在线' },
+  { name:'陈强', role:'项目经理', email:'chenq@anariev.com', status:'离线' },
+  { name:'张明远', role:'产品经理', email:'zhangmy@anariev.com', status:'在线' },
+  { name:'刘洋', role:'认证工程师', email:'liuy@anariev.com', status:'忙碌' },
 ];
 const AUDIT_LOGS = [
   { user:'张明远', action:'提交生命周期流转', target:'AC-220-EU', time:'10:32 2026-06-14' },
@@ -768,9 +957,9 @@ const STATUS_TAG = {
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════════
 const PAGE_TITLES = {
-  dashboard:'工作台', products:'产品管理', projects:'项目管理', design:'设计协同',
+  dashboard:'工作台', products:'产品管理', projects:'项目管理', design:'设计协同', analytics:'数据分析',
   suppliers:'供应商管理', lifecycle:'生命周期管理', firmware:'固件管理',
-  analytics:'数据分析', certifications:'认证管理', admin:'系统管理', settings:'个人设置'
+  certifications:'认证管理', admin:'系统管理', settings:'个人设置'
 };
 
 document.querySelectorAll('.sidebar-btn[data-page]').forEach(btn => {
@@ -781,23 +970,101 @@ document.querySelectorAll('.sidebar-btn[data-page]').forEach(btn => {
 });
 
 function navigateTo(page) {
+  // Permission guard: admin page requires admin permission
+  if (page === 'admin' && !isAdmin()) {
+    showToast('⛔ 无权限访问系统管理页面');
+    return;
+  }
+  // Show page loading progress
+  const progressBar = document.getElementById('pageProgressBar');
+  if (progressBar) progressBar.style.width = '30%';
+
   document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
   document.querySelector(`.sidebar-btn[data-page="${page}"]`).classList.add('active');
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+
+  // Page transition: fade out current, then fade in new
+  document.querySelectorAll('.page').forEach(p => {
+    if (p.classList.contains('active')) {
+      p.classList.remove('active');
+      p.style.display = 'none';
+    }
+  });
   const el = document.getElementById(`page-${page}`);
-  if (el) { el.classList.add('active'); }
+  if (el) {
+    el.style.display = 'block';
+    // Force reflow for transition to work
+    void el.offsetHeight;
+    el.classList.add('active');
+  }
+
+  // Dashboard default: show overview tab
+  if (page === 'dashboard') {
+    // Reset sub-tabs to overview
+    document.querySelectorAll('.dashboard-tab').forEach(t => t.classList.remove('active'));
+    document.querySelector(`.dashboard-tab[data-dtab="overview"]`).classList.add('active');
+    document.querySelectorAll('.dashboard-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('dtab-overview').classList.add('active');
+    if (sortableInstance) sortableInstance.option('disabled', false);
+  }
+
   document.getElementById('pageTitle').textContent = PAGE_TITLES[page] || page;
 
-  // Init page-specific content on first visit
-  if (page === 'projects') renderProjects();
-  if (page === 'design') renderDesignFiles();
-  if (page === 'suppliers') renderSuppliers();
-  if (page === 'firmware') { renderFirmware(); initFirmwareChart(); }
-  if (page === 'analytics') { initAnalyticsCharts(); }
-  if (page === 'certifications') renderCerts();
-  if (page === 'admin') renderAdmin();
-  if (page === 'lifecycle') renderLifecycle();
-  if (page === 'products') renderProductsTable();
+  // Complete progress bar
+  if (progressBar) { progressBar.style.width = '90%'; }
+
+  // Apply i18n to the newly shown page
+  applyLanguage();
+
+  // Init page-specific content on first visit with skeleton placeholder
+  if (page === 'analytics') {
+    // Analytics is a sub-tab of dashboard — route to dashboard and switch tab
+    navigateTo('dashboard');
+    setTimeout(() => switchDashboardTab('analytics'), 50);
+    return;
+  }
+  else if (page === 'projects') { showSkeleton('projectGrid','card',4); setTimeout(()=>{ hideSkeleton('projectGrid'); renderProjects(); if(progressBar)progressBar.style.width='100%'; setTimeout(()=>progressBar.style.width='0%',300); },200); }
+  else if (page === 'design') { showSkeleton('designGrid','card',4); setTimeout(()=>{ hideSkeleton('designGrid'); renderDesignFiles(); if(progressBar)progressBar.style.width='100%'; setTimeout(()=>progressBar.style.width='0%',300); },200); }
+  else if (page === 'suppliers') { renderSuppliers(); if(progressBar)progressBar.style.width='100%'; setTimeout(()=>progressBar.style.width='0%',300); }
+  else if (page === 'firmware') { renderFirmware(); initFirmwareChart(); if(progressBar)progressBar.style.width='100%'; setTimeout(()=>progressBar.style.width='0%',300); }
+  else if (page === 'certifications') { renderCerts(); if(progressBar)progressBar.style.width='100%'; setTimeout(()=>progressBar.style.width='0%',300); }
+  else if (page === 'admin') { renderAdmin(); if(progressBar)progressBar.style.width='100%'; setTimeout(()=>progressBar.style.width='0%',300); }
+  else if (page === 'lifecycle') { renderLifecycle(); if(progressBar)progressBar.style.width='100%'; setTimeout(()=>progressBar.style.width='0%',300); }
+  else if (page === 'products') { renderProductsTable(); if(progressBar)progressBar.style.width='100%'; setTimeout(()=>progressBar.style.width='0%',300); }
+  else if (page === 'settings') { loadSettingsUI(); if(progressBar)progressBar.style.width='100%'; setTimeout(()=>progressBar.style.width='0%',300); }
+  else { if(progressBar)progressBar.style.width='100%'; setTimeout(()=>progressBar.style.width='0%',300); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD SUB-TAB SWITCH
+// ═══════════════════════════════════════════════════════════════
+function switchDashboardTab(tab) {
+  // Update sidebar active state: analytics button activates when tab=analytics
+  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+  const targetBtn = tab === 'analytics' ? '.sidebar-btn[onclick*="analytics"]' : '.sidebar-btn[data-page="dashboard"]';
+  document.querySelector(targetBtn)?.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-dashboard').classList.add('active');
+  document.getElementById('pageTitle').textContent = tab === 'overview' ? '工作台' : '工作台 · 数据分析';
+
+  // Update tab buttons
+  document.querySelectorAll('.dashboard-tab').forEach(t => t.classList.remove('active'));
+  document.querySelector(`.dashboard-tab[data-dtab="${tab}"]`).classList.add('active');
+
+  // Switch sections
+  document.querySelectorAll('.dashboard-section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`dtab-${tab}`).classList.add('active');
+
+  // Init charts if needed
+  if (tab === 'overview') {
+    initDashboardCharts();
+    // Re-init SortableJS on the dashboard grid when switching back
+    if (sortableInstance) sortableInstance.option('disabled', false);
+  }
+  if (tab === 'analytics') {
+    initAnalyticsCharts();
+    // Disable SortableJS when on analytics tab (no dashboard-grid visible)
+    if (sortableInstance) sortableInstance.option('disabled', true);
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -928,14 +1195,18 @@ function makeBar(id,xData,data,colors){
 function renderProductsTable() {
   const tb = document.getElementById('productsTableBody');
   const search = (document.getElementById('productSearch')?.value||'').toLowerCase();
-  const sf = document.getElementById('productStatusFilter')?.value||'';
-  const tf = document.getElementById('productTypeFilter')?.value||'';
-  const filtered = PRODUCTS.filter(p => {
-    if (search && !p.code.toLowerCase().includes(search) && !p.model.toLowerCase().includes(search)) return false;
-    if (sf && p.status !== sf) return false;
-    if (tf && p.type !== tf) return false;
-    return true;
+  const statusF = document.getElementById('productStatusFilter')?.value||'';
+  const typeF = document.getElementById('productTypeFilter')?.value||'';
+  let filtered = PRODUCTS.filter(p => {
+    const matchSearch = !search || p.code.toLowerCase().includes(search) || p.model.toLowerCase().includes(search);
+    const matchStatus = !statusF || p.status === statusF;
+    const matchType = !typeF || p.type === typeF;
+    return matchSearch && matchStatus && matchType;
   });
+  if (filtered.length === 0) {
+    tb.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-muted);font-size:14px">📭 没有匹配的产品</td></tr>';
+    return;
+  }
   tb.innerHTML = filtered.map(p => {
     const t = STATUS_TAG[p.status]||{c:'tag-gray',l:p.status};
     return `<tr>
@@ -970,17 +1241,73 @@ document.getElementById('productModal').addEventListener('click', function(e) {
 // ═══════════════════════════════════════════════════════════════
 // PROJECTS PAGE
 // ═══════════════════════════════════════════════════════════════
+function getWorkflowNodes() {
+  try { return JSON.parse(localStorage.getItem('pdm_workflow_nodes')) || DEFAULT_WORKFLOW_NODES; }
+  catch(e) { return DEFAULT_WORKFLOW_NODES; }
+}
+function saveWorkflowNodes(nodes) {
+  localStorage.setItem('pdm_workflow_nodes', JSON.stringify(nodes));
+}
+
+function syncProjectsWithWorkflow() {
+  // Ensure every existing project has approval entries for all current workflow nodes.
+  // Missing nodes are added as 'pending' so they appear in the approval timeline.
+  const workflows = getWorkflowNodes();
+  PROJECTS.forEach(p => {
+    if (!p.approvals) { p.approvals = []; }
+    workflows.forEach(wn => {
+      const existing = p.approvals.find(a => a.nodeId === wn.id);
+      if (!existing) {
+        p.approvals.push({
+          nodeId: wn.id,
+          status: 'pending',
+          approver: '',
+          comment: '',
+          date: ''
+        });
+        // If this project has no currentNode set and is pending_approval,
+        // keep currentNode at 0 (default for new projects).
+        // If currentNode is -1 (completed) don't change it.
+      }
+    });
+  });
+  saveProjects();
+}
+const DEFAULT_WORKFLOW_NODES = [
+  { id:'node1', name:'产品经理初审', role:'产品经理', order:1 },
+  { id:'node2', name:'技术评审', role:'技术总监', order:2 },
+  { id:'node3', name:'成本评审', role:'CEO', order:3 },
+  { id:'node4', name:'立项审批', role:'CEO', order:4 },
+];
+
+function getApprovalStatusLabel(p) {
+  const workflows = getWorkflowNodes();
+  // Sort by order for consistent indexing
+  const sorted = [...workflows].sort((a, b) => (a.order || 0) - (b.order || 0));
+  if (p.status === 'pending_approval') return {c:'tag-yellow', l:'⏳ 待初审'};
+  if (p.status === 'rejected') return {c:'tag-red', l:'❌ 已驳回'};
+  if (p.status === 'approved') return {c:'tag-green', l:'✅ 已立项'};
+  if (p.status === 'in_review') {
+    const nodeIdx = p.currentNode !== undefined ? p.currentNode : 0;
+    const node = sorted[nodeIdx];
+    const nodeName = node ? node.name : '评审中';
+    return {c:'tag-blue', l:'🔄 ' + nodeName};
+  }
+  if (p.status === 'completed') return {c:'tag-green', l:'✅ 已完成'};
+  if (p.status === 'in_progress') return {c:'tag-blue', l:'进行中'};
+  return {c:'tag-gray', l:p.status};
+}
+
 function renderProjects() {
   const grid = document.getElementById('projectGrid');
   grid.innerHTML = PROJECTS.map(p => {
     const pct = p.progress;
-    const statusColor = p.status === 'completed' ? 'tag-green' : p.status === 'in_progress' ? 'tag-blue' : p.status === 'pending_approval' ? 'tag-yellow' : 'tag-gray';
-    const statusLabel = p.status === 'completed' ? '已完成' : p.status === 'in_progress' ? '进行中' : p.status === 'pending_approval' ? '待审批' : p.status;
+    const sc = getApprovalStatusLabel(p);
     const priorityIcon = p.priority === 'high' ? '🔴' : p.priority === 'medium' ? '🟡' : '🟢';
     return `<div class="project-card" onclick="viewProject(${p.id})">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <h4>${p.name}</h4>
-        <span class="tag ${statusColor}">${statusLabel}</span>
+        <span class="tag ${sc.c}">${sc.l}</span>
       </div>
       <div class="meta">${priorityIcon} ${p.product} · 截止 ${p.deadline}</div>
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary)">
@@ -1008,7 +1335,7 @@ function renderDesignFiles() {
       <div class="meta">${f.icon === '📄' ? 'PDF' : f.type} · v${f.version} · ${f.author}</div>
       <div class="meta" style="margin-top:2px">${f.updated}</div>
       <div style="display:flex;gap:4px;justify-content:center;margin-top:10px">
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showToast('📥 下载 ${f.name} (演示)')">下载</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();downloadDesignFile('${f.name}')">下载</button>
         <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showVersionHistory('${f.name}')">历史</button>
       </div>
     </div>`).join('');
@@ -1170,7 +1497,7 @@ function renderAdmin() {
         <div class="admin-label">${u.name} <span class="tag ${sc}" style="margin-left:8px">${u.status}</span></div>
         <div class="admin-desc">${u.role} · ${u.email}</div>
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="showToast('✏️ 编辑用户 ${u.name} (演示)')">编辑</button>
+      <button class="btn btn-ghost btn-sm" onclick="editAdminUser('${u.name}')">编辑</button>
     </div>`;
   }).join('');
   // Audit logs
@@ -1183,6 +1510,95 @@ function renderAdmin() {
       </div>
     </div>`
   ).join('');
+  // Product configuration
+  renderProductConfig();
+  // Roles
+  renderAdminRoles();
+  // Workflow nodes
+  renderWorkflowNodes();
+  // System settings
+  loadAdminSettings();
+}
+
+function renderWorkflowNodes() {
+  const el = document.getElementById('adminWorkflowNodes');
+  if (!el) return;
+  const nodes = getWorkflowNodes();
+  // Sort by order field to respect manual ordering
+  const sorted = [...nodes].sort((a, b) => (a.order || 0) - (b.order || 0));
+  el.innerHTML = sorted.map((n, idx) => `
+    <div class="admin-row">
+      <div style="flex:1">
+        <div class="admin-label">${idx + 1}. ${n.name} <span style="color:var(--text-muted);font-size:12px">→ ${n.role}</span></div>
+        <div class="admin-desc">审批角色: ${n.role}</div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-ghost btn-sm" onclick="editWorkflowNode('${n.id}')">编辑</button>
+        <button class="btn btn-ghost btn-sm" onclick="removeWorkflowNode('${n.id}')" ${nodes.length <= 1 ? 'disabled' : ''}>✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addWorkflowNode() {
+  showForm('新增审批节点', [
+    {id:'name', label:'节点名称', placeholder:'例如 质量评审'},
+    {id:'role', label:'审批角色', placeholder:'例如 质量经理'},
+  ], () => {
+    const name = document.getElementById('fm_name')?.value?.trim();
+    const role = document.getElementById('fm_role')?.value?.trim();
+    if (!name || !role) { showToast('⚠️ 请填写节点名称和审批角色'); return; }
+    const nodes = getWorkflowNodes();
+    const maxOrder = Math.max(...nodes.map(n => n.order), 0);
+    const newId = 'node_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4);
+    nodes.push({ id:newId, name, role, order:maxOrder + 1 });
+    saveWorkflowNodes(nodes);
+    syncProjectsWithWorkflow();
+    renderWorkflowNodes();
+    renderProjects();
+    showToast('✅ 已新增审批节点: ' + name);
+  });
+}
+
+function editWorkflowNode(nodeId) {
+  const nodes = getWorkflowNodes();
+  const n = nodes.find(x => x.id === nodeId);
+  if (!n) return;
+  showForm('编辑审批节点', [
+    {id:'name', label:'节点名称', value:n.name},
+    {id:'role', label:'审批角色', value:n.role},
+  ], () => {
+    const name = document.getElementById('fm_name')?.value?.trim();
+    const role = document.getElementById('fm_role')?.value?.trim();
+    if (!name || !role) { showToast('⚠️ 请填写完整信息'); return; }
+    n.name = name;
+    n.role = role;
+    saveWorkflowNodes(nodes);
+    syncProjectsWithWorkflow();
+    renderWorkflowNodes();
+    showToast('✅ 审批节点已更新');
+  });
+}
+
+function removeWorkflowNode(nodeId) {
+  const nodes = getWorkflowNodes();
+  if (nodes.length <= 1) { showToast('⚠️ 至少保留一个审批节点'); return; }
+  const idx = nodes.findIndex(x => x.id === nodeId);
+  if (idx === -1) return;
+  nodes.splice(idx, 1);
+  // Reassign order
+  nodes.forEach((n, i) => n.order = i + 1);
+  saveWorkflowNodes(nodes);
+  // Clean up removed node from all existing projects
+  PROJECTS.forEach(p => {
+    if (p.approvals) {
+      p.approvals = p.approvals.filter(a => a.nodeId !== nodeId);
+    }
+  });
+  saveProjects();
+  renderWorkflowNodes();
+  renderProjects();
+  showToast('🗑️ 已移除审批节点，已从项目中同步删除');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1203,8 +1619,10 @@ document.querySelectorAll('.theme-btn').forEach(btn => {
     document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     // Re-init all visible charts
-    if (document.getElementById('page-dashboard').classList.contains('active')) initDashboardCharts();
-    if (document.getElementById('page-analytics').classList.contains('active')) initAnalyticsCharts();
+    if (document.getElementById('page-dashboard').classList.contains('active')) {
+      initDashboardCharts();
+      if (document.getElementById('dtab-analytics').classList.contains('active')) initAnalyticsCharts();
+    }
     if (document.getElementById('page-firmware').classList.contains('active')) initFirmwareChart();
   });
 });
@@ -1244,6 +1662,10 @@ function showForm(title, fields, submitCallback) {
     if (f.type === 'textarea') {
       return `<div class="form-group"><label class="form-label">${f.label}</label>
         <textarea class="form-input" id="fm_${f.id}" placeholder="${f.placeholder||''}" rows="3"></textarea></div>`;
+    }
+    if (f.type === 'date') {
+      return `<div class="form-group"><label class="form-label">${f.label}</label>
+        <input type="date" class="form-input" id="fm_${f.id}" value="${f.value||''}" /></div>`;
     }
     return `<div class="form-group"><label class="form-label">${f.label}</label>
       <input class="form-input" id="fm_${f.id}" placeholder="${f.placeholder||''}" value="${f.value||''}" /></div>`;
@@ -1304,22 +1726,199 @@ function editProduct(code) {
 function viewProject(id) {
   const p = PROJECTS.find(x => x.id === id);
   if (!p) return;
+  // Ensure this project has approval entries for all current workflow nodes
+  const workflows = getWorkflowNodes();
+  if (!p.approvals) p.approvals = [];
+  workflows.forEach(wn => {
+    if (!p.approvals.find(a => a.nodeId === wn.id)) {
+      p.approvals.push({ nodeId: wn.id, status:'pending', approver:'', comment:'', date:'' });
+    }
+  });
   const pct = p.progress;
-  const sl = p.status === 'completed' ? '已完成' : p.status === 'in_progress' ? '进行中' : p.status === 'pending_approval' ? '待审批' : p.status;
   const pi = p.priority === 'high' ? '🔴 高' : p.priority === 'medium' ? '🟡 中' : '🟢 低';
+  const sc = getApprovalStatusLabel(p);
+  
+  // Build approval timeline HTML (sort by workflow order)
+  const sortedWorkflows = [...workflows].sort((a, b) => (a.order || 0) - (b.order || 0));
+  const currentUser = getCurrentUser();
+  let timelineHtml = '<div class="approval-timeline">';
+  sortedWorkflows.forEach((node, idx) => {
+    const approval = p.approvals ? p.approvals.find(a => a.nodeId === node.id) : null;
+    const status = approval ? approval.status : 'pending';
+    let dotClass = 'pending';
+    let label = '⏳ 待审批';
+    let infoHtml = `<div class="name">${node.name}</div><div class="meta">${node.role}</div>`;
+    
+    if (status === 'approved') {
+      dotClass = 'approved';
+      label = '✅ 已通过';
+      infoHtml = `<div class="name">${node.name} <span style="color:var(--success);font-size:12px">✅</span></div>
+        <div class="meta">${approval.approver} · ${approval.date}</div>
+        <div class="comment">${approval.comment}</div>`;
+    } else if (status === 'rejected') {
+      dotClass = 'rejected';
+      label = '❌ 已驳回';
+      infoHtml = `<div class="name">${node.name} <span style="color:var(--error);font-size:12px">❌</span></div>
+        <div class="meta">${approval.approver} · ${approval.date}</div>
+        <div class="comment">${approval.comment}</div>`;
+    } else if (p.currentNode === idx) {
+      dotClass = 'active';
+      label = '🔄 待审批';
+      infoHtml = `<div class="name">${node.name} <span style="color:var(--accent);font-size:12px">🔄</span></div>
+        <div class="meta">等待 ${node.role} 审批</div>`;
+    }
+    
+    timelineHtml += `<div class="approval-node">
+      <span class="approval-dot ${dotClass}"></span>
+      <div class="approval-info">${infoHtml}</div>
+    </div>`;
+  });
+  timelineHtml += '</div>';
+  
+  // Check if current user can approve
+  let canApprove = false;
+  let currentNodeRole = '';
+  // currentNode index maps to sorted workflows (respecting workflow order in admin config)
+  if (p.currentNode >= 0 && p.currentNode < sortedWorkflows.length) {
+    currentNodeRole = sortedWorkflows[p.currentNode].role;
+    if (currentUser && currentUser.role === currentNodeRole) {
+      canApprove = true;
+    }
+  }
+  
+  const actions = [
+    {text:'📋 任务列表', cls:'btn-primary', onclick:'viewProjectTasks(' + id + ')'},
+  ];
+  
+  if (canApprove) {
+    actions.push({text:'✅ 批准', cls:'btn-primary', onclick:'approveProjectNode(' + id + ')'});
+    actions.push({text:'❌ 拒绝', cls:'btn-ghost', onclick:'rejectProjectNode(' + id + ')'});
+  }
+  
   showDetail('项目详情: ' + p.name, [
     {label:'项目名称', value:p.name},
     {label:'关联产品', value:p.product},
-    {label:'状态', value:sl},
+    {label:'状态', value:'<span class="tag ' + sc.c + '">' + sc.l + '</span>'},
     {label:'优先级', value:pi},
     {label:'截止日期', value:p.deadline},
     {label:'进度', value:pct + '%'},
     {label:'任务', value:p.tasks.done + '/' + p.tasks.total + ' (' + Math.round(p.tasks.done/p.tasks.total*100) + '%)'},
-  ], [
-    {text:'📋 任务列表', cls:'btn-primary', onclick:'viewProjectTasks(' + id + ')'},
-    {text:'📝 更新状态', cls:'btn-ghost', onclick:'updateProjectStatus(' + id + ')'},
-  ]);
+    {label:'创建人', value:p.createdBy || '-'},
+    {label:'创建时间', value:p.createdAt || '-'},
+    {label:'审批流程', value:timelineHtml},
+  ], actions);
 }
+
+function approveProjectNode(id) {
+  const p = PROJECTS.find(x => x.id === id);
+  if (!p) return;
+  const user = getCurrentUser();
+  if (!user) { showToast('⚠️ 请先登录'); return; }
+  
+  showForm('审批操作', [
+    {id:'comment', label:'审批意见 *', type:'textarea', placeholder:'请输入审批意见'},
+  ], () => {
+    const comment = document.getElementById('fm_comment')?.value?.trim();
+    if (!comment) { showToast('⚠️ 请填写审批意见'); return; }
+    
+    const workflows = getWorkflowNodes();
+    const sorted = [...workflows].sort((a, b) => (a.order || 0) - (b.order || 0));
+    const nodeIdx = p.currentNode;
+    if (nodeIdx < 0 || nodeIdx >= sorted.length) { showToast('⚠️ 审批流程已完成'); return; }
+    const node = sorted[nodeIdx];
+    const approval = p.approvals.find(a => a.nodeId === node.id);
+    if (!approval) { showToast('⚠️ 审批节点异常'); return; }
+    
+    const now = new Date();
+    const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+    
+    approval.status = 'approved';
+    approval.approver = user.name;
+    approval.comment = comment;
+    approval.date = dateStr;
+    
+    // Check if all done
+    if (nodeIdx + 1 >= sorted.length) {
+      p.currentNode = -1;
+      p.status = 'approved';
+      p.lifecycleStage = 'requirement';
+      showToast('✅ 所有审批通过！项目已立项');
+    } else {
+      p.currentNode = nodeIdx + 1;
+      p.status = 'in_review';
+      const nextNode = sorted[p.currentNode];
+      showToast('✅ ' + node.name + ' 已批准，下一节点: ' + nextNode.name);
+    }
+    
+    // Save projects to localStorage for persistence
+    saveProjects();
+    renderProjects();
+    closeModal('detailModal');
+  });
+}
+
+function rejectProjectNode(id) {
+  const p = PROJECTS.find(x => x.id === id);
+  if (!p) return;
+  const user = getCurrentUser();
+  if (!user) { showToast('⚠️ 请先登录'); return; }
+  
+  showForm('审批操作', [
+    {id:'comment', label:'驳回原因 *', type:'textarea', placeholder:'请输入驳回原因'},
+  ], () => {
+    const comment = document.getElementById('fm_comment')?.value?.trim();
+    if (!comment) { showToast('⚠️ 请填写驳回原因'); return; }
+    
+    const workflows = getWorkflowNodes();
+    const sorted = [...workflows].sort((a, b) => (a.order || 0) - (b.order || 0));
+    const nodeIdx = p.currentNode;
+    if (nodeIdx < 0 || nodeIdx >= sorted.length) { showToast('⚠️ 审批流程已完成'); return; }
+    const node = sorted[nodeIdx];
+    const approval = p.approvals.find(a => a.nodeId === node.id);
+    if (!approval) { showToast('⚠️ 审批节点异常'); return; }
+    
+    const now = new Date();
+    const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+    
+    approval.status = 'rejected';
+    approval.approver = user.name;
+    approval.comment = comment;
+    approval.date = dateStr;
+    p.status = 'rejected';
+    
+    saveProjects();
+    renderProjects();
+    closeModal('detailModal');
+    showToast('❌ 项目已驳回: ' + comment);
+  });
+}
+
+function saveProjects() {
+  localStorage.setItem('pdm_projects', JSON.stringify(PROJECTS));
+}
+
+// Load persisted projects on startup
+(function loadProjects() {
+  try {
+    const saved = localStorage.getItem('pdm_projects');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // Merge saved approval data into the static PROJECTS array
+      parsed.forEach(sp => {
+        const idx = PROJECTS.findIndex(pp => pp.id === sp.id);
+        if (idx !== -1) {
+          // Preserve approvals and status changes
+          PROJECTS[idx].approvals = sp.approvals;
+          PROJECTS[idx].status = sp.status;
+          PROJECTS[idx].currentNode = sp.currentNode;
+          if (sp.lifecycleStage) PROJECTS[idx].lifecycleStage = sp.lifecycleStage;
+        }
+      });
+    }
+    // Sync all projects with current workflow config (add missing nodes, remove orphaned)
+    syncProjectsWithWorkflow();
+  } catch(e) {}
+})();
 function viewProjectTasks(id) {
   const p = PROJECTS.find(x => x.id === id);
   showForm(p.name + ' - 任务列表', [
@@ -1339,10 +1938,50 @@ function createProject() {
   showForm('新建项目', [
     {id:'name', label:'项目名称', placeholder:'输入项目名称'},
     {id:'product', label:'关联产品', placeholder:'例如 ARC-7.2kW'},
-    {id:'deadline', label:'截止日期', placeholder:'例如 2026-12'},
+    {id:'deadline', label:'截止日期', type:'date'},
     {id:'priority', label:'优先级', type:'select', options:['高','中','低']},
   ], () => {
-    showToast('📋 项目已创建 (演示)');
+    const name = document.getElementById('fm_name')?.value?.trim();
+    const product = document.getElementById('fm_product')?.value?.trim();
+    const deadline = document.getElementById('fm_deadline')?.value?.trim();
+    const priorityRaw = document.getElementById('fm_priority')?.value || '中';
+    if (!name || !product) { showToast('⚠️ 请填写项目名称和关联产品'); return; }
+    
+    const priorityMap = { '高':'high', '中':'medium', '低':'low' };
+    const newId = Math.max(...PROJECTS.map(p => p.id), 0) + 1;
+    const now = new Date();
+    const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+    const currentUser = getCurrentUser();
+    
+    const sortedWf = [...getWorkflowNodes()].sort((a,b) => (a.order||0) - (b.order||0));
+    const approvals = sortedWf.map(n => ({
+      nodeId: n.id,
+      status: 'pending',
+      approver: '',
+      comment: '',
+      date: ''
+    }));
+    
+    const newProject = {
+      id: newId,
+      name: name,
+      product: product,
+      status: 'pending_approval',
+      progress: 0,
+      deadline: deadline,
+      tasks: {total:0, done:0},
+      priority: priorityMap[priorityRaw] || 'medium',
+      lifecycleStage: 'requirement',
+      currentNode: 0,
+      createdBy: currentUser ? currentUser.name : '未知',
+      createdAt: dateStr,
+      approvals: approvals
+    };
+    
+    PROJECTS.push(newProject);
+    saveProjects();
+    renderProjects();
+    showToast('📋 项目已创建，等待产品经理初审');
   });
 }
 
@@ -1361,7 +2000,7 @@ function viewDesignFile(name) {
     {label:'文件大小', value: (Math.random() * 10 + 1).toFixed(1) + ' MB'},
     {label:'文件格式', value:'application/' + f.type.toLowerCase()},
   ], [
-    {text:'📥 下载', cls:'btn-primary', onclick:'showToast("📥 正在下载 ' + f.name + ' (演示)")'},
+    {text:'📥 下载', cls:'btn-primary', onclick:'downloadDesignFile("' + f.name + '")'},
     {text:'📋 版本历史', cls:'btn-ghost', onclick:'showVersionHistory("' + f.name + '")'},
   ]);
 }
@@ -1380,14 +2019,38 @@ function showVersionHistory(name) {
   document.getElementById('detailModalBody').innerHTML += html;
 }
 function uploadDesignFile() {
-  showForm('上传设计文件', [
-    {id:'file', label:'选择文件', placeholder:'点击选择文件'},
-    {id:'product', label:'关联产品', placeholder:'例如 ARC-7.2kW'},
-    {id:'type', label:'文件类型', type:'select', options:['STEP','IGS','PDF','STL','DXF']},
-    {id:'notes', label:'变更说明', type:'textarea', placeholder:'本次变更内容'},
-  ], () => {
-    showToast('📤 文件上传成功 (演示)');
-  });
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.step,.igs,.pdf,.stl,.dxf,.stp,.sldprt,.sldasm,.dwg,.dxf,.zip,.rar';
+  input.onchange = function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    showForm('上传设计文件', [
+      {id:'file', label:'已选择文件', value: file.name},
+      {id:'size', label:'文件大小', value: (file.size / 1024 / 1024).toFixed(2) + ' MB'},
+      {id:'product', label:'关联产品', placeholder:'例如 ARC-7.2kW'},
+      {id:'type', label:'文件类型', type:'select', options:['STEP','IGS','PDF','STL','DXF']},
+      {id:'notes', label:'变更说明', type:'textarea', placeholder:'本次变更内容'},
+    ], () => {
+      showToast('📤 文件 "' + file.name + '" 上传成功');
+    });
+  };
+  input.click();
+}
+function downloadDesignFile(name) {
+  const f = DESIGN_FILES.find(x => x.name === name);
+  if (!f) return;
+  const content = name + '\nType: ' + f.type + '\nVersion: v' + f.version + '\nAuthor: ' + f.author + '\nUpdated: ' + f.updated;
+  const blob = new Blob([content], {type: 'application/octet-stream'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = f.name.replace(/[^a-zA-Z0-9\u4e00-\u9fff]/g, '_') + '.' + f.type.toLowerCase();
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('📥 文件 "' + f.name + '" 下载完成');
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1412,10 +2075,22 @@ function viewSupplier(name) {
 function createOutsourceTask(supplierName) {
   showForm('发起外协任务 - ' + supplierName, [
     {id:'title', label:'任务名称', placeholder:'外协任务描述'},
-    {id:'deadline', label:'交付期限', placeholder:'例如 2026-08'},
+    {id:'deadline', label:'交付期限', type:'date'},
     {id:'budget', label:'预算 (万元)', placeholder:'例如 15'},
     {id:'desc', label:'任务说明', type:'textarea', placeholder:'详细要求描述'},
   ], () => { showToast('📤 外协任务已发起 (演示)'); });
+}
+function createSupplier() {
+  showForm('新建供应商', [
+    {id:'name', label:'供应商名称', placeholder:'输入供应商名称'},
+    {id:'type', label:'供应商类型', type:'select', options:['设计供应商','模组开发商','原材料供应商','代工厂']},
+    {id:'contact', label:'联系人', placeholder:'姓名'},
+    {id:'phone', label:'联系电话', placeholder:'手机号'},
+    {id:'rating', label:'初始评级', type:'select', options:['5.0','4.5','4.0','3.5','3.0']},
+    {id:'desc', label:'备注', type:'textarea', placeholder:'供应商备注信息'},
+  ], () => {
+    showToast('🤝 供应商已创建 (演示)');
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1467,8 +2142,20 @@ function viewCert(product, type) {
     {label:'状态', value:sc},
   ], [
     {text:'📄 查看证书', cls:'btn-primary', onclick:'showToast("📄 打开证书文件 (演示)")'},
-    {text:'🔄 更新认证', cls:'btn-ghost', onclick:'showForm("更新认证", [{id:"number",label:"证书编号",value:"' + c.number + '"},{id:"expiry",label:"到期日期",value:"' + c.expiry + '"}], ()=>{showToast("✅ 认证已更新")})'},
+    {text:'🔄 更新认证', cls:'btn-ghost', onclick:'showForm("更新认证", [{id:"number",label:"证书编号",value:"' + c.number + '"},{id:"expiry",label:"到期日期",type:"date",value:"' + c.expiry + '"}], ()=>{showToast("✅ 认证已更新")})'},
   ]);
+}
+function createCertification() {
+  showForm('新建认证记录', [
+    {id:'product', label:'产品型号', placeholder:'例如 AC-220-EU'},
+    {id:'type', label:'认证类型', type:'select', options:['CE','FCC','UL','CCC','PSE','UKCA','CB','RoHS','REACH']},
+    {id:'number', label:'证书编号', placeholder:'证书编号'},
+    {id:'issuer', label:'颁发机构', placeholder:'例如 TÜV Rheinland'},
+    {id:'issued', label:'颁发日期', type:'date'},
+    {id:'expiry', label:'到期日期', type:'date'},
+  ], () => {
+    showToast('🛡️ 认证记录已创建 (演示)');
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1480,16 +2167,353 @@ function editAdminUser(name) {
   showForm('编辑用户: ' + u.name, [
     {id:'name', label:'姓名', value:u.name},
     {id:'email', label:'邮箱', value:u.email},
-    {id:'role', label:'角色', type:'select', options:['产品经理','项目经理','研发工程师','硬件工程师','认证工程师','系统管理员']},
+    {id:'role', label:'角色', type:'select', options:['产品经理','项目经理','研发工程师','硬件工程师','认证工程师','系统管理员','财务','供应链负责人']},
     {id:'status', label:'状态', type:'select', options:['在线','离线','忙碌']},
   ], () => { showToast('✅ 用户 ' + u.name + ' 已更新'); });
 }
 function inviteUser() {
   showForm('邀请新用户', [
-    {id:'email', label:'邮箱地址', placeholder:'user@annarui.com'},
-    {id:'role', label:'角色', type:'select', options:['产品经理','项目经理','研发工程师','硬件工程师','认证工程师']},
+    {id:'email', label:'邮箱地址', placeholder:'user@anariev.com'},
+    {id:'role', label:'角色', type:'select', options:['产品经理','项目经理','研发工程师','硬件工程师','认证工程师','财务','供应链负责人']},
     {id:'msg', label:'邀请说明', type:'textarea', placeholder:'可选：附言'},
   ], () => { showToast('👤 邀请已发送 (演示)'); });
+}
+
+// ─── Logo Management ───
+function loadSavedLogo() {
+  const saved = localStorage.getItem('pdm_logo');
+  const sidebarLogo = document.querySelector('.sidebar-logo');
+  if (!sidebarLogo) return;
+  const isCustom = !!saved;
+  // Remove existing custom img if any
+  sidebarLogo.querySelectorAll('img').forEach(i => i.remove());
+  const loginLogo = document.querySelector('.login-box .logo');
+  if (loginLogo) loginLogo.querySelectorAll('img').forEach(i => i.remove());
+  const previewImg = document.getElementById('logoPreviewImg');
+  const previewSvg = document.getElementById('logoPreviewSvg');
+  if (isCustom) {
+    // Show uploaded image, hide SVG text
+    sidebarLogo.querySelector('.logo-icon')?.remove();
+    sidebarLogo.querySelector('.logo-text')?.remove();
+    const img = document.createElement('img');
+    img.src = saved;
+    img.alt = 'Logo';
+    img.className = 'logo-icon';
+    sidebarLogo.prepend(img);
+    // Login page
+    if (loginLogo) {
+      const limg = document.createElement('img');
+      limg.src = saved;
+      limg.alt = '安纳瑞';
+      limg.style.cssText = 'height:40px;width:auto;max-width:60px;object-fit:contain';
+      loginLogo.prepend(limg);
+      loginLogo.querySelector('svg')?.remove();
+    }
+    // Preview
+    if (previewImg) { previewImg.src = saved; previewImg.style.display = ''; }
+    if (previewSvg) previewSvg.style.display = 'none';
+  } else {
+    // Restore default SVG
+    sidebarLogo.querySelectorAll('img').forEach(i => i.remove());
+    if (!sidebarLogo.querySelector('.logo-icon')) {
+      // Re-add SVG if missing
+      const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('class','logo-icon');
+      svg.setAttribute('viewBox','0 0 28 28');
+      svg.innerHTML = '<rect width="28" height="28" rx="6" fill="#3B82F6"/><path d="M14 5L8 16h4l-2 7 8-12h-4l2-7H14z" fill="#fff"/>';
+      sidebarLogo.prepend(svg);
+    }
+    if (!sidebarLogo.querySelector('.logo-text')) {
+      const div = document.createElement('div');
+      div.className = 'logo-text';
+      div.innerHTML = '<span class="brand">安纳瑞</span><span class="sub">PDM</span>';
+      sidebarLogo.appendChild(div);
+    }
+    // Login page
+    if (loginLogo) {
+      loginLogo.querySelectorAll('img').forEach(i => i.remove());
+      if (!loginLogo.querySelector('svg')) {
+        const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+        svg.setAttribute('viewBox','0 0 36 36');
+        svg.setAttribute('style','width:40px;height:40px');
+        svg.innerHTML = '<rect width="36" height="36" rx="8" fill="#3B82F6"/><path d="M18 6l-8 14h5l-2 8 10-15h-5l2-7H18z" fill="#fff"/>';
+        loginLogo.prepend(svg);
+      }
+    }
+    // Preview
+    if (previewImg) previewImg.style.display = 'none';
+    if (previewSvg) previewSvg.style.display = '';
+  }
+}
+function uploadLogo() {
+  document.getElementById('logoFileInput').click();
+}
+function handleLogoFile(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) {
+    document.getElementById('logoUploadStatus').textContent = '⚠️ 文件大小不能超过 2MB';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    localStorage.setItem('pdm_logo', e.target.result);
+    loadSavedLogo();
+    document.getElementById('logoUploadStatus').textContent = '✅ Logo 已更新！';
+    setTimeout(() => document.getElementById('logoUploadStatus').textContent = '', 3000);
+  };
+  reader.readAsDataURL(file);
+}
+function resetLogo() {
+  localStorage.removeItem('pdm_logo');
+  loadSavedLogo();
+  document.getElementById('logoUploadStatus').textContent = '↺ 已恢复默认';
+  setTimeout(() => document.getElementById('logoUploadStatus').textContent = '', 3000);
+}
+
+// ─── Admin Settings (localStorage) ───
+const ADMIN_CONFIG_KEY = 'pdm_admin_config';
+
+function getAdminConfig() {
+  try { return JSON.parse(localStorage.getItem(ADMIN_CONFIG_KEY)) || {}; }
+  catch(e) { return {}; }
+}
+
+function saveAdminConfig(config) {
+  localStorage.setItem(ADMIN_CONFIG_KEY, JSON.stringify(config));
+}
+
+function toggleSetting(el, key) {
+  el.classList.toggle('on');
+  el.classList.toggle('off');
+  const config = getAdminConfig();
+  config[key] = el.classList.contains('on');
+  saveAdminConfig(config);
+  showToast('⚙️ 配置已更新');
+}
+
+function saveSetting(key, value) {
+  const config = getAdminConfig();
+  config[key] = value;
+  saveAdminConfig(config);
+  showToast('⚙️ 设置已保存');
+}
+
+function loadAdminSettings() {
+  const config = getAdminConfig();
+  document.querySelectorAll('[data-setting]').forEach(el => {
+    const key = el.dataset.setting;
+    if (config[key] !== undefined) {
+      if (el.classList.contains('toggle-switch')) {
+        if (config[key]) { el.classList.add('on'); el.classList.remove('off'); }
+        else { el.classList.add('off'); el.classList.remove('on'); }
+      } else if (el.tagName === 'SELECT' || el.tagName === 'INPUT') {
+        el.value = config[key];
+      }
+    }
+  });
+}
+
+// ─── Product Configuration ───
+const PROD_CONFIG_KEY = 'pdm_product_config';
+const DEFAULT_PRODUCT_TYPES = ['AC Charger','DC Charger','Portable'];
+const DEFAULT_LIFECYCLE_STATUSES = ['研发中','试产移交','在售','停产','退市'];
+const DEFAULT_TARGET_MARKETS = ['EU','US','CN','JP'];
+
+function getProdConfig() {
+  try { return JSON.parse(localStorage.getItem(PROD_CONFIG_KEY)) || {}; }
+  catch(e) { return {}; }
+}
+
+function saveProdConfig(cfg) {
+  localStorage.setItem(PROD_CONFIG_KEY, JSON.stringify(cfg));
+}
+
+function renderProductConfig() {
+  const cfg = getProdConfig();
+  const types = cfg.productTypes || DEFAULT_PRODUCT_TYPES;
+  const statuses = cfg.lifecycleStatuses || DEFAULT_LIFECYCLE_STATUSES;
+  const markets = cfg.targetMarkets || DEFAULT_TARGET_MARKETS;
+
+  const tEl = document.getElementById('admin_product_types');
+  if (tEl) tEl.innerHTML = types.map(t => `<span class="tag tag-blue" style="cursor:pointer" onclick="removeProductType('${t}')">${t} ✕</span>`).join('');
+
+  const sEl = document.getElementById('admin_lifecycle_statuses');
+  if (sEl) sEl.innerHTML = statuses.map(s => `<span class="tag tag-purple" style="cursor:pointer" onclick="removeLifecycleStatus('${s}')">${s} ✕</span>`).join('');
+
+  const mEl = document.getElementById('admin_target_markets');
+  if (mEl) mEl.innerHTML = markets.map(m => `<span class="tag tag-cyan" style="cursor:pointer" onclick="removeTargetMarket('${m}')">${m} ✕</span>`).join('');
+}
+
+function addProductType() {
+  const input = document.getElementById('admin_new_type');
+  const val = input.value.trim();
+  if (!val) { showToast('⚠️ 请输入产品类型'); return; }
+  const cfg = getProdConfig();
+  const types = cfg.productTypes || [...DEFAULT_PRODUCT_TYPES];
+  if (types.includes(val)) { showToast('⚠️ 类型已存在'); return; }
+  types.push(val);
+  cfg.productTypes = types;
+  saveProdConfig(cfg);
+  renderProductConfig();
+  input.value = '';
+  showToast('✅ 已添加产品类型: ' + val);
+}
+function removeProductType(name) {
+  const cfg = getProdConfig();
+  let types = cfg.productTypes || [...DEFAULT_PRODUCT_TYPES];
+  types = types.filter(t => t !== name);
+  cfg.productTypes = types;
+  saveProdConfig(cfg);
+  renderProductConfig();
+  showToast('🗑️ 已移除: ' + name);
+}
+function addLifecycleStatus() {
+  const input = document.getElementById('admin_new_status');
+  const val = input.value.trim();
+  if (!val) { showToast('⚠️ 请输入生命周期状态'); return; }
+  const cfg = getProdConfig();
+  const statuses = cfg.lifecycleStatuses || [...DEFAULT_LIFECYCLE_STATUSES];
+  if (statuses.includes(val)) { showToast('⚠️ 状态已存在'); return; }
+  statuses.push(val);
+  cfg.lifecycleStatuses = statuses;
+  saveProdConfig(cfg);
+  renderProductConfig();
+  input.value = '';
+  showToast('✅ 已添加状态: ' + val);
+}
+function removeLifecycleStatus(name) {
+  const cfg = getProdConfig();
+  let statuses = cfg.lifecycleStatuses || [...DEFAULT_LIFECYCLE_STATUSES];
+  statuses = statuses.filter(s => s !== name);
+  cfg.lifecycleStatuses = statuses;
+  saveProdConfig(cfg);
+  renderProductConfig();
+  showToast('🗑️ 已移除: ' + name);
+}
+function addTargetMarket() {
+  const input = document.getElementById('admin_new_market');
+  const val = input.value.trim();
+  if (!val) { showToast('⚠️ 请输入目标市场'); return; }
+  const cfg = getProdConfig();
+  const markets = cfg.targetMarkets || [...DEFAULT_TARGET_MARKETS];
+  if (markets.includes(val)) { showToast('⚠️ 市场已存在'); return; }
+  markets.push(val);
+  cfg.targetMarkets = markets;
+  saveProdConfig(cfg);
+  renderProductConfig();
+  input.value = '';
+  showToast('✅ 已添加市场: ' + val);
+}
+function removeTargetMarket(name) {
+  const cfg = getProdConfig();
+  let markets = cfg.targetMarkets || [...DEFAULT_TARGET_MARKETS];
+  markets = markets.filter(m => m !== name);
+  cfg.targetMarkets = markets;
+  saveProdConfig(cfg);
+  renderProductConfig();
+  showToast('🗑️ 已移除: ' + name);
+}
+
+// ─── Role Management ───
+const ROLES_DATA_KEY = 'pdm_roles';
+const DEFAULT_ROLES = [
+  { name:'系统管理员', permissions:['用户管理','系统配置','审计日志','产品管理','项目管理','认证管理','供应商管理','固件管理','数据分析'], users:1 },
+  { name:'产品经理', permissions:['产品管理','项目管理','认证管理','供应商管理','数据分析'], users:2 },
+  { name:'项目经理', permissions:['项目管理','产品查看','审计日志'], users:1 },
+  { name:'研发工程师', permissions:['产品查看','设计协同','固件管理'], users:3 },
+  { name:'认证工程师', permissions:['认证管理','产品查看'], users:1 },
+];
+
+function getRoles() {
+  try { return JSON.parse(localStorage.getItem(ROLES_DATA_KEY)) || DEFAULT_ROLES; }
+  catch(e) { return DEFAULT_ROLES; }
+}
+
+function saveRoles(roles) {
+  localStorage.setItem(ROLES_DATA_KEY, JSON.stringify(roles));
+}
+
+// ─── Permission Check ───
+function getCurrentUserRole() {
+  const user = getCurrentUser();
+  if (!user) return null;
+  const roles = getRoles();
+  return roles.find(r => r.name === user.role) || null;
+}
+
+function hasPermission(perm) {
+  const role = getCurrentUserRole();
+  if (!role || !role.permissions) return false;
+  return role.permissions.includes(perm);
+}
+
+function isAdmin() {
+  // 系统管理员权限：拥有 用户管理 或 系统配置 任一权限即可视为管理员
+  return hasPermission('用户管理') || hasPermission('系统配置');
+}
+
+function updateSidebarByPermission() {
+  const adminBtn = document.querySelector('.sidebar-btn[data-page="admin"]');
+  if (!adminBtn) return;
+  if (isAdmin()) {
+    adminBtn.style.display = '';
+  } else {
+    adminBtn.style.display = 'none';
+  }
+}
+
+function renderAdminRoles() {
+  const el = document.getElementById('adminRoleList');
+  if (!el) return;
+  const roles = getRoles();
+  const permColors = { '用户管理':'tag-blue','系统配置':'tag-purple','审计日志':'tag-yellow','产品管理':'tag-green','项目管理':'tag-cyan','认证管理':'tag-orange','供应商管理':'tag-green','固件管理':'tag-red','数据分析':'tag-purple','设计协同':'tag-cyan','产品查看':'tag-gray' };
+  el.innerHTML = roles.map(r => `
+    <div class="admin-row">
+      <div>
+        <div class="admin-label">${r.name} <span style="font-size:11px;color:var(--text-muted)">${r.users || 0} 人</span></div>
+        <div class="admin-desc" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">
+          ${(r.permissions||[]).map(p => `<span class="tag ${permColors[p]||'tag-gray'}">${p}</span>`).join('')}
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="editRole('${r.name}')">编辑</button>
+    </div>
+  `).join('');
+}
+
+function createRole() {
+  showForm('新建角色', [
+    {id:'name', label:'角色名称', placeholder:'输入角色名称'},
+    {id:'perm1', label:'权限 (用逗号分隔)', placeholder:'例如 产品管理,项目管理'},
+    {id:'desc', label:'角色描述', type:'textarea', placeholder:'角色职责描述'},
+  ], () => {
+    const name = document.getElementById('fm_name')?.value?.trim();
+    if (!name) { showToast('⚠️ 请输入角色名称'); return; }
+    const roles = getRoles();
+    if (roles.find(r => r.name === name)) { showToast('⚠️ 角色已存在'); return; }
+    const permStr = document.getElementById('fm_perm1')?.value || '';
+    const permissions = permStr.split(',').map(p => p.trim()).filter(Boolean);
+    roles.push({ name, permissions, users:0 });
+    saveRoles(roles);
+    renderAdminRoles();
+    showToast('👑 角色 "' + name + '" 已创建');
+  });
+}
+
+function editRole(name) {
+  const roles = getRoles();
+  const r = roles.find(x => x.name === name);
+  if (!r) return;
+  showForm('编辑角色: ' + r.name, [
+    {id:'name', label:'角色名称', value:r.name},
+    {id:'perms', label:'权限 (用逗号分隔)', value:(r.permissions||[]).join(',')},
+  ], () => {
+    const perms = (document.getElementById('fm_perms')?.value||'').split(',').map(p => p.trim()).filter(Boolean);
+    r.permissions = perms;
+    saveRoles(roles);
+    renderAdminRoles();
+    showToast('✅ 角色 "' + r.name + '" 已更新');
+  });
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1504,10 +2528,630 @@ function showToast(msg) {
   setTimeout(() => t.remove(), 2500);
 }
 
+// ─── Skeleton loading ───
+function showSkeleton(containerId, type, count) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  if (type === 'card') {
+    el.innerHTML = Array(count).fill(0).map(() =>
+      `<div class="skeleton skeleton-card"></div>`
+    ).join('');
+  } else if (type === 'row') {
+    el.innerHTML = Array(count).fill(0).map(() =>
+      `<div class="skeleton skeleton-row"></div>`
+    ).join('');
+  }
+}
+function hideSkeleton(containerId) {
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML = '';
+}
+
+// ─── Empty state helper ───
+function showEmpty(containerId, icon, text) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = `<div class="empty-state"><div class="empty-state-icon">${icon||'📭'}</div><div class="empty-state-text">${text||'暂无数据'}</div></div>`;
+}
+
+function updateProfileUI(profile) {
+  // Update avatar display in settings page
+  const avatarEl = document.getElementById('settingsAvatar');
+  if (avatarEl) avatarEl.textContent = profile.name ? profile.name.charAt(0) : '👤';
+  const nameEl = document.getElementById('settingsNameDisplay');
+  if (nameEl) nameEl.textContent = profile.name || '张明远';
+  const infoEl = document.getElementById('settingsInfoDisplay');
+  if (infoEl) {
+    const roleEn = UI_TRANSLATIONS.en.roles[profile.role] || profile.role;
+    const lang = getCurrentLang();
+    const displayRole = lang === 'en' ? roleEn : profile.role;
+    infoEl.textContent = displayRole + ' · ' + (profile.email || 'zhangmy@anariev.com');
+  }
+  // Sync input values
+  const nameInput = document.querySelector('#page-settings .grid-2 input');
+  if (nameInput) nameInput.value = profile.name || '张明远';
+  const emailInput = document.querySelectorAll('#page-settings .grid-2 input')[1];
+  if (emailInput) emailInput.value = profile.email || 'zhangmy@anariev.com';
+  const roleSelect = document.getElementById('settingsRole');
+  if (roleSelect) roleSelect.value = profile.role || '产品经理';
+  const phoneInput = document.querySelectorAll('#page-settings .grid-2 input')[2];
+  if (phoneInput) phoneInput.value = profile.phone || '+86 138-0000-0000';
+}
+
 function saveSettings() {
-  const name = document.querySelector('#page-settings input')?.value || '';
-  const email = document.querySelectorAll('#page-settings input')[1]?.value || '';
-  showToast('✅ 设置已保存: ' + name + ' · ' + email);
+  const name = document.querySelector('#page-settings .grid-2 input')?.value || '';
+  const email = document.querySelectorAll('#page-settings .grid-2 input')[1]?.value || '';
+  const roleSelect = document.getElementById('settingsRole');
+  const role = roleSelect ? roleSelect.value : '产品经理';
+  const phoneInput = document.querySelectorAll('#page-settings .grid-2 input')[2];
+  const phone = phoneInput ? phoneInput.value : '';
+  // Save language preference
+  const langSelect = document.getElementById('langSelect');
+  if (langSelect) {
+    localStorage.setItem('pdm_lang', langSelect.value);
+  }
+  // Save sidebar mode preference
+  const sidebarSelect = document.getElementById('sidebarModeSelect');
+  if (sidebarSelect) {
+    localStorage.setItem('pdm_sidebar_mode', sidebarSelect.value);
+    applySidebarMode(sidebarSelect.value === 'expanded');
+  }
+  // Save user profile to localStorage
+  const profile = { name, email, role, phone };
+  localStorage.setItem('pdm_user_profile', JSON.stringify(profile));
+  // Update header user display
+  const headerEl = document.getElementById('headerUser');
+  if (headerEl) {
+    headerEl.textContent = '👤 ' + name + ' · ' + role;
+  }
+  // Update avatar initial and display
+  updateProfileUI(profile);
+  applyLanguage();
+  const roleEn = UI_TRANSLATIONS.en.roles[role] || role;
+  const displayRole = langSelect?.value === 'en' ? roleEn : role;
+  showToast('✅ ' + (langSelect?.value === 'en' ? 'Settings saved: ' : '设置已保存: ') + name + ' · ' + displayRole);
+}
+
+// ─── Load saved settings into the settings page UI ───
+function loadSettingsUI() {
+  const saved = localStorage.getItem('pdm_user_profile');
+  if (saved) {
+    try {
+      const profile = JSON.parse(saved);
+      updateProfileUI(profile);
+    } catch(e) {}
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// I18N — Chinese / English UI Translation
+// ═══════════════════════════════════════════════════════════════
+const UI_TRANSLATIONS = {
+  zh: {
+    // Page titles (in header)
+    pageTitles: {
+      dashboard:'工作台', products:'产品管理', projects:'项目管理', design:'设计协同',
+      suppliers:'供应商管理', lifecycle:'生命周期管理', firmware:'固件管理',
+      analytics:'数据分析', certifications:'认证管理', admin:'系统管理', settings:'个人设置'
+    },
+    // Page descriptions
+    pageDescs: {
+      dashboard:'', products:'管理所有产品型号与生命周期', projects:'研发项目看板与进度追踪',
+      design:'产品设计文件协同管理', suppliers:'供应商管理与评级',
+      lifecycle:'产品生命周期状态追踪', firmware:'固件版本管理与OTA发布',
+      analytics:'产品数据多维分析', certifications:'全球认证管理与到期提醒',
+      admin:'系统配置与用户管理', settings:'账户信息与偏好配置'
+    },
+    // Sidebar button labels and titles
+    sidebar: {
+      dashboard:'工作台', products:'产品管理', projects:'项目管理', design:'设计协同',
+      suppliers:'供应商', lifecycle:'生命周期', firmware:'固件管理',
+      analytics:'数据分析', certifications:'认证管理', admin:'系统管理', settings:'个人设置'
+    },
+    // Common UI strings
+    ui: {
+      save:'保存设置', cancel:'取消', create:'创建', search:'搜索',
+      backToDashboard:'← 工作台', saveLayout:'💾 保存布局', reset:'↺ 重置',
+      moduleManage:'☰ 模块管理', newProduct:'＋ 新建产品', newCert:'＋ 新建认证',
+      uploadLogo:'📤 上传新 Logo', resetLogo:'↺ 恢复默认', inviteUser:'👤 邀请用户',
+      newRole:'＋ 新建角色', logout:'🚪 退出',
+      langLabel:'语言', langDesc:'界面显示语言',
+      sidebarLabel:'侧边栏模式', sidebarDesc:'图标模式 / 完整模式',
+      sidebarCollapsed:'图标模式', sidebarExpanded:'完整模式',
+      sidebarCollapse:'收起侧边栏', sidebarExpand:'展开侧边栏',
+      settingsTitle:'个人设置', settingsDesc:'账户信息与偏好配置',
+      adminTitle:'系统管理', adminDesc:'系统配置与用户管理',
+      headerTitle:'安纳瑞 PDM',
+      // Login
+      loginTitle:'安纳瑞 PDM', loginDesc:'产品开发生命周期管理系统',
+      username:'用户名', password:'密码', login:'登 录',
+      noAccount:'还没有账号？', registerNow:'立即注册',
+      testAccounts:'🔑 测试账号',
+      regTitle:'注册新账号', regSubmit:'提交注册', regCancel:'取消'
+    },
+    // Role translations
+    roles: {
+      '总经理':'总经理', '技术总监':'技术总监', '产品经理':'产品经理',
+      '研发-硬件':'研发-硬件', '研发-软件':'研发-软件', '研发-系统':'研发-系统',
+      '技术支持':'技术支持', '销售总监':'销售总监'
+    },
+    // Dashboard stat labels
+    stats: {
+      activeProducts:'活跃产品', activeProjects:'活跃项目', pendingTasks:'待处理任务',
+      completedTasks:'已完成任务', completionRate:'完成率'
+    },
+    // Dashboard widget titles
+    widgets: {
+      lifecycle:'产品生命周期分布', progress:'项目进度看板',
+      activity:'最近动态', productList:'产品列表'
+    },
+    // Action bar buttons (dashboard)
+    actionBar: {
+      saveLayout:'💾 保存布局', reset:'↺ 重置', moduleManage:'☰ 模块管理'
+    },
+    // Admin section headings
+    adminSections: {
+      userManagement:'👥 用户管理', systemConfig:'⚙️ 系统配置',
+      productConfig:'🏷️ 产品配置', roleManagement:'👑 角色管理',
+      workflowConfig:'📋 审批流配置', logoManagement:'🖼️ Logo 管理',
+      auditLog:'📋 审计日志', registrationReview:'📋 注册审核',
+      integrations:'🔌 集成服务'
+    },
+    // Settings page labels and descriptions
+    settingsLabels: {
+      personalInfo:'👤 个人信息', interfacePrefs:'🎨 界面偏好',
+      name:'姓名', email:'邮箱', role:'角色', phone:'电话',
+      notifications:'通知偏好', notificationsDesc:'接收飞书消息通知',
+      weeklyDigest:'每周摘要', weeklyDigestDesc:'每周一发送项目进展摘要',
+      searchPlaceholder:'搜索产品、项目、文件...'
+    },
+    // Auth page texts
+    auth: {
+      loginTitle:'安纳瑞 PDM', loginDesc:'产品开发生命周期管理系统',
+      username:'用户名', password:'密码', login:'登 录',
+      noAccount:'还没有账号？', registerNow:'立即注册',
+      regTitle:'注册新账号', regSubmit:'提交注册', regCancel:'取消',
+      regUser:'用户名 *', regPass:'密码 *', regPass2:'确认密码 *',
+      regName:'姓名', regRole:'角色', regEmail:'邮箱',
+      loginUserPlaceholder:'输入用户名', loginPassPlaceholder:'输入密码',
+      regUserPlaceholder:'字母数字组合', regPassPlaceholder:'至少6位',
+      regPass2Placeholder:'再次输入密码', regNamePlaceholder:'真实姓名',
+      regEmailPlaceholder:'email@anariev.com'
+    }
+  },
+  en: {
+    pageTitles: {
+      dashboard:'Dashboard', products:'Products', projects:'Projects', design:'Design',
+      suppliers:'Suppliers', lifecycle:'Lifecycle', firmware:'Firmware',
+      analytics:'Analytics', certifications:'Certifications', admin:'Admin', settings:'Settings'
+    },
+    pageDescs: {
+      dashboard:'', products:'Manage all product models and lifecycles', projects:'R&D project board and progress tracking',
+      design:'Product design file collaboration', suppliers:'Supplier management and ratings',
+      lifecycle:'Product lifecycle status tracking', firmware:'Firmware version management and OTA release',
+      analytics:'Multi-dimensional product data analysis', certifications:'Global certification management and expiry alerts',
+      admin:'System configuration and user management', settings:'Account info and preferences'
+    },
+    sidebar: {
+      dashboard:'Dashboard', products:'Products', projects:'Projects', design:'Design',
+      suppliers:'Suppliers', lifecycle:'Lifecycle', firmware:'Firmware',
+      analytics:'Analytics', certifications:'Certifications', admin:'Admin', settings:'Settings'
+    },
+    ui: {
+      save:'💾 Save Settings', cancel:'Cancel', create:'Create', search:'Search',
+      backToDashboard:'← Dashboard', saveLayout:'💾 Save Layout', reset:'↺ Reset',
+      moduleManage:'☰ Modules', newProduct:'＋ New Product', newCert:'＋ New Certification',
+      uploadLogo:'📤 Upload Logo', resetLogo:'↺ Reset Default', inviteUser:'👤 Invite User',
+      newRole:'＋ New Role', logout:'🚪 Logout',
+      langLabel:'Language', langDesc:'Interface display language',
+      sidebarLabel:'Sidebar Mode', sidebarDesc:'Icons only / Icons + Labels',
+      sidebarCollapsed:'Icons Only', sidebarExpanded:'Icons + Labels',
+      sidebarCollapse:'Collapse Sidebar', sidebarExpand:'Expand Sidebar',
+      settingsTitle:'Settings', settingsDesc:'Account info and preferences',
+      adminTitle:'Admin', adminDesc:'System configuration and user management',
+      headerTitle:'Annarui PDM',
+      // Login
+      loginTitle:'Annarui PDM', loginDesc:'Product Development Lifecycle Management System',
+      username:'Username', password:'Password', login:'Sign In',
+      noAccount:"Don't have an account?", registerNow:'Register Now',
+      testAccounts:'🔑 Test Accounts',
+      regTitle:'Register New Account', regSubmit:'Submit', regCancel:'Cancel'
+    },
+    // Role translations
+    roles: {
+      '总经理':'General Manager', '技术总监':'Technical Director', '产品经理':'Product Manager',
+      '研发-硬件':'HW Engineer', '研发-软件':'SW Engineer', '研发-系统':'System Engineer',
+      '技术支持':'Technical Support', '销售总监':'Sales Director'
+    },
+    // Dashboard stat labels
+    stats: {
+      activeProducts:'Active Products', activeProjects:'Active Projects', pendingTasks:'Pending Tasks',
+      completedTasks:'Completed', completionRate:'Completion Rate'
+    },
+    // Dashboard widget titles
+    widgets: {
+      lifecycle:'Product Lifecycle', progress:'Project Progress',
+      activity:'Recent Activity', productList:'Product List'
+    },
+    // Action bar buttons (dashboard)
+    actionBar: {
+      saveLayout:'💾 Save Layout', reset:'↺ Reset', moduleManage:'☰ Modules'
+    },
+    // Admin section headings
+    adminSections: {
+      userManagement:'👥 User Management', systemConfig:'⚙️ System Config',
+      productConfig:'🏷️ Product Config', roleManagement:'👑 Role Management',
+      workflowConfig:'📋 Approval Workflow', logoManagement:'🖼️ Logo Management',
+      auditLog:'📋 Audit Log', registrationReview:'📋 Registration Review',
+      integrations:'🔌 Integration Services'
+    },
+    // Settings page labels and descriptions
+    settingsLabels: {
+      personalInfo:'👤 Personal Info', interfacePrefs:'🎨 Interface Preferences',
+      name:'Name', email:'Email', role:'Role', phone:'Phone',
+      notifications:'Notifications', notificationsDesc:'Receive Lark notifications',
+      weeklyDigest:'Weekly Digest', weeklyDigestDesc:'Weekly project summary every Monday',
+      searchPlaceholder:'Search products, projects, documents...'
+    },
+    // Auth page texts
+    auth: {
+      loginTitle:'Annarui PDM', loginDesc:'Product Development Lifecycle Management System',
+      username:'Username', password:'Password', login:'Sign In',
+      noAccount:"Don't have an account?", registerNow:'Register Now',
+      regTitle:'Register New Account', regSubmit:'Submit', regCancel:'Cancel',
+      regUser:'Username *', regPass:'Password *', regPass2:'Confirm Password *',
+      regName:'Name', regRole:'Role', regEmail:'Email',
+      loginUserPlaceholder:'Enter username', loginPassPlaceholder:'Enter password',
+      regUserPlaceholder:'alphanumeric', regPassPlaceholder:'at least 6 chars',
+      regPass2Placeholder:'re-enter password', regNamePlaceholder:'full name',
+      regEmailPlaceholder:'email@anariev.com'
+    }
+  }
+};
+
+function getCurrentLang() {
+  return localStorage.getItem('pdm_lang') || 'zh';
+}
+
+function applyLanguage() {
+  const lang = getCurrentLang();
+  const t = UI_TRANSLATIONS[lang];
+  if (!t) return;
+
+  document.documentElement.lang = lang === 'en' ? 'en' : 'zh-CN';
+
+  // Update page title and description
+  document.querySelectorAll('.page').forEach(pageEl => {
+    const pageId = pageEl.id ? pageEl.id.replace('page-', '') : '';
+    if (pageId && t.pageTitles[pageId]) {
+      const h2 = pageEl.querySelector('.page-header h2');
+      const p = pageEl.querySelector('.page-header p');
+      if (h2) h2.textContent = t.pageTitles[pageId];
+      if (p && t.pageDescs[pageId]) p.textContent = t.pageDescs[pageId];
+    }
+  });
+
+  // Update sidebar button labels
+  document.querySelectorAll('.sidebar-btn[data-page]').forEach(btn => {
+    const page = btn.dataset.page;
+    const label = btn.querySelector('.label');
+    if (label && t.sidebar[page]) {
+      label.textContent = t.sidebar[page];
+    }
+    if (t.sidebar[page]) {
+      btn.title = t.sidebar[page];
+    }
+  });
+
+  // Update sidebar toggle button
+  const toggleBtn = document.getElementById('sidebarToggle');
+  if (toggleBtn) {
+    const isExpanded = document.querySelector('.sidebar')?.classList.contains('expanded');
+    const toggleLabel = toggleBtn.querySelector('.label');
+    if (toggleLabel) {
+      toggleLabel.textContent = isExpanded ? t.ui.sidebarCollapse : t.ui.sidebarExpand;
+    }
+    toggleBtn.title = isExpanded ? t.ui.sidebarCollapse : t.ui.sidebarExpand;
+  }
+
+  // Update page title (header h1)
+  const currentPage = document.querySelector('.page.active');
+  if (currentPage) {
+    const pageId = currentPage.id ? currentPage.id.replace('page-', '') : 'dashboard';
+    const h1 = document.getElementById('pageTitle');
+    if (h1 && t.pageTitles[pageId]) {
+      h1.textContent = t.pageTitles[pageId];
+    }
+  }
+
+  // Update logout button
+  const logoutBtn = document.getElementById('logoutBtn');
+  if (logoutBtn) logoutBtn.textContent = t.ui.logout;
+
+  // --- New: Search placeholder ---
+  const searchInput = document.querySelector('.header-search');
+  if (searchInput) searchInput.placeholder = t.settingsLabels.searchPlaceholder;
+
+  // --- New: Dashboard stat cards ---
+  const statCards = document.querySelectorAll('.stat-card');
+  if (statCards.length >= 4) {
+    const statKeys = ['activeProducts', 'activeProjects', 'pendingTasks', 'completionRate'];
+    statCards.forEach((card, i) => {
+      const labelEl = card.querySelector('.label');
+      if (labelEl && statKeys[i] && t.stats[statKeys[i]]) {
+        labelEl.textContent = t.stats[statKeys[i]];
+      }
+    });
+  }
+
+  // --- New: Dashboard widget titles ---
+  const widgetMap = {
+    'widget-lifecycle': 'lifecycle',
+    'widget-progress': 'progress',
+    'widget-activity': 'activity',
+    'widget-table': 'productList'
+  };
+  document.querySelectorAll('.widget').forEach(widget => {
+    const wid = widget.dataset.id;
+    if (wid && widgetMap[wid] && t.widgets[widgetMap[wid]]) {
+      const h3 = widget.querySelector('.widget-header h3');
+      if (h3) h3.textContent = t.widgets[widgetMap[wid]];
+    }
+  });
+
+  // --- New: Dashboard action bar buttons ---
+  const actionBar = document.querySelector('.action-bar');
+  if (actionBar) {
+    const btns = actionBar.querySelectorAll('.btn');
+    if (btns[0]) btns[0].textContent = t.actionBar.saveLayout;
+    if (btns[1]) btns[1].textContent = t.actionBar.reset;
+    if (btns[2]) btns[2].textContent = t.actionBar.moduleManage;
+  }
+
+  // --- New: Admin page section headings ---
+  const adminSectKeys = [
+    { text:'👥 用户管理', key:'userManagement' }, { text:'⚙️ 系统配置', key:'systemConfig' },
+    { text:'🏷️ 产品配置', key:'productConfig' }, { text:'👑 角色管理', key:'roleManagement' },
+    { text:'📋 审批流配置', key:'workflowConfig' }, { text:'🖼️ Logo 管理', key:'logoManagement' },
+    { text:'📋 审计日志', key:'auditLog' }, { text:'📋 注册审核', key:'registrationReview' },
+    { text:'🔌 集成服务', key:'integrations' }
+  ];
+  document.querySelectorAll('.admin-section h3').forEach(h3 => {
+    const origText = h3.textContent.replace(/\s+/g, ' ').trim();
+    for (const item of adminSectKeys) {
+      if (origText.startsWith(item.text.substring(0, 4))) {
+        h3.textContent = t.adminSections[item.key];
+        break;
+      }
+    }
+  });
+
+  // Update settings page UI labels (existing code enhanced)
+  const settingsPage = document.getElementById('page-settings');
+
+  // Settings lang/desc
+  const langLabel = document.querySelector('.admin-row:has(#langSelect) .admin-label');
+  const langDesc = document.querySelector('.admin-row:has(#langSelect) .admin-desc');
+  if (langLabel) langLabel.textContent = t.ui.langLabel;
+  if (langDesc) langDesc.textContent = t.ui.langDesc;
+
+  // Settings sidebar mode
+  const sidebarLabel = document.querySelector('.admin-row:has(#sidebarModeSelect) .admin-label');
+  const sidebarDesc = document.querySelector('.admin-row:has(#sidebarModeSelect) .admin-desc');
+  if (sidebarLabel) sidebarLabel.textContent = t.ui.sidebarLabel;
+  if (sidebarDesc) sidebarDesc.textContent = t.ui.sidebarDesc;
+
+  // Update sidebar mode select options
+  const sidebarSelect = document.getElementById('sidebarModeSelect');
+  if (sidebarSelect) {
+    const opts = sidebarSelect.options;
+    if (opts[0]) opts[0].textContent = t.ui.sidebarCollapsed;
+    if (opts[1]) opts[1].textContent = t.ui.sidebarExpanded;
+  }
+
+  // Update settings back button and save button
+  if (settingsPage) {
+    const backBtn = settingsPage.querySelector('.page-header .back-btn');
+    if (backBtn) backBtn.textContent = t.ui.backToDashboard;
+    const saveBtn = settingsPage.querySelector('.page-header .btn-ghost');
+    if (saveBtn && saveBtn.textContent.includes('💾')) saveBtn.textContent = t.ui.save;
+  }
+
+  // Update settings personal info card title
+  if (settingsPage) {
+    const cardTitles = settingsPage.querySelectorAll('.card .card-title');
+    if (cardTitles[0]) cardTitles[0].textContent = t.settingsLabels.personalInfo;
+    if (cardTitles[1]) cardTitles[1].textContent = t.settingsLabels.interfacePrefs;
+  }
+
+  // Update settings form labels
+  if (settingsPage) {
+    const formLabels = settingsPage.querySelectorAll('.grid-2 .form-group label');
+    const labelKeys = ['name', 'email', 'role', 'phone'];
+    formLabels.forEach((label, i) => {
+      if (labelKeys[i] && t.settingsLabels[labelKeys[i]]) {
+        label.textContent = t.settingsLabels[labelKeys[i]];
+      }
+    });
+  }
+
+  // Update settings notification & weekly digest labels
+  if (settingsPage) {
+    const notifRow = settingsPage.querySelector('.card:last-child .admin-row:nth-child(3)');
+    const digestRow = settingsPage.querySelector('.card:last-child .admin-row:nth-child(4)');
+    if (notifRow) {
+      const nl = notifRow.querySelector('.admin-label');
+      const nd = notifRow.querySelector('.admin-desc');
+      if (nl) nl.textContent = t.settingsLabels.notifications;
+      if (nd) nd.textContent = t.settingsLabels.notificationsDesc;
+    }
+    if (digestRow) {
+      const dl = digestRow.querySelector('.admin-label');
+      const dd = digestRow.querySelector('.admin-desc');
+      if (dl) dl.textContent = t.settingsLabels.weeklyDigest;
+      if (dd) dd.textContent = t.settingsLabels.weeklyDigestDesc;
+    }
+  }
+
+  // Update lang select options
+  const langSelect = document.getElementById('langSelect');
+  if (langSelect) {
+    langSelect.value = lang;
+    const opts = langSelect.options;
+    if (opts[0]) opts[0].textContent = lang === 'zh' ? '中文 (简体)' : 'Chinese';
+    if (opts[1]) opts[1].textContent = lang === 'zh' ? 'English' : 'English';
+  }
+
+  // --- New: Update settings profile display ---
+  if (settingsPage) {
+    const savedProfile = localStorage.getItem('pdm_user_profile');
+    if (savedProfile) {
+      try {
+        const profile = JSON.parse(savedProfile);
+        const avatarEl = document.getElementById('settingsAvatar');
+        if (avatarEl) avatarEl.textContent = profile.name ? profile.name.charAt(0) : '👤';
+        const nameEl = document.getElementById('settingsNameDisplay');
+        if (nameEl) nameEl.textContent = profile.name || '张明远';
+        const infoEl = document.getElementById('settingsInfoDisplay');
+        if (infoEl) {
+          const roleEn = UI_TRANSLATIONS.en.roles[profile.role] || profile.role;
+          const displayRole = lang === 'en' ? roleEn : profile.role;
+          infoEl.textContent = displayRole + ' · ' + (profile.email || 'zhangmy@anariev.com');
+        }
+      } catch(e) {}
+    }
+  }
+
+  // --- New: Update settings role select option labels ---
+  const roleSelect = document.getElementById('settingsRole');
+  if (roleSelect) {
+    Array.from(roleSelect.options).forEach(opt => {
+      if (t.roles[opt.value]) {
+        opt.textContent = t.roles[opt.value];
+      }
+    });
+  }
+
+  // --- New: Auth - Login overlay ---
+  const loginOverlay = document.getElementById('loginOverlay');
+  if (loginOverlay) {
+    const h1 = loginOverlay.querySelector('.login-box h1');
+    const p = loginOverlay.querySelector('.login-box p');
+    const userLabel = loginOverlay.querySelector('.form-group:first-child label');
+    const passLabel = loginOverlay.querySelector('.form-group:nth-child(2) label');
+    const loginBtn = loginOverlay.querySelector('.login-btn');
+    const footer = loginOverlay.querySelector('.login-footer');
+    const testTitle = loginOverlay.querySelector('.test-accounts-title');
+    const userInput = loginOverlay.querySelector('.form-group:first-child input');
+    const passInput = loginOverlay.querySelector('.form-group:nth-child(2) input');
+
+    if (h1) h1.textContent = t.auth.loginTitle;
+    if (p) p.textContent = t.auth.loginDesc;
+    if (userLabel) userLabel.textContent = t.auth.username;
+    if (passLabel) passLabel.textContent = t.auth.password;
+    if (loginBtn) loginBtn.textContent = t.auth.login;
+    if (footer) {
+      const noAcc = footer.childNodes[0];
+      if (noAcc) noAcc.textContent = t.auth.noAccount;
+      const regLink = footer.querySelector('a');
+      if (regLink) regLink.textContent = t.auth.registerNow;
+    }
+    if (testTitle) testTitle.textContent = t.ui.testAccounts;
+    if (userInput) userInput.placeholder = t.auth.loginUserPlaceholder;
+    if (passInput) passInput.placeholder = t.auth.loginPassPlaceholder;
+  }
+
+  // --- New: Register modal ---
+  const regModal = document.getElementById('registerModal');
+  if (regModal) {
+    const h3 = regModal.querySelector('.modal h3');
+    const cancelBtn = regModal.querySelector('.btn-ghost');
+    const submitBtn = regModal.querySelector('.btn-primary');
+    const labels = regModal.querySelectorAll('.form-group label');
+    const inputs = regModal.querySelectorAll('.form-group input');
+    const roleLabel = regModal.querySelector('.form-group label[for]') || regModal.querySelectorAll('.form-group label')[3];
+    const roleSelectReg = regModal.querySelector('#regRole');
+
+    if (h3) h3.textContent = t.auth.regTitle;
+    if (cancelBtn) cancelBtn.textContent = t.auth.regCancel;
+    if (submitBtn) submitBtn.textContent = t.auth.regSubmit;
+
+    const labelKeys = ['regUser', 'regPass', 'regPass2', 'regName', 'regRole', 'regEmail'];
+    labels.forEach((label, i) => {
+      if (labelKeys[i] && t.auth[labelKeys[i]]) {
+        // Avoid overwriting the role select since it's a select not input
+        if (labelKeys[i] !== 'regRole' || i < 4 || i === 5) {
+          label.textContent = t.auth[labelKeys[i]];
+        }
+      }
+    });
+    // Role label separately
+    if (roleLabel && roleLabel.textContent === '角色') {
+      roleLabel.textContent = t.auth.regRole;
+    }
+
+    const placeholderKeys = ['regUserPlaceholder', 'regPassPlaceholder', 'regPass2Placeholder', 'regNamePlaceholder', null, 'regEmailPlaceholder'];
+    inputs.forEach((input, i) => {
+      if (placeholderKeys[i] && t.auth[placeholderKeys[i]]) {
+        input.placeholder = t.auth[placeholderKeys[i]];
+      }
+    });
+  }
+}
+
+function translatePage() {
+  applyLanguage();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIDEBAR EXPAND/COLLAPSE
+// ═══════════════════════════════════════════════════════════════
+function applySidebarMode(expanded) {
+  const sidebar = document.querySelector('.sidebar');
+  const main = document.querySelector('.main');
+  const toggleBtn = document.getElementById('sidebarToggle');
+
+  if (expanded) {
+    sidebar.classList.add('expanded');
+    main.classList.add('expanded');
+    if (toggleBtn) {
+      toggleBtn.innerHTML = '◀<span class="label">收起侧边栏</span>';
+    }
+  } else {
+    sidebar.classList.remove('expanded');
+    main.classList.remove('expanded');
+    if (toggleBtn) {
+      toggleBtn.innerHTML = '▶<span class="label">展开侧边栏</span>';
+    }
+  }
+  // Keep labels translated
+  applyLanguage();
+}
+
+function initSidebar() {
+  const saved = localStorage.getItem('pdm_sidebar_mode');
+  const expanded = saved === 'expanded';
+  applySidebarMode(expanded);
+
+  // Sync the settings select
+  const sidebarSelect = document.getElementById('sidebarModeSelect');
+  if (sidebarSelect) {
+    sidebarSelect.value = expanded ? 'expanded' : 'collapsed';
+  }
+
+  // Toggle button click
+  const toggleBtn = document.getElementById('sidebarToggle');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isExpanded = !document.querySelector('.sidebar').classList.contains('expanded');
+      applySidebarMode(isExpanded);
+      localStorage.setItem('pdm_sidebar_mode', isExpanded ? 'expanded' : 'collapsed');
+      // Sync the settings select
+      const ss = document.getElementById('sidebarModeSelect');
+      if (ss) ss.value = isExpanded ? 'expanded' : 'collapsed';
+    });
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1515,11 +3159,11 @@ function saveSettings() {
 // ═══════════════════════════════════════════════════════════════
 
 const DEFAULT_USERS = [
-  { user:'admin', pass:'123456', name:'系统管理员', role:'系统管理员', email:'admin@annarui.com', status:'approved' },
-  { user:'sunyue', pass:'123456', name:'孙越', role:'产品经理', email:'sunyue@annarui.com', status:'approved' },
-  { user:'Bryan', pass:'123456', name:'Bryan', role:'研发工程师', email:'bryan@annarui.com', status:'approved' },
-  { user:'kerry', pass:'123456', name:'Kerry', role:'CEO', email:'kerry@annarui.com', status:'approved' },
-  { user:'dylan', pass:'123456', name:'Dylan', role:'技术总监', email:'dylan@annarui.com', status:'approved' },
+  { user:'admin', pass:'123456', name:'系统管理员', role:'系统管理员', email:'admin@anariev.com', status:'approved' },
+  { user:'sunyue', pass:'123456', name:'孙越', role:'产品经理', email:'sunyue@anariev.com', status:'approved' },
+  { user:'Bryan', pass:'123456', name:'Bryan', role:'研发工程师', email:'bryan@anariev.com', status:'approved' },
+  { user:'kerry', pass:'123456', name:'Kerry', role:'CEO', email:'kerry@anariev.com', status:'approved' },
+  { user:'dylan', pass:'123456', name:'Dylan', role:'技术总监', email:'dylan@anariev.com', status:'approved' },
 ];
 
 function getUsers() {
@@ -1567,6 +3211,11 @@ function doLogin() {
   document.getElementById('headerUser').textContent = '👤 ' + found.name + ' · ' + found.role;
   document.getElementById('headerUser').style.display = '';
   document.getElementById('logoutBtn').style.display = '';
+  updateSidebarByPermission();
+  // 如果当前不是管理员且当前页面已切到 admin，强制跳回工作台
+  if (!isAdmin() && document.getElementById('page-admin')?.classList.contains('active')) {
+    navigateTo('dashboard');
+  }
   showToast('✅ 欢迎回来，' + found.name);
 }
 
@@ -1621,6 +3270,7 @@ function renderPendingUsers() {
   const users = getUsers();
   const pending = users.filter(u => u.status === 'pending');
   const badge = document.getElementById('pendingBadge');
+  const adminBadge = document.getElementById('adminBadge');
 
   if (badge) {
     if (pending.length > 0) {
@@ -1628,6 +3278,15 @@ function renderPendingUsers() {
       badge.textContent = pending.length;
     } else {
       badge.style.display = 'none';
+    }
+  }
+  // Update sidebar admin badge
+  if (adminBadge) {
+    if (pending.length > 0) {
+      adminBadge.style.display = '';
+      adminBadge.textContent = pending.length;
+    } else {
+      adminBadge.style.display = 'none';
     }
   }
 
@@ -1670,7 +3329,7 @@ function rejectUser(username) {
   showToast('🗑️ 已拒绝用户: ' + username);
 }
 
-// Update the renderAdmin to also render pending users
+// Update the renderAdmin to also render pending users and product/role config
 const origRenderAdmin = renderAdmin;
 renderAdmin = function() {
   if (origRenderAdmin) origRenderAdmin();
@@ -1685,6 +3344,11 @@ function checkAuth() {
     document.getElementById('headerUser').textContent = '👤 ' + user.name + ' · ' + user.role;
     document.getElementById('headerUser').style.display = '';
     document.getElementById('logoutBtn').style.display = '';
+    updateSidebarByPermission();
+    // 如果非管理员之前停留在 admin 页面，强制跳回
+    if (!isAdmin()) {
+      navigateTo('dashboard');
+    }
   }
 }
 
@@ -1693,12 +3357,25 @@ function checkAuth() {
 // ═══════════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
   checkAuth();
+  loadSavedLogo();
   initTheme();
   loadState();
   populateDashboard();
   initDashboardCharts();
   initSortable();
   renderModulesPanel();
+  initSidebar();
+  applyLanguage();
+  // Load saved user profile (from settings) or fallback to current auth user
+  const savedProfile = localStorage.getItem('pdm_user_profile');
+  if (savedProfile) {
+    try { updateProfileUI(JSON.parse(savedProfile)); } catch(e) {}
+  } else {
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+      updateProfileUI({ name: currentUser.name, email: currentUser.email || '', role: currentUser.role });
+    }
+  }
 });
 if (document.readyState !== 'loading') {
   setTimeout(() => {
@@ -1709,6 +3386,18 @@ if (document.readyState !== 'loading') {
     initDashboardCharts();
     initSortable();
     renderModulesPanel();
+    initSidebar();
+    applyLanguage();
+    // Load saved user profile (from settings) or fallback to current auth user
+    const savedProfile = localStorage.getItem('pdm_user_profile');
+    if (savedProfile) {
+      try { updateProfileUI(JSON.parse(savedProfile)); } catch(e) {}
+    } else {
+      const currentUser = getCurrentUser();
+      if (currentUser) {
+        updateProfileUI({ name: currentUser.name, email: currentUser.email || '', role: currentUser.role });
+      }
+    }
   }, 0);
 }
 </script>
