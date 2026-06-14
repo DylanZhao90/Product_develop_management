@@ -1,0 +1,297 @@
+/* ── PDM Global Styles — Theme-responsive via CSS custom properties ── */
+
+/* ── CSS Custom Properties (default fallback; overridden by ThemeProvider) ── */
+:root {
+  --color-primary: #4f6ef6;
+  --color-primary-hover: #3b4fcf;
+  --color-primary-bg: rgba(79, 110, 246, 0.08);
+  --color-primary-border: rgba(79, 110, 246, 0.3);
+
+  --color-sidebar-bg: #0f172a;
+  --color-sidebar-hover: rgba(79, 110, 246, 0.12);
+  --color-sidebar-active: rgba(79, 110, 246, 0.22);
+
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+
+  --color-bg-page: #f8fafc;
+  --color-bg-card: #ffffff;
+  --color-border: #e2e8f0;
+  --color-border-light: #f1f5f9;
+
+  --color-text: #334155;
+  --color-text-secondary: #64748b;
+  --color-text-muted: #94a3b8;
+
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.03),
+    0 1px 6px -1px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.06),
+    0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 24px -4px rgba(0, 0, 0, 0.08),
+    0 4px 8px -4px rgba(0, 0, 0, 0.04);
+
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Base Overrides ────────────────────────────────────────── */
+body {
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: var(--color-bg-page);
+  color: var(--color-text);
+}
+/* Dark-mode body override */
+[data-theme="linear-dark"] body {
+  background: #212121;
+  color: #cccccc;
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(128,128,128,0.25); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(128,128,128,0.45); }
+
+/* ── Sidebar Brand Area ────────────────────────────────────── */
+.sidebar-brand {
+  position: relative;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.sidebar-brand::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 16px;
+  right: 16px;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-primary-border),
+    transparent
+  );
+}
+
+/* ── Header Glass Morphism ─────────────────────────────────── */
+.header-glass {
+  background: rgba(255, 255, 255, 0.8) !important;
+  backdrop-filter: blur(12px) saturate(180%);
+  -webkit-backdrop-filter: blur(12px) saturate(180%);
+  border-bottom: 1px solid var(--color-border-light) !important;
+}
+[data-theme="linear-dark"] .header-glass {
+  background: rgba(26, 26, 26, 0.85) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+/* ── Statistic Card Accent Bar ──────────────────────────────── */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  transition: transform var(--transition-base),
+    box-shadow var(--transition-base);
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md) !important;
+}
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+.stat-card.stat-primary::before {
+  background: linear-gradient(90deg, var(--color-primary), #6366f1);
+}
+.stat-card.stat-success::before {
+  background: linear-gradient(90deg, var(--color-success), #10b981);
+}
+.stat-card.stat-warning::before {
+  background: linear-gradient(90deg, var(--color-warning), #f97316);
+}
+.stat-card.stat-purple::before {
+  background: linear-gradient(90deg, #8b5cf6, #a855f7);
+}
+
+/* ── Login Page (theme-responsive background) ──────────────── */
+.login-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: var(--color-sidebar-bg);
+}
+.login-page::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background:
+    radial-gradient(ellipse at 20% 50%, var(--color-primary-bg) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(99,102,241,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(139,92,246,0.06) 0%, transparent 50%);
+  animation: loginBgPulse 8s ease-in-out infinite alternate;
+}
+@keyframes loginBgPulse {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+.login-card {
+  position: relative;
+  z-index: 1;
+  width: 420px;
+  text-align: center;
+  border-radius: 20px !important;
+  background: var(--color-bg-card) !important;
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+}
+[data-theme="linear-dark"] .login-card {
+  background: rgba(30, 30, 30, 0.92) !important;
+  box-shadow:
+    0 25px 50px -12px rgba(0,0,0,0.5),
+    0 0 0 1px rgba(255,255,255,0.06) !important;
+}
+
+/* Login button gradient — uses primary color */
+.login-btn-gradient {
+  background: linear-gradient(135deg, var(--color-primary) 0%, #6366f1 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 16px color-mix(in srgb, var(--color-primary) 35%, transparent) !important;
+}
+.login-btn-gradient:hover,
+.login-btn-gradient:focus {
+  filter: brightness(0.9);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--color-primary) 50%, transparent) !important;
+  transform: translateY(-1px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.login-btn-gradient:active {
+  filter: brightness(0.8);
+  transform: translateY(0);
+}
+
+.login-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  margin: 0 auto;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--color-primary) 0%, #6366f1 100%);
+  box-shadow: 0 8px 24px -4px color-mix(in srgb, var(--color-primary) 40%, transparent);
+}
+
+/* ── Dashboard Enhancements ────────────────────────────────── */
+.dashboard-title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+.dashboard-subtitle {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin-bottom: 24px;
+}
+
+/* ── Page Header ───────────────────────────────────────────── */
+.page-header { margin-bottom: 24px; }
+.page-header-title {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin-bottom: 4px;
+}
+.page-header-desc {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+/* ── Loading Screen ────────────────────────────────────────── */
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  gap: 16px;
+  background: var(--color-bg-page);
+}
+
+/* ── Empty State ───────────────────────────────────────────── */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--color-text-muted);
+}
+
+/* ── Smooth Page Transitions ───────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Glow Dot (active indicator) ───────────────────────────── */
+.glow-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+}
+.glow-dot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  opacity: 0.4;
+  animation: glowPulse 2s ease-in-out infinite;
+}
+.glow-dot.green { background: var(--color-success); }
+.glow-dot.green::after { background: var(--color-success); }
+.glow-dot.amber { background: var(--color-warning); }
+.glow-dot.amber::after { background: var(--color-warning); }
+@keyframes glowPulse {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.8); opacity: 0; }
+}
+
+/* ── Theme Switcher Menu Item ───────────────────────────────── */
+.theme-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 2px solid transparent;
+  transition: border-color var(--transition-fast);
+}
+.theme-option-active .theme-swatch {
+  border-color: var(--color-primary);
+}

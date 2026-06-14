@@ -35,6 +35,7 @@ class ProjectService:
         )
         project = await self.project_repo.create(project)
         await AuditLogger.log(self.db, user_id=created_by, action="project.create", resource_type="project", resource_id=str(project.id), new_value={"name": project.name})
+        await self.db.commit()
         return project
 
     async def get_projects(
@@ -62,6 +63,7 @@ class ProjectService:
         update_entity_attrs(project, data)
         project = await self.project_repo.update(project)
         await AuditLogger.log(self.db, user_id=updated_by, action="project.update", resource_type="project", resource_id=str(project.id), old_value=old_values, new_value={"name": project.name, "status": project.status})
+        await self.db.commit()
         return project
 
     # ---- Tasks ----
@@ -83,6 +85,7 @@ class ProjectService:
         await AuditLogger.log(self.db, user_id=created_by, action="task.create", resource_type="project_task", resource_id=str(task.id), new_value={"name": task.name, "project_id": str(task.project_id)})
         if task.assignee_feishu_id:
             await event_bus.publish(Topics.TASK_ASSIGNED, {"task_id": str(task.id), "task_name": task.name, "assignee_feishu_id": task.assignee_feishu_id})
+        await self.db.commit()
         return task
 
     async def get_tasks(self, project_id: str) -> Sequence[ProjectTask]:
@@ -130,6 +133,7 @@ class ProjectService:
         update_entity_attrs(task, data)
         task = await self.task_repo.update(task)
         await AuditLogger.log(self.db, user_id=updated_by, action="task.update", resource_type="project_task", resource_id=str(task.id), old_value=old_values, new_value={"name": task.name, "status": task.status})
+        await self.db.commit()
         return task
 
     # ---- Technical Issues ----
@@ -144,6 +148,7 @@ class ProjectService:
         )
         issue = await self.issue_repo.create(issue)
         await AuditLogger.log(self.db, user_id=created_by, action="issue.create", resource_type="technical_issue", resource_id=str(issue.id), new_value={"title": issue.title, "severity": issue.severity})
+        await self.db.commit()
         return issue
 
     async def get_issues(self, project_id: str) -> Sequence[TechnicalIssue]:
@@ -157,4 +162,5 @@ class ProjectService:
         update_entity_attrs(issue, data)
         issue = await self.issue_repo.update(issue)
         await AuditLogger.log(self.db, user_id=updated_by, action="issue.update", resource_type="technical_issue", resource_id=str(issue.id), old_value=old_values, new_value={"title": issue.title, "status": issue.status, "severity": issue.severity})
+        await self.db.commit()
         return issue

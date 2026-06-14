@@ -20,7 +20,7 @@ async def _check_cert_expiry(db_factory):
 
 
 async def _run_scheduler(db_factory, interval: int = 3600):
-    """Run background tasks periodically. Default: every 24 hours."""
+    """Run background tasks periodically. Default: every 1 hour."""
     import logging
     logger = logging.getLogger(__name__)
     await asyncio.sleep(60)  # First run after 1 minute for quick feedback

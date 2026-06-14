@@ -33,6 +33,7 @@ class CertificationService:
             resource_id=str(cert.id),
             new_value={"cert_type": cert.cert_type, "product_id": str(cert.product_id)},
         )
+        await self.db.commit()
         return cert
 
     async def get_certifications(
@@ -59,6 +60,7 @@ class CertificationService:
         update_entity_attrs(cert, data)
         cert = await self.repo.update(cert)
         await AuditLogger.log(self.db, user_id=updated_by, action="certification.update", resource_type="certification", resource_id=str(cert.id), old_value=old_values, new_value={"cert_type": cert.cert_type, "status": cert.status})
+        await self.db.commit()
         return cert
 
     async def get_expiring(self, *, days: int = 90):

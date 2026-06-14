@@ -33,6 +33,7 @@ class SupplierService:
             resource_id=str(supplier.id),
             new_value={"name": supplier.name, "type": supplier.type},
         )
+        await self.db.commit()
         return supplier
 
     async def get_suppliers(
@@ -59,6 +60,7 @@ class SupplierService:
         update_entity_attrs(supplier, data)
         supplier = await self.supplier_repo.update(supplier)
         await AuditLogger.log(self.db, user_id=updated_by, action="supplier.update", resource_type="supplier", resource_id=str(supplier.id), old_value=old_values, new_value={"name": supplier.name, "status": supplier.status})
+        await self.db.commit()
         return supplier
 
     # ---- Outsource Tasks ----
@@ -80,6 +82,7 @@ class SupplierService:
             resource_id=str(task.id),
             new_value={"title": task.title, "supplier_id": str(task.supplier_id)},
         )
+        await self.db.commit()
         return task
 
     async def get_outsource_tasks(self, supplier_id: str):
@@ -96,6 +99,7 @@ class SupplierService:
         update_entity_attrs(task, data)
         task = await self.task_repo.update(task)
         await AuditLogger.log(self.db, user_id=updated_by, action="outsource_task.update", resource_type="outsource_task", resource_id=str(task.id), old_value=old_values, new_value={"title": task.title, "review_status": task.review_status})
+        await self.db.commit()
         return task
 
     async def review_outsource_task(self, task_id: str, data: dict, reviewer_id: str) -> OutsourceTask:
@@ -112,4 +116,5 @@ class SupplierService:
             resource_id=str(task.id),
             new_value={"review_status": task.review_status},
         )
+        await self.db.commit()
         return await self.task_repo.update(task)

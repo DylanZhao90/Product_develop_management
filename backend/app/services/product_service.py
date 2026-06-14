@@ -38,6 +38,7 @@ class ProductService:
         )
         product = await self.product_repo.create(product)
         await AuditLogger.log(self.db, user_id=created_by, action="product.create", resource_type="product", resource_id=str(product.id), new_value={"name": product.name, "model": product.model})
+        await self.db.commit()
         return product
 
     async def get_products(
@@ -64,6 +65,7 @@ class ProductService:
         update_entity_attrs(product, data)
         product = await self.product_repo.update(product)
         await AuditLogger.log(self.db, user_id=updated_by, action="product.update", resource_type="product", resource_id=str(product.id), old_value=old_values, new_value={"name": product.name, "model": product.model})
+        await self.db.commit()
         return product
 
     async def transition_lifecycle(self, product_id: str, to_status: str, changed_by: str, reason: str | None = None) -> tuple[Product, LifecycleChangeLog]:
@@ -93,6 +95,7 @@ class ProductService:
         await AuditLogger.log(self.db, user_id=changed_by, action="lifecycle.transition", resource_type="product", resource_id=str(product.id), old_value={"status": old_status}, new_value={"status": to_status})
         if to_status == "discontinued":
             await event_bus.publish(Topics.PRODUCT_DISCONTINUED, {"product_id": str(product.id), "product_name": product.name})
+        await self.db.commit()
         return product, log
 
     async def get_lifecycle_logs(self, product_id: str) -> Sequence[LifecycleChangeLog]:

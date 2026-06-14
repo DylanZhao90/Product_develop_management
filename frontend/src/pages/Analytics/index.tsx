@@ -4,9 +4,11 @@ import { useQuery } from "@tanstack/react-query";
 import { analyticsApi } from "../../services/api";
 import { useLocale } from "../../locales";
 import ReactECharts from "echarts-for-react";
+import { useEChartsColors } from "../../theme/echartsTheme";
 
 export default function Analytics() {
   const { t } = useLocale();
+  const ec = useEChartsColors();
 
   const { data: overviewResp } = useQuery({
     queryKey: ["analytics-overview"],
@@ -36,6 +38,7 @@ export default function Analytics() {
   // Product lifecycle distribution pie
   const statusData = overview.products_by_status || {};
   const statusPie = {
+    ...ec.baseChartOption,
     tooltip: { trigger: "item" as const },
     legend: { bottom: 0 },
     series: [{
@@ -50,22 +53,25 @@ export default function Analytics() {
   // Project status bar chart
   const projectData = overview.projects_by_status || {};
   const projectBar = {
+    ...ec.baseChartOption,
     tooltip: { trigger: "axis" as const },
     xAxis: { type: "category" as const, data: Object.keys(projectData).map(k => t(`project.status.${k}`) || k) },
     yAxis: { type: "value" as const },
-    series: [{ type: "bar" as const, data: Object.values(projectData), itemStyle: { color: "#1677ff" } }],
+    series: [{ type: "bar" as const, data: Object.values(projectData), itemStyle: { color: ec.colors[0] } }],
   };
 
   // Product creation trend line
   const trendLine = {
+    ...ec.baseChartOption,
     tooltip: { trigger: "axis" as const },
     xAxis: { type: "category" as const, data: trendData.map((d: Record<string, unknown>) => d.date) },
     yAxis: { type: "value" as const },
-    series: [{ type: "line" as const, data: trendData.map((d: Record<string, unknown>) => d.count), smooth: true, itemStyle: { color: "#52c41a" } }],
+    series: [{ type: "line" as const, data: trendData.map((d: Record<string, unknown>) => d.count), smooth: true, itemStyle: { color: ec.colors[1] } }],
   };
 
   // Issue severity distribution pie
   const issuePie = {
+    ...ec.baseChartOption,
     tooltip: { trigger: "item" as const },
     legend: { bottom: 0 },
     series: [{
@@ -86,7 +92,7 @@ export default function Analytics() {
       <Row gutter={[16, 16]} style={{ marginBottom: 16 }}>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic title="Total Products" value={totalProducts} prefix={<AppstoreOutlined />} valueStyle={{ color: "#1677ff" }} />
+            <Statistic title="Total Products" value={totalProducts} prefix={<AppstoreOutlined />} valueStyle={{ color: ec.colors[0] }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
@@ -96,12 +102,12 @@ export default function Analytics() {
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic title="Completed Tasks" value={taskData.completed || 0} prefix={<CheckCircleOutlined />} valueStyle={{ color: "#52c41a" }} />
+            <Statistic title="Completed Tasks" value={taskData.completed || 0} prefix={<CheckCircleOutlined />} valueStyle={{ color: ec.colors[1] }} />
           </Card>
         </Col>
         <Col xs={24} sm={12} lg={6}>
           <Card>
-            <Statistic title="Blocked Tasks" value={taskData.blocked || 0} prefix={<WarningOutlined />} valueStyle={{ color: "#ff4d4f" }} />
+            <Statistic title="Blocked Tasks" value={taskData.blocked || 0} prefix={<WarningOutlined />} valueStyle={{ color: ec.error }} />
           </Card>
         </Col>
       </Row>

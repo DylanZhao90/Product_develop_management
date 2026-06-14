@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -73,8 +74,6 @@ app.include_router(admin_router, prefix="/api/v1")
 
 @app.get("/api/health")
 async def health_check():
-    import logging
-    logger = logging.getLogger(__name__)
     db_status = "unknown"
     try:
         async with async_session() as db:

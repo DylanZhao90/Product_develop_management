@@ -1,6 +1,13 @@
 """Feishu Approval integration - create approval instances and handle callbacks."""
 
+import logging
+
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.event_bus import Topics, event_bus
 from app.integrations.feishu.client import FeishuClient
+
+logger = logging.getLogger(__name__)
 
 
 class FeishuApprovalClient(FeishuClient):
@@ -52,11 +59,11 @@ class FeishuApprovalClient(FeishuClient):
         )
 
 
-async def handle_approval_callback(body: dict, db) -> None:
+async def handle_approval_callback(body: dict, db: AsyncSession) -> dict:
     """Process Feishu approval callback.
 
     Called when an approval instance status changes (approved/rejected/canceled).
-    Updates the related project status and notifies the applicant.
+    Updates the related project status and publishes an event for notification.
 
     Event structure from Feishu:
     {
@@ -66,6 +73,66 @@ async def handle_approval_callback(body: dict, db) -> None:
         "status": "APPROVED",  // APPROVED | REJECTED | CANCELED
     }
     """
-    # Decrypt and validate the callback body using Feishu verification
-    # Then update the related resource based on approval_code and instance_id
-    pass  # Implemented when Feishu app credentials are configured
+    from app.repositories.project_repo import ProjectRepository
+
+    instance_id = body.get("instance_id")
+    approval_code = body.get("approval_code")
+    new_status = body.get("status")
+
+    if not instance_id or not new_status:
+        logger.warning("Approval callback missing instance_id or status: %s", body)
+        return {"success": False, "message": "Invalid callback payload"}
+
+    if approval_code != "PROJECT_REVIEW":
+        logger.info("Ignoring non-project approval callback: %s", approval_code)
+        return {"success": True, "message": "Ignored — not a project approval"}
+
+    # Find the project by approval_id
+    project_repo = ProjectRepository(db)
+    project = await project_repo.get_by_approval_id(instance_id)
+    if not project:
+        logger.warning("No project found for approval instance: %s", instance_id)
+        return {"success": False, "message": "Project not found"}
+
+    # Map Feishu approval status to project status
+    status_map = {
+        "APPROVED": "approved",
+        "REJECTED": "pending_approval",
+        "CANCELED": "closed",
+    }
+    mapped_status = status_map.get(new_status)
+    if mapped_status is None:
+        logger.warning("Unknown approval status: %s", new_status)
+        return {"success": False, "message": f"Unknown status: {new_status}"}
+
+    old_status = project.status
+    project.status = mapped_status
+    await project_repo.update(project)
+    await db.commit()
+
+    logger.info(
+        "Approval callback: project %s: %s → %s (feishu: %s)",
+        project.name, old_status, mapped_status, new_status,
+    )
+
+    # Publish event for notification
+    if mapped_status == "approved":
+        await event_bus.publish(
+            Topics.APPROVAL_APPROVED,
+            {
+                "project_id": str(project.id),
+                "project_name": project.name,
+                "created_by": str(project.created_by) if project.created_by else None,
+            },
+        )
+    elif mapped_status == "pending_approval":
+        await event_bus.publish(
+            Topics.APPROVAL_REJECTED,
+            {
+                "project_id": str(project.id),
+                "project_name": project.name,
+                "created_by": str(project.created_by) if project.created_by else None,
+            },
+        )
+
+    return {"success": True, "message": f"Project status updated to {mapped_status}"}

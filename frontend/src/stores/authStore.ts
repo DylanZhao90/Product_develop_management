@@ -19,7 +19,18 @@ interface AuthState {
   handleCallback: (code: string) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  /** Demo mode: skip backend auth for UI preview */
+  enableDemo: () => void;
 }
+
+const DEMO_USER: User = {
+  id: "demo-001",
+  name: "Demo User",
+  email: "demo@pdm.local",
+  avatar_url: null,
+  role: "admin",
+  language_pref: "zh-CN",
+};
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
@@ -53,10 +64,22 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   logout: () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
+    localStorage.removeItem("demo_mode");
     set({ user: null, token: null, isAuthenticated: false });
   },
 
   checkAuth: async () => {
+    // Demo mode: skip backend, use mock user
+    if (localStorage.getItem("demo_mode") === "1") {
+      set({
+        user: DEMO_USER,
+        token: "demo-token",
+        isAuthenticated: true,
+        isLoading: false,
+      });
+      return;
+    }
+
     const token = get().token;
     if (!token) {
       set({ isLoading: false });
@@ -74,5 +97,15 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       localStorage.removeItem("refresh_token");
       set({ token: null, user: null, isLoading: false });
     }
+  },
+
+  enableDemo: () => {
+    localStorage.setItem("demo_mode", "1");
+    set({
+      user: DEMO_USER,
+      token: "demo-token",
+      isAuthenticated: true,
+      isLoading: false,
+    });
   },
 }));

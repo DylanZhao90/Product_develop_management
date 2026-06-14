@@ -7,22 +7,28 @@ from app.services.auth_service import AuthService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
-# Simple in-memory rate limiter for /refresh endpoint
-_refresh_attempts: dict[str, list[float]] = {}
 
-
-def check_rate_limit(ip: str, max_per_min: int = 5) -> bool:
-    """Return True if request is allowed, False if rate-limited (max attempts per minute)."""
-    now = time.time()
-    window = 60.0  # 1 minute
-    attempts = _refresh_attempts.setdefault(ip, [])
-    # Purge entries outside the window
-    cutoff = now - window
-    _refresh_attempts[ip] = [t for t in attempts if t > cutoff]
-    if len(_refresh_attempts[ip]) >= max_per_min:
-        return False
-    _refresh_attempts[ip].append(now)
-    return True
+async def check_rate_limit(ip: str, max_per_min: int = 5) -> bool:
+    """Return True if request is allowed, False if rate-limited.
+    
+    Uses Redis for distributed rate limiting across multiple workers.
+    """
+    from app.core.redis import get_redis
+    
+    redis = await get_redis()
+    key = f"rate_limit:refresh:{ip}"
+    now = int(time.time())
+    window_start = now - 60  # 1 minute window
+    
+    # Clean old entries and add current timestamp
+    async with redis.pipeline(transaction=True) as pipe:
+        pipe.zremrangebyscore(key, 0, window_start)
+        pipe.zcard(key)
+        pipe.zadd(key, {str(now): now})
+        pipe.expire(key, 60)
+        _, count, _, _ = await pipe.execute()
+    
+    return count <= max_per_min
 
 
 @router.get("/feishu/login")
@@ -74,9 +80,9 @@ async def get_me(current_user: CurrentUserDep, db: DBSessionDep):
 @router.post("/refresh")
 async def refresh_token(request: Request, db: DBSessionDep):
     """Refresh access token using refresh token (with rotation — old token is revoked)."""
-    # Rate limit: max 5 attempts per minute per IP
+    # Rate limit: max 5 attempts per minute per IP (Redis-backed)
     ip = request.client.host if request.client else "unknown"
-    if not check_rate_limit(ip):
+    if not await check_rate_limit(ip):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Too many refresh requests. Please try again later.",

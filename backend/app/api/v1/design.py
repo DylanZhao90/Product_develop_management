@@ -46,7 +46,7 @@ async def upload_design_file_multipart(
 ):
     content = await file.read()
     object_key = f"design-files/{product_id}/{uuid.uuid4()}/{file.filename}"
-    upload_file(object_key, content, file.content_type or "application/octet-stream")
+    await upload_file(object_key, content, file.content_type or "application/octet-stream")
 
     ext = file.filename.rsplit(".", 1)[-1].lower() if "." in file.filename else "unknown"
     service = DesignService(db)
@@ -79,7 +79,7 @@ async def download_design_file(file_id: str, db: DBSessionDep, current_user: Cur
     f = await service.get_design_file(file_id)
     if not f:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
-    presigned_url = get_file_url(f.file_url)
+    presigned_url = await get_file_url(f.file_url)
     return {"success": True, "data": {"download_url": presigned_url, "file_name": f.file_name}}
 
 

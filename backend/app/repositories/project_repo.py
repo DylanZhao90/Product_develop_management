@@ -25,6 +25,12 @@ class ProjectRepository(BaseRepository[Project]):
         result = await self.db.execute(q.order_by(Project.created_at.desc()).offset(skip).limit(limit))
         return result.scalars().all(), total
 
+    async def get_by_approval_id(self, approval_id: str) -> Project | None:
+        result = await self.db.execute(
+            select(Project).where(Project.approval_id == approval_id)
+        )
+        return result.scalar_one_or_none()
+
 
 class ProjectTaskRepository(BaseRepository[ProjectTask]):
     model_class = ProjectTask

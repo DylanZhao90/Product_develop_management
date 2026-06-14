@@ -18,4 +18,16 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-antd": ["antd", "@ant-design/icons", "@ant-design/pro-components"],
+          "vendor-charts": ["echarts", "echarts-for-react"],
+          "vendor-data": ["@tanstack/react-query", "axios", "zustand"],
+        },
+      },
+    },
+  },
 });

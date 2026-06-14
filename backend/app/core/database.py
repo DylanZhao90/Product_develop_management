@@ -19,11 +19,13 @@ class Base(DeclarativeBase):
 
 
 async def get_db() -> AsyncSession:
+    """Yield a database session. Caller is responsible for commit/rollback."""
     async with async_session() as session:
         try:
             yield session
-            if session.dirty or session.deleted or session.new:
-                await session.commit()
         except Exception:
             await session.rollback()
             raise
+        finally:
+            # Ensure session is closed even if commit/rollback wasn't called
+            await session.close()

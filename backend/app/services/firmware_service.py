@@ -40,6 +40,7 @@ class FirmwareService:
             resource_id=str(fw.id),
             new_value={"product_model": fw.product_model, "version": fw.version},
         )
+        await self.db.commit()
         return fw
 
     async def upload_firmware(
@@ -61,7 +62,7 @@ class FirmwareService:
         object_key = f"firmware/{product_model}/{version}/{file.filename}"
 
         try:
-            upload_file(object_key, content, "application/octet-stream")
+            await upload_file(object_key, content, "application/octet-stream")
         except Exception:
             await self.db.rollback()
             raise
@@ -85,6 +86,7 @@ class FirmwareService:
             resource_id=str(fw.id),
             new_value={"product_model": fw.product_model, "version": fw.version},
         )
+        await self.db.commit()
         return fw
 
     async def get_versions(
@@ -95,7 +97,7 @@ class FirmwareService:
     async def get_version(self, version_id: str) -> FirmwareVersion | None:
         fw = await self.version_repo.get_by_id(version_id)
         if fw:
-            fw._download_url = get_file_url(fw.file_url)
+            fw._download_url = await get_file_url(fw.file_url)
         return fw
 
     # ---- Upgrade Tasks ----
@@ -115,6 +117,7 @@ class FirmwareService:
             resource_type="firmware_upgrade_task",
             resource_id=str(task.id),
         )
+        await self.db.commit()
         return task
 
     async def get_upgrade_tasks(
@@ -140,6 +143,7 @@ class FirmwareService:
         update_entity_attrs(task, data)
         task = await self.task_repo.update(task)
         await AuditLogger.log(self.db, user_id=updated_by, action="firmware_upgrade_task.update", resource_type="firmware_upgrade_task", resource_id=str(task.id), old_value=old_values, new_value={"status": task.status, "gray_scale_percent": task.gray_scale_percent})
+        await self.db.commit()
         return task
 
     async def cancel_upgrade_task(self, task_id: str, cancelled_by: str | None = None) -> FirmwareUpgradeTask:
@@ -150,4 +154,5 @@ class FirmwareService:
         task.status = "failed"
         task = await self.task_repo.update(task)
         await AuditLogger.log(self.db, user_id=cancelled_by, action="firmware_upgrade_task.cancel", resource_type="firmware_upgrade_task", resource_id=str(task.id), old_value={"status": old_status}, new_value={"status": "failed"})
+        await self.db.commit()
         return task

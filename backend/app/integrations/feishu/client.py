@@ -4,9 +4,9 @@ import json
 import time
 
 import httpx
-import redis.asyncio as aioredis
 
 from app.core.config import get_settings
+from app.core.redis import get_redis
 
 settings = get_settings()
 
@@ -22,15 +22,11 @@ class FeishuClient:
         self.app_id = settings.feishu_app_id
         self.app_secret = settings.feishu_app_secret
 
-    async def _get_redis(self):
-        return await aioredis.from_url(settings.redis_url)
-
     async def get_tenant_access_token(self) -> str:
-        redis = await self._get_redis()
+        redis = await get_redis()
         token = await redis.get(TOKEN_CACHE_KEY)
         if token:
-            await redis.close()
-            return token.decode("utf-8")
+            return token
 
         async with httpx.AsyncClient() as http:
             resp = await http.post(
@@ -44,7 +40,6 @@ class FeishuClient:
             token = data["tenant_access_token"]
             expires = data.get("expire", TOKEN_TTL)
             await redis.set(TOKEN_CACHE_KEY, token, ex=expires - 300)  # refresh early
-            await redis.close()
             return token
 
     async def request(self, method: str, path: str, **kwargs) -> dict:

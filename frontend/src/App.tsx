@@ -28,8 +28,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
-        <Spin size="large" tip="Loading..." />
+      <div className="loading-screen">
+        <Spin size="large" />
+        <span style={{ color: "#94a3b8", fontSize: 14 }}>Loading...</span>
       </div>
     );
   }

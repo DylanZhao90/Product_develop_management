@@ -34,6 +34,7 @@ class AdminService:
         self.db.add(user)
         await self.db.flush()
         await AuditLogger.log(self.db, user_id=created_by, action="user.create", resource_type="user", resource_id=str(user.id), new_value={"name": user.name, "role": user.role})
+        await self.db.commit()
         return user
 
     async def update_user(self, user_id: str, data: dict, updated_by: str | None = None) -> User:
@@ -44,6 +45,7 @@ class AdminService:
         update_entity_attrs(user, data)
         await self.db.flush()
         await AuditLogger.log(self.db, user_id=updated_by, action="user.update", resource_type="user", resource_id=str(user.id), old_value=old_values, new_value={"name": user.name, "role": user.role, "is_active": user.is_active})
+        await self.db.commit()
         return user
 
     # ---- Audit Logs ----

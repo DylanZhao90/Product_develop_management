@@ -40,6 +40,7 @@ class DesignService:
             resource_id=str(design_file.id),
             new_value={"file_name": design_file.file_name, "version": version},
         )
+        await self.db.commit()
         return design_file
 
     async def get_design_files(
@@ -61,7 +62,7 @@ class DesignService:
     async def get_design_file_with_url(self, file_id: str) -> DesignFile | None:
         design_file = await self.repo.get_by_id(file_id)
         if design_file:
-            design_file._download_url = get_file_url(design_file.file_url)
+            design_file._download_url = await get_file_url(design_file.file_url)
         return design_file
 
     async def get_versions(self, file_id: str):
@@ -75,4 +76,5 @@ class DesignService:
         update_entity_attrs(design_file, data)
         design_file = await self.repo.update(design_file)
         await AuditLogger.log(self.db, user_id=updated_by, action="design_file.update", resource_type="design_file", resource_id=str(design_file.id), old_value=old_values, new_value={"file_name": design_file.file_name, "is_current": design_file.is_current})
+        await self.db.commit()
         return design_file

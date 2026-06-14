@@ -41,6 +41,7 @@ class AuthService:
         access_token = create_access_token(subject=str(user.id))
         refresh_token = create_refresh_token(subject=str(user.id))
 
+        await self.db.commit()
         return {
             "access_token": access_token,
             "refresh_token": refresh_token,
