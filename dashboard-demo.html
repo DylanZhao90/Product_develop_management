@@ -110,6 +110,17 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
 .form-group input:focus,.form-group select:focus{border:var(--border-hover)}
 .form-group textarea{width:100%;padding:9px 12px;border-radius:var(--radius-md);border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none;resize:vertical;min-height:64px;font-family:inherit}
 .form-group textarea:focus{border:var(--border-hover)}
+.detail-row{display:flex;padding:10px 0;border-bottom:var(--border);font-size:13px}
+.detail-row:last-child{border-bottom:none}
+.detail-label{width:100px;color:var(--text-secondary);font-weight:500;flex-shrink:0}
+.detail-value{flex:1;color:var(--text-primary)}
+.form-row{display:flex;gap:12px;margin-bottom:14px}
+.form-row .form-group{flex:1;margin-bottom:0}
+.form-label{display:block;font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:4px}
+.form-input{width:100%;padding:8px 12px;border-radius:6px;border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none}
+.form-input:focus{border:var(--border-hover)}
+.form-select{width:100%;padding:8px 12px;border-radius:6px;border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none}
+.form-select:focus{border:var(--border-hover)}
 
 /* ═══════════════════ LOGIN ═══════════════════ */
 .login-overlay{position:fixed;inset:0;background:var(--bg-primary);z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity 0.4s}
@@ -466,7 +477,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   <div class="page-header">
     <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
     <div><h2>生命周期管理</h2><p>产品状态流转与审批记录</p></div>
-    <button class="btn btn-ghost" onclick="showToast('🔄 状态流转申请已提交 (演示)')">提交流转</button>
+    <button class="btn btn-ghost" onclick="submitLifecycleTransition()">提交流转</button>
   </div>
   <div class="card" style="margin-bottom:16px">
     <div class="card-title">📌 当前产品</div>
@@ -486,7 +497,7 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
   <div class="page-header">
     <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
     <div><h2>固件管理</h2><p>固件版本发布与 OTA 升级任务</p></div>
-    <button class="btn btn-primary" onclick="showToast('⚡ 新建固件版本表单已打开 (演示)')">⚡ 发布新版本</button>
+    <button class="btn btn-primary" onclick="createFirmwareVersion()">⚡ 发布新版本</button>
   </div>
   <div class="grid-2">
     <div class="card">
@@ -633,6 +644,29 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
       <button class="btn btn-ghost" onclick="closeProductModal()">取消</button>
       <button class="btn btn-primary" onclick="submitProduct()">创建产品</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ DETAIL MODAL ═══════════════ -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal" style="width:560px">
+    <button class="modal-close" onclick="closeModal('detailModal')">✕</button>
+    <h3 id="detailModalTitle">详情</h3>
+    <div id="detailModalBody"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px" id="detailModalActions"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ FORM MODAL ═══════════════ -->
+<div class="modal-overlay" id="formModal">
+  <div class="modal" style="width:480px">
+    <button class="modal-close" onclick="closeModal('formModal')">✕</button>
+    <h3 id="formModalTitle">表单</h3>
+    <div id="formModalBody"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-ghost" onclick="closeModal('formModal')">取消</button>
+      <button class="btn btn-primary" id="formModalSubmitBtn" onclick="submitFormModal()">提交</button>
     </div>
   </div>
 </div>
@@ -907,8 +941,8 @@ function renderProductsTable() {
     return `<tr>
       <td><strong>${p.code}</strong></td><td>${p.model}</td><td>${p.type}</td><td>${p.market}</td>
       <td><span class="tag ${t.c}">${t.l}</span></td>
-      <td><button class="btn btn-ghost btn-sm" onclick="showToast('📋 打开产品 ${p.code} 详情 (演示)')">查看</button>
-      <button class="btn btn-ghost btn-sm" onclick="showToast('✏️ 编辑产品 ${p.code} (演示)')">编辑</button></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="viewProduct('${p.code}')">查看</button>
+      <button class="btn btn-ghost btn-sm" onclick="editProduct('${p.code}')">编辑</button></td>
     </tr>`;
   }).join('');
 }
@@ -943,7 +977,7 @@ function renderProjects() {
     const statusColor = p.status === 'completed' ? 'tag-green' : p.status === 'in_progress' ? 'tag-blue' : p.status === 'pending_approval' ? 'tag-yellow' : 'tag-gray';
     const statusLabel = p.status === 'completed' ? '已完成' : p.status === 'in_progress' ? '进行中' : p.status === 'pending_approval' ? '待审批' : p.status;
     const priorityIcon = p.priority === 'high' ? '🔴' : p.priority === 'medium' ? '🟡' : '🟢';
-    return `<div class="project-card" onclick="showToast('📋 打开项目「${p.name}」详情 (演示)')">
+    return `<div class="project-card" onclick="viewProject(${p.id})">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
         <h4>${p.name}</h4>
         <span class="tag ${statusColor}">${statusLabel}</span>
@@ -955,8 +989,8 @@ function renderProjects() {
       </div>
       <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
       <div style="display:flex;gap:8px;margin-top:12px">
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showToast('📋 查看任务列表 (演示)')">任务</button>
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showToast('📝 更新项目状态 (演示)')">更新</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();viewProjectTasks(${p.id})">任务</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();updateProjectStatus(${p.id})">更新</button>
       </div>
     </div>`;
   }).join('');
@@ -968,14 +1002,14 @@ function renderProjects() {
 function renderDesignFiles() {
   const grid = document.getElementById('designGrid');
   grid.innerHTML = DESIGN_FILES.map(f => `
-    <div class="file-card" onclick="showToast('📂 打开文件「${f.name}」预览 (演示)')">
+    <div class="file-card" onclick="viewDesignFile('${f.name}')">
       <span class="file-icon">${f.icon}</span>
       <h4>${f.name}</h4>
       <div class="meta">${f.icon === '📄' ? 'PDF' : f.type} · v${f.version} · ${f.author}</div>
       <div class="meta" style="margin-top:2px">${f.updated}</div>
       <div style="display:flex;gap:4px;justify-content:center;margin-top:10px">
         <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showToast('📥 下载 ${f.name} (演示)')">下载</button>
-        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showToast('📋 查看版本历史 (演示)')">历史</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showVersionHistory('${f.name}')">历史</button>
       </div>
     </div>`).join('');
 }
@@ -994,8 +1028,8 @@ function renderSuppliers() {
       <td><span style="color:var(--success)">★</span> ${s.rating}</td>
       <td>${s.delivery}%</td>
       <td><span class="tag ${sc}">${sl}</span></td>
-      <td><button class="btn btn-ghost btn-sm" onclick="showToast('📋 查看 ${s.name} 详情 (演示)')">查看</button>
-      <button class="btn btn-ghost btn-sm" onclick="showToast('📤 发起外协任务 (演示)')">外协</button></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="viewSupplier('${s.name}')">查看</button>
+      <button class="btn btn-ghost btn-sm" onclick="createOutsourceTask('${s.name}')">外协</button></td>
     </tr>`;
   }).join('');
 }
@@ -1066,7 +1100,7 @@ function renderFirmware() {
         <span>✅ ${f.success}</span>
         <span>📊 ${f.total}</span>
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showToast('⚡ 创建灰度升级任务 (演示)')">灰度</button>
+      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();createGrayRelease('${f.version}','${f.model}')">灰度</button>
     </div>`;
   }).join('');
 }
@@ -1118,7 +1152,7 @@ function renderCerts() {
       <td style="font-family:monospace;font-size:12px">${c.number}</td><td>${c.issuer}</td>
       <td>${c.issued}</td><td>${c.expiry}</td>
       <td><span class="tag ${sc}">${sl}</span></td>
-      <td><button class="btn btn-ghost btn-sm" onclick="showToast('📄 查看证书文件 (演示)')">查看</button></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="viewCert('${c.product}','${c.type}')">查看</button></td>
     </tr>`;
   }).join('');
 }
@@ -1178,6 +1212,285 @@ const themeObserver = new MutationObserver(() => {
   if (document.getElementById('page-dashboard').classList.contains('active')) initDashboardCharts();
 });
 themeObserver.observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+
+// ═══════════════════════════════════════════════════════════════
+// MODAL SYSTEM
+// ═══════════════════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+// Detail modal
+function showDetail(title, fields, actions) {
+  document.getElementById('detailModalTitle').textContent = title;
+  document.getElementById('detailModalBody').innerHTML = fields.map(f =>
+    `<div class="detail-row"><span class="detail-label">${f.label}</span><span class="detail-value">${f.value}</span></div>`
+  ).join('');
+  document.getElementById('detailModalActions').innerHTML = (actions || []).map(a =>
+    `<button class="btn ${a.cls || 'btn-ghost'} btn-sm" onclick="${a.onclick || ''}">${a.text}</button>`
+  ).join('');
+  openModal('detailModal');
+}
+
+// Form modal state
+let _formModalCallback = null;
+
+function showForm(title, fields, submitCallback) {
+  document.getElementById('formModalTitle').textContent = title;
+  document.getElementById('formModalBody').innerHTML = fields.map(f => {
+    if (f.type === 'select') {
+      return `<div class="form-group"><label class="form-label">${f.label}</label>
+        <select class="form-select" id="fm_${f.id}">${(f.options||[]).map(o => `<option value="${o}">${o}</option>`).join('')}</select></div>`;
+    }
+    if (f.type === 'textarea') {
+      return `<div class="form-group"><label class="form-label">${f.label}</label>
+        <textarea class="form-input" id="fm_${f.id}" placeholder="${f.placeholder||''}" rows="3"></textarea></div>`;
+    }
+    return `<div class="form-group"><label class="form-label">${f.label}</label>
+      <input class="form-input" id="fm_${f.id}" placeholder="${f.placeholder||''}" value="${f.value||''}" /></div>`;
+  }).join('');
+  _formModalCallback = submitCallback;
+  openModal('formModal');
+}
+function submitFormModal() {
+  if (_formModalCallback) _formModalCallback();
+  closeModal('formModal');
+  _formModalCallback = null;
+}
+
+// Overlay click to close modals
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('modal-overlay') && e.target.classList.contains('show')) {
+    e.target.classList.remove('show');
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════
+// PRODUCT FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+function viewProduct(code) {
+  const p = PRODUCTS.find(x => x.code === code);
+  if (!p) return;
+  const t = STATUS_TAG[p.status] || {l: p.status, c: ''};
+  showDetail('产品详情: ' + p.code, [
+    {label:'产品编码', value:p.code},
+    {label:'型号', value:p.model},
+    {label:'类型', value:p.type},
+    {label:'目标市场', value:p.market},
+    {label:'生命周期', value:`<span class="tag ${t.c}">${t.l}</span>`},
+    {label:'产品经理', value:'张明远'},
+    {label:'创建时间', value:'2026-01-15'},
+  ], [
+    {text:'✏️ 编辑', cls:'btn-primary', onclick:'editProduct("' + p.code + '")'},
+    {text:'📋 生命周期', cls:'btn-ghost', onclick:'showToast("🔄 查看生命周期 (演示)")'},
+  ]);
+}
+function editProduct(code) {
+  const p = PRODUCTS.find(x => x.code === code);
+  if (!p) return;
+  showForm('编辑产品: ' + p.code, [
+    {id:'model', label:'型号', value:p.model},
+    {id:'name', label:'产品名称', value:p.model + ' ' + p.type},
+    {id:'type', label:'类型', type:'select', options:['AC Charger','DC Charger','Portable']},
+    {id:'market', label:'目标市场', value:p.market},
+    {id:'desc', label:'描述', type:'textarea', placeholder:'产品描述'},
+  ], () => {
+    showToast('✅ 产品 ' + p.code + ' 已更新');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PROJECT FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+function viewProject(id) {
+  const p = PROJECTS.find(x => x.id === id);
+  if (!p) return;
+  const pct = p.progress;
+  const sl = p.status === 'completed' ? '已完成' : p.status === 'in_progress' ? '进行中' : p.status === 'pending_approval' ? '待审批' : p.status;
+  const pi = p.priority === 'high' ? '🔴 高' : p.priority === 'medium' ? '🟡 中' : '🟢 低';
+  showDetail('项目详情: ' + p.name, [
+    {label:'项目名称', value:p.name},
+    {label:'关联产品', value:p.product},
+    {label:'状态', value:sl},
+    {label:'优先级', value:pi},
+    {label:'截止日期', value:p.deadline},
+    {label:'进度', value:pct + '%'},
+    {label:'任务', value:p.tasks.done + '/' + p.tasks.total + ' (' + Math.round(p.tasks.done/p.tasks.total*100) + '%)'},
+  ], [
+    {text:'📋 任务列表', cls:'btn-primary', onclick:'viewProjectTasks(' + id + ')'},
+    {text:'📝 更新状态', cls:'btn-ghost', onclick:'updateProjectStatus(' + id + ')'},
+  ]);
+}
+function viewProjectTasks(id) {
+  const p = PROJECTS.find(x => x.id === id);
+  showForm(p.name + ' - 任务列表', [
+    {id:'task1', label:'', type:'textarea', placeholder:'设计评审 (已完成)'},
+  ], () => {});
+}
+function updateProjectStatus(id) {
+  const p = PROJECTS.find(x => x.id === id);
+  showForm('更新状态: ' + p.name, [
+    {id:'status', label:'新状态', type:'select', options:['待审批','进行中','已完成','已关闭']},
+    {id:'remark', label:'备注', type:'textarea', placeholder:'状态变更说明'},
+  ], () => {
+    showToast('✅ 项目状态已更新');
+  });
+}
+function createProject() {
+  showForm('新建项目', [
+    {id:'name', label:'项目名称', placeholder:'输入项目名称'},
+    {id:'product', label:'关联产品', placeholder:'例如 ARC-7.2kW'},
+    {id:'deadline', label:'截止日期', placeholder:'例如 2026-12'},
+    {id:'priority', label:'优先级', type:'select', options:['高','中','低']},
+  ], () => {
+    showToast('📋 项目已创建 (演示)');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DESIGN FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+function viewDesignFile(name) {
+  const f = DESIGN_FILES.find(x => x.name === name);
+  if (!f) return;
+  showDetail('文件详情: ' + f.name, [
+    {label:'文件名', value:f.name},
+    {label:'类型', value:f.type},
+    {label:'版本', value:'v' + f.version},
+    {label:'上传者', value:f.author},
+    {label:'更新时间', value:f.updated},
+    {label:'文件大小', value: (Math.random() * 10 + 1).toFixed(1) + ' MB'},
+    {label:'文件格式', value:'application/' + f.type.toLowerCase()},
+  ], [
+    {text:'📥 下载', cls:'btn-primary', onclick:'showToast("📥 正在下载 ' + f.name + ' (演示)")'},
+    {text:'📋 版本历史', cls:'btn-ghost', onclick:'showVersionHistory("' + f.name + '")'},
+  ]);
+}
+function showVersionHistory(name) {
+  const f = DESIGN_FILES.find(x => x.name === name);
+  if (!f) return;
+  let html = '';
+  for (let v = f.version; v >= Math.max(1, f.version - 3); v--) {
+    html += `<div class="detail-row"><span class="detail-label">v${v}</span><span class="detail-value">${f.author} · ${f.updated} ${v === f.version ? '<span class="tag tag-green">当前</span>' : ''}</span></div>`;
+  }
+  showDetail(f.name + ' - 版本历史', [
+    {label:'当前版本', value:'v' + f.version},
+    {label:'历史版本', value:''},
+  ]);
+  // Append version history
+  document.getElementById('detailModalBody').innerHTML += html;
+}
+function uploadDesignFile() {
+  showForm('上传设计文件', [
+    {id:'file', label:'选择文件', placeholder:'点击选择文件'},
+    {id:'product', label:'关联产品', placeholder:'例如 ARC-7.2kW'},
+    {id:'type', label:'文件类型', type:'select', options:['STEP','IGS','PDF','STL','DXF']},
+    {id:'notes', label:'变更说明', type:'textarea', placeholder:'本次变更内容'},
+  ], () => {
+    showToast('📤 文件上传成功 (演示)');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUPPLIER FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+function viewSupplier(name) {
+  const s = SUPPLIERS.find(x => x.name === name);
+  if (!s) return;
+  showDetail('供应商详情: ' + s.name, [
+    {label:'供应商', value:s.name},
+    {label:'类型', value: s.type === 'design' ? '设计供应商' : '模组开发商'},
+    {label:'联系人', value:s.contact},
+    {label:'评级', value:'★ ' + s.rating},
+    {label:'准时交付率', value:s.delivery + '%'},
+    {label:'合作状态', value: s.status === 'active' ? '<span class="tag tag-green">合作中</span>' : '<span class="tag tag-red">暂停合作</span>'},
+    {label:'合作项目数', value: Math.floor(Math.random() * 8 + 2) + ' 个'},
+  ], [
+    {text:'📤 发起外协', cls:'btn-primary', onclick:'createOutsourceTask("' + s.name + '")'},
+    {text:'✏️ 编辑', cls:'btn-ghost', onclick:'showForm("编辑供应商: " + "' + s.name + '", [{id:"contact",label:"联系人",value:"' + s.contact + '"},{id:"rating",label:"评级",value:"' + s.rating + '"}], ()=>{showToast("✅ 已更新")})'},
+  ]);
+}
+function createOutsourceTask(supplierName) {
+  showForm('发起外协任务 - ' + supplierName, [
+    {id:'title', label:'任务名称', placeholder:'外协任务描述'},
+    {id:'deadline', label:'交付期限', placeholder:'例如 2026-08'},
+    {id:'budget', label:'预算 (万元)', placeholder:'例如 15'},
+    {id:'desc', label:'任务说明', type:'textarea', placeholder:'详细要求描述'},
+  ], () => { showToast('📤 外协任务已发起 (演示)'); });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LIFECYCLE FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+function submitLifecycleTransition() {
+  const sel = document.getElementById('lifecycleProduct');
+  const code = sel ? sel.value : 'AC-220-EU';
+  showForm('生命周期流转 - ' + code, [
+    {id:'target', label:'目标状态', type:'select', options:['研发中','试产移交','在售','停产','退市']},
+    {id:'reason', label:'流转原因', type:'textarea', placeholder:'请说明流转原因'},
+    {id:'approval', label:'审批单号', placeholder:'飞书审批单号 (可选)'},
+  ], () => { showToast('🔄 流转申请已提交 (演示)'); });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FIRMWARE FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+function createGrayRelease(version, model) {
+  showForm('灰度升级 - ' + model + ' ' + version, [
+    {id:'percent', label:'灰度比例 (%)', value:'30'},
+    {id:'target', label:'目标区域', type:'select', options:['全部','华东','华南','华北','海外']},
+    {id:'desc', label:'发布说明', type:'textarea', value:'灰度发布 ' + version + ' 到 ' + model},
+  ], () => { showToast('⚡ 灰度升级任务已创建 (演示)'); });
+}
+function createFirmwareVersion() {
+  showForm('发布新固件版本', [
+    {id:'model', label:'产品型号', placeholder:'例如 ARC-7.2kW'},
+    {id:'version', label:'版本号', placeholder:'例如 v2.5.0'},
+    {id:'type', label:'发布类型', type:'select', options:['完整包','增量包']},
+    {id:'notes', label:'发布说明', type:'textarea', placeholder:'更新内容描述'},
+  ], () => { showToast('⚡ 固件版本已发布 (演示)'); });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CERTIFICATION FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+function viewCert(product, type) {
+  const c = CERTS.find(x => x.product === product && x.type === type);
+  if (!c) return;
+  const sc = c.status === 'valid' ? '<span class="tag tag-green">有效</span>' : c.status === 'expiring_soon' ? '<span class="tag tag-yellow">即将到期</span>' : '<span class="tag tag-red">已过期</span>';
+  showDetail('认证详情: ' + c.product + ' - ' + c.type, [
+    {label:'产品', value:c.product},
+    {label:'认证类型', value:'<span class="tag tag-cyan">' + c.type + '</span>'},
+    {label:'证书编号', value:'<code style="font-size:12px;background:var(--bg-glass);padding:2px 6px;border-radius:4px">' + c.number + '</code>'},
+    {label:'颁发机构', value:c.issuer},
+    {label:'颁发日期', value:c.issued},
+    {label:'到期日期', value:c.expiry},
+    {label:'状态', value:sc},
+  ], [
+    {text:'📄 查看证书', cls:'btn-primary', onclick:'showToast("📄 打开证书文件 (演示)")'},
+    {text:'🔄 更新认证', cls:'btn-ghost', onclick:'showForm("更新认证", [{id:"number",label:"证书编号",value:"' + c.number + '"},{id:"expiry",label:"到期日期",value:"' + c.expiry + '"}], ()=>{showToast("✅ 认证已更新")})'},
+  ]);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN FUNCTIONS
+// ═══════════════════════════════════════════════════════════════
+function editAdminUser(name) {
+  const u = USERS.find(x => x.name === name);
+  if (!u) return;
+  showForm('编辑用户: ' + u.name, [
+    {id:'name', label:'姓名', value:u.name},
+    {id:'email', label:'邮箱', value:u.email},
+    {id:'role', label:'角色', type:'select', options:['产品经理','项目经理','研发工程师','硬件工程师','认证工程师','系统管理员']},
+    {id:'status', label:'状态', type:'select', options:['在线','离线','忙碌']},
+  ], () => { showToast('✅ 用户 ' + u.name + ' 已更新'); });
+}
+function inviteUser() {
+  showForm('邀请新用户', [
+    {id:'email', label:'邮箱地址', placeholder:'user@annarui.com'},
+    {id:'role', label:'角色', type:'select', options:['产品经理','项目经理','研发工程师','硬件工程师','认证工程师']},
+    {id:'msg', label:'邀请说明', type:'textarea', placeholder:'可选：附言'},
+  ], () => { showToast('👤 邀请已发送 (演示)'); });
+}
 
 // ═══════════════════════════════════════════════════════════════
 // TOAST

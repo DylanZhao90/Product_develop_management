@@ -1,5 +1,9 @@
-# PDM 前端演示 · 迭代记录
+# 🎮 PDM 前端演示 · 迭代记录 (DEMO)
 
+> ⚠️ **这是一个独立的前端演示项目**，与后端生产系统无关。
+> 演示版本使用 localStorage 模拟登录和假数据，用于 UI 原型验证。
+> 生产系统文档请见 [COMPREHENSIVE_REVIEW.md](COMPREHENSIVE_REVIEW.md) 和 [DEVELOPMENT_PLAN.md](DEVELOPMENT_PLAN.md)。
+>
 > Orion-Unified-UI 演示版本 & 产品开发生命周期管理系统前端
 > 文档维护人: AI Agent (Orion Labs)
 

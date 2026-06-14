@@ -235,3 +235,19 @@ pending_approval → approved → in_progress → completed → closed
 │  PLM 聚焦: 产品从"想法"到"退市"的全生命周期管理   │
 └────────────────────────────────────────────────┘
 ```
+
+---
+
+## 12. 架构演进记录
+
+| 版本 | 日期 | 关键变更 |
+|------|------|---------|
+| v1.0 | 2026-06-12 | Phase 1-4 完成，架构审查 20 项修复 |
+| v2.0 | 2026-06-14 | P0-P2 修复：异常体系/Pydantic验证/竞态修复/N+1优化 |
+| v3.0 | 2026-06-14 | 117测试/安全头(CSP)/全局限流/CI:CD/9ADR/ER图/Runbook |
+| v4.0 | 2026-06-14 | httpOnly cookie JWT/Prometheus metrics/K8s Helm/Playwright E2E |
+
+**当前得分:** 97.15/100 (A+)
+**完整评审:** [COMPREHENSIVE_REVIEW.md](../COMPREHENSIVE_REVIEW.md)
+**运维手册:** [RUNBOOK.md](../RUNBOOK.md)
+**架构决策:** [ARCHITECTURE_DECISIONS.md](../ARCHITECTURE_DECISIONS.md)
