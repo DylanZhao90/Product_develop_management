@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import NotFoundError
 from app.core.utils import update_entity_attrs
 from app.middleware.audit import AuditLogger
 from app.models.supplier import OutsourceTask, Supplier
@@ -55,7 +56,7 @@ class SupplierService:
     async def update_supplier(self, supplier_id: str, data: dict, updated_by: str | None = None) -> Supplier:
         supplier = await self.supplier_repo.get_by_id(supplier_id)
         if not supplier:
-            raise ValueError("Supplier not found")
+            raise NotFoundError("Supplier not found")
         old_values = {"name": supplier.name, "status": supplier.status, "rating": float(supplier.rating) if supplier.rating is not None else None}
         update_entity_attrs(supplier, data)
         supplier = await self.supplier_repo.update(supplier)
@@ -94,7 +95,7 @@ class SupplierService:
     async def update_outsource_task(self, task_id: str, data: dict, updated_by: str | None = None) -> OutsourceTask:
         task = await self.task_repo.get_by_id(task_id)
         if not task:
-            raise ValueError("Outsource task not found")
+            raise NotFoundError("Outsource task not found")
         old_values = {"title": task.title, "review_status": task.review_status}
         update_entity_attrs(task, data)
         task = await self.task_repo.update(task)
@@ -105,7 +106,7 @@ class SupplierService:
     async def review_outsource_task(self, task_id: str, data: dict, reviewer_id: str) -> OutsourceTask:
         task = await self.task_repo.get_by_id(task_id)
         if not task:
-            raise ValueError("Outsource task not found")
+            raise NotFoundError("Outsource task not found")
         task.review_status = data["review_status"]
         task.review_comment = data.get("review_comment")
         await AuditLogger.log(

@@ -1,7 +1,9 @@
 from datetime import date, timedelta
 
+from sqlalchemy import update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import NotFoundError
 from app.core.utils import update_entity_attrs
 from app.middleware.audit import AuditLogger
 from app.models.certification import Certification
@@ -55,7 +57,7 @@ class CertificationService:
     async def update_certification(self, cert_id: str, data: dict, updated_by: str | None = None) -> Certification:
         cert = await self.repo.get_by_id(cert_id)
         if not cert:
-            raise ValueError("Certification not found")
+            raise NotFoundError("Certification not found")
         old_values = {"cert_type": cert.cert_type, "status": cert.status}
         update_entity_attrs(cert, data)
         cert = await self.repo.update(cert)
@@ -67,18 +69,39 @@ class CertificationService:
         return await self.repo.get_expiring(days=days)
 
     async def check_expiry_and_update_status(self) -> int:
-        """Update status of expired/expiring certs. Returns count of status changes."""
-        count = 0
+        """Update status of expired/expiring certs using bulk UPDATE.
+
+        Uses two SQL UPDATE statements (expired + expiring_soon), avoiding
+        the N+1 pattern of loading all certs and updating one by one.
+        Returns total count of changed rows.
+        """
         today = date.today()
-        all_certs = await self.repo.get_all(skip=0, limit=10000)
-        for cert in all_certs[0]:
-            new_status = None
-            if cert.expiry_date and cert.expiry_date <= today:
-                new_status = "expired"
-            elif cert.expiry_date and cert.expiry_date <= today + timedelta(days=cert.remind_before_days):
-                new_status = "expiring_soon"
-            if new_status and cert.status != new_status:
-                cert.status = new_status
-                await self.repo.update(cert)
-                count += 1
+        count = 0
+
+        # Bulk update: mark truly expired certs
+        result = await self.db.execute(
+            update(Certification)
+            .where(
+                Certification.expiry_date.isnot(None),
+                Certification.expiry_date <= today,
+                Certification.status != "expired",
+            )
+            .values(status="expired")
+        )
+        count += result.rowcount  # type: ignore[attr-defined]
+
+        # Bulk update: mark certs expiring soon
+        remind_threshold = today + timedelta(days=90)
+        result = await self.db.execute(
+            update(Certification)
+            .where(
+                Certification.expiry_date.isnot(None),
+                Certification.expiry_date > today,
+                Certification.expiry_date <= remind_threshold,
+                Certification.status != "expiring_soon",
+            )
+            .values(status="expiring_soon")
+        )
+        count += result.rowcount  # type: ignore[attr-defined]
+
         return count

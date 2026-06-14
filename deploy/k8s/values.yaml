@@ -1,0 +1,91 @@
+# PDM System — Helm Values
+
+replicaCount: 2
+
+image:
+  repository: registry.anariev.com/pdm-backend
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8000
+
+ingress:
+  enabled: true
+  className: nginx
+  hosts:
+    - host: pdm.anariev.com
+      paths:
+        - path: /api
+          pathType: Prefix
+          backendPort: 8000
+        - path: /
+          pathType: Prefix
+          backendPort: 5173
+  tls:
+    - secretName: pdm-tls
+      hosts:
+        - pdm.anariev.com
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+
+# PostgreSQL
+postgresql:
+  enabled: false  # Use external/managed PostgreSQL
+
+externalDatabase:
+  host: pdm-postgres
+  port: 5432
+  database: pdm
+  user: pdm
+  existingSecret: pdm-db-credentials
+
+# Redis
+redis:
+  enabled: false  # Use external/managed Redis
+
+externalRedis:
+  host: pdm-redis
+  port: 6379
+  existingSecret: pdm-redis-credentials
+
+# Application config
+config:
+  environment: production
+  appName: "PDM System"
+  corsOrigins: "https://pdm.anariev.com"
+
+# Health checks
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: 8000
+  initialDelaySeconds: 30
+  periodSeconds: 15
+
+readinessProbe:
+  httpGet:
+    path: /api/health
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 5
+
+# Monitoring
+metrics:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    interval: 30s

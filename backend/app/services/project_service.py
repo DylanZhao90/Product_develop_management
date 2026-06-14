@@ -3,6 +3,7 @@ from typing import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.event_bus import Topics, event_bus
+from app.core.exceptions import BadRequestError, NotFoundError
 from app.core.utils import update_entity_attrs
 from app.middleware.audit import AuditLogger
 from app.models.project import Project, ProjectTask, TechnicalIssue
@@ -49,14 +50,14 @@ class ProjectService:
     async def update_project(self, project_id: str, data: dict, updated_by: str | None = None) -> Project:
         project = await self.project_repo.get_by_id(project_id)
         if not project:
-            raise ValueError("Project not found")
+            raise NotFoundError("Project not found")
         old_values = {"name": project.name, "status": project.status}
         # Validate status transition
         new_status = data.get("status")
         if new_status and new_status != project.status:
             valid_next = self.VALID_TRANSITIONS.get(project.status, [])
             if new_status not in valid_next:
-                raise ValueError(
+                raise BadRequestError(
                     f"Invalid project transition: {project.status} -> {new_status}. "
                     f"Allowed: {valid_next}"
                 )
@@ -128,7 +129,7 @@ class ProjectService:
     async def update_task(self, task_id: str, data: dict, updated_by: str | None = None) -> ProjectTask:
         task = await self.task_repo.get_by_id(task_id)
         if not task:
-            raise ValueError("Task not found")
+            raise NotFoundError("Task not found")
         old_values = {"name": task.name, "status": task.status}
         update_entity_attrs(task, data)
         task = await self.task_repo.update(task)
@@ -157,7 +158,7 @@ class ProjectService:
     async def update_issue(self, issue_id: str, data: dict, updated_by: str | None = None) -> TechnicalIssue:
         issue = await self.issue_repo.get_by_id(issue_id)
         if not issue:
-            raise ValueError("Issue not found")
+            raise NotFoundError("Issue not found")
         old_values = {"title": issue.title, "status": issue.status, "severity": issue.severity}
         update_entity_attrs(issue, data)
         issue = await self.issue_repo.update(issue)

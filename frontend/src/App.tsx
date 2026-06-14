@@ -5,7 +5,7 @@ import { Spin } from "antd";
 import { useAuthStore } from "./stores/authStore";
 import { useAppStore } from "./stores/appStore";
 import MainLayout from "./components/common/MainLayout";
-import Dashboard from "./pages/Dashboard";
+import EnhancedDashboard from "./pages/Dashboard/EnhancedDashboard";
 import Products from "./pages/Products";
 import ProductDetail from "./pages/Products/ProductDetail";
 import Projects from "./pages/Projects";
@@ -61,7 +61,7 @@ export default function App() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Dashboard />} />
+        <Route index element={<EnhancedDashboard />} />
         <Route path="products" element={<Products />} />
         <Route path="products/:id" element={<ProductDetail />} />
         <Route path="projects" element={<Projects />} />

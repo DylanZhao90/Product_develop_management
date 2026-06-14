@@ -1,0 +1,1403 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="deep-space">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>安纳瑞 PDM · 完整演示</title>
+<!-- SortableJS -->
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<!-- ECharts -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+<style>
+/* ═══════════════════════════════════ THEME SYSTEM ═══════════════════════════════════ */
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{font-size:16px}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg-primary);color:var(--text-primary);min-height:100vh;transition:background var(--transition-base),color var(--transition-base);overflow-x:hidden}
+:root{--font-sans:'Inter',sans-serif;--transition-base:250ms cubic-bezier(0.4,0,0.2,1);--transition-fast:150ms cubic-bezier(0.4,0,0.2,1);--radius-sm:6px;--radius-md:10px;--radius-lg:16px;--radius-xl:24px;--shadow-drag:0 20px 60px rgba(0,0,0,0.15)}
+[data-theme="deep-space"]{--bg-primary:#0A0A0F;--bg-secondary:#111118;--bg-card:rgba(18,18,28,0.75);--bg-card-hover:rgba(28,28,42,0.85);--bg-glass:rgba(255,255,255,0.04);--text-primary:#F1F5F9;--text-secondary:#94A3B8;--text-muted:#475569;--accent:#3B82F6;--accent-gradient:linear-gradient(135deg,#3B82F6,#6366F1);--accent-glow:rgba(59,130,246,0.25);--success:#22C55E;--warning:#F59E0B;--error:#EF4444;--info:#6366F1;--border:1px solid rgba(59,130,246,0.12);--border-hover:1px solid rgba(59,130,246,0.3);--chart-grid:#1E293B;--chart-text:#94A3B8;--scrollbar-bg:#1E293B;--scrollbar-thumb:#334155}
+[data-theme="moonlight"]{--bg-primary:#F8FAFC;--bg-secondary:#F1F5F9;--bg-card:rgba(255,255,255,0.85);--bg-card-hover:rgba(255,255,255,0.95);--bg-glass:rgba(0,0,0,0.02);--text-primary:#0F172A;--text-secondary:#64748B;--text-muted:#94A3B8;--accent:#0F172A;--accent-gradient:linear-gradient(135deg,#0F172A,#334155);--accent-glow:rgba(15,23,42,0.12);--success:#16A34A;--warning:#D97706;--error:#DC2626;--info:#6366F1;--border:1px solid rgba(0,0,0,0.06);--border-hover:1px solid rgba(0,0,0,0.15);--chart-grid:#E2E8F0;--chart-text:#64748B;--scrollbar-bg:#E2E8F0;--scrollbar-thumb:#CBD5E1}
+[data-theme="cyber"]{--bg-primary:#000000;--bg-secondary:#0A0A0A;--bg-card:rgba(0,15,15,0.85);--bg-card-hover:rgba(0,25,25,0.92);--bg-glass:rgba(0,255,255,0.03);--text-primary:#00F0FF;--text-secondary:#00B8C9;--text-muted:#006666;--accent:#00F0FF;--accent-gradient:linear-gradient(135deg,#00F0FF,#FF00FF);--accent-glow:rgba(0,240,255,0.20);--success:#39FF14;--warning:#FFD700;--error:#FF0040;--info:#FF00FF;--border:1px solid rgba(0,240,255,0.15);--border-hover:1px solid rgba(0,240,255,0.4);--chart-grid:#003333;--chart-text:#00B8C9;--scrollbar-bg:#003333;--scrollbar-thumb:#006666}
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:var(--scrollbar-bg)}
+::-webkit-scrollbar-thumb{background:var(--scrollbar-thumb);border-radius:3px}
+
+/* ═══════════════════════════════════ LAYOUT ═══════════════════════════════════ */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:64px;background:var(--bg-secondary);border-right:var(--border);display:flex;flex-direction:column;align-items:center;padding:16px 0;z-index:100;transition:var(--transition-base)}
+.sidebar-logo{width:36px;height:36px;border-radius:10px;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;box-shadow:0 0 20px var(--accent-glow);margin-bottom:24px;cursor:pointer;transition:transform var(--transition-fast)}
+.sidebar-logo:hover{transform:scale(1.08)}
+.sidebar-nav{display:flex;flex-direction:column;gap:4px;flex:1}
+.sidebar-btn{width:40px;height:40px;border-radius:10px;border:none;background:transparent;color:var(--text-muted);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--transition-fast);position:relative}
+.sidebar-btn:hover{background:var(--bg-glass);color:var(--text-primary)}
+.sidebar-btn.active{background:var(--accent-glow);color:var(--accent)}
+.sidebar-btn.active::before{content:'';position:absolute;left:-12px;top:50%;transform:translateY(-50%);width:3px;height:20px;background:var(--accent);border-radius:0 3px 3px 0;box-shadow:0 0 8px var(--accent-glow)}
+.sidebar-btn .badge{position:absolute;top:2px;right:2px;width:8px;height:8px;border-radius:50%;background:var(--error);box-shadow:0 0 6px var(--error)}
+.main{margin-left:64px;padding:24px 32px;min-height:100vh;transition:var(--transition-base)}
+
+/* ═══════════════════════════════════ COMMON ═══════════════════════════════════ */
+.page{display:none}.page.active{display:block}
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding:16px 24px;background:var(--bg-card);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:var(--radius-lg);border:var(--border);transition:var(--transition-base)}
+.header-left{display:flex;align-items:center;gap:16px}
+.header-left h1{font-size:20px;font-weight:700;letter-spacing:-0.5px;background:var(--accent-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.header-badge{padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600;background:var(--accent-glow);color:var(--accent);border:1px solid rgba(59,130,246,0.2)}
+.header-right{display:flex;align-items:center;gap:12px}
+.header-search{padding:8px 14px;border-radius:var(--radius-md);border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;width:200px;outline:none;transition:all var(--transition-fast)}
+.header-search:focus{border:var(--border-hover);width:260px}.header-search::placeholder{color:var(--text-muted)}
+
+/* Theme switcher */
+.theme-switcher{display:flex;gap:6px;background:var(--bg-glass);padding:4px;border-radius:var(--radius-md);border:var(--border)}
+.theme-btn{padding:6px 14px;border-radius:6px;border:none;font-size:12px;font-weight:500;cursor:pointer;background:transparent;color:var(--text-muted);transition:all var(--transition-fast)}
+.theme-btn:hover{color:var(--text-primary)}
+.theme-btn.active{background:var(--accent-gradient);color:#fff;box-shadow:0 0 16px var(--accent-glow)}
+
+/* Page header */
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
+.page-header h2{font-size:22px;font-weight:700;letter-spacing:-0.5px;margin:0}
+/* Page header */
+.page-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px}
+.page-header h2{font-size:22px;font-weight:700;letter-spacing:-0.5px;margin:0}
+.page-header p{font-size:14px;color:var(--text-secondary);margin:4px 0 0 0}
+.back-btn{padding:6px 14px;border-radius:var(--radius-md);border:var(--border);background:var(--bg-glass);color:var(--text-secondary);cursor:pointer;font-size:12px;font-weight:500;transition:all var(--transition-fast);display:inline-flex;align-items:center;gap:4px;margin-right:12px}
+.back-btn:hover{background:var(--bg-card-hover);color:var(--text-primary);border:var(--border-hover)}
+
+/* Cards */
+.card{background:var(--bg-card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:var(--radius-lg);border:var(--border);padding:20px 24px;transition:all var(--transition-base)}
+.card:hover{border:var(--border-hover)}
+.card-title{font-size:15px;font-weight:600;margin-bottom:16px;color:var(--text-primary);display:flex;align-items:center;gap:8px}
+
+/* Buttons */
+.btn{padding:8px 18px;border-radius:var(--radius-md);border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all var(--transition-fast);display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--accent-gradient);color:#fff;box-shadow:0 0 20px var(--accent-glow)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 0 30px var(--accent-glow)}
+.btn-ghost{background:var(--bg-glass);color:var(--text-secondary);border:var(--border)}
+.btn-ghost:hover{background:var(--bg-card-hover);color:var(--text-primary)}
+.btn-sm{padding:5px 12px;font-size:12px}
+.btn-icon{width:32px;height:32px;border-radius:8px;padding:0;display:flex;align-items:center;justify-content:center}
+
+/* Tags */
+.tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:600}
+.tag-blue{background:rgba(59,130,246,0.15);color:#60A5FA}
+.tag-green{background:rgba(34,197,94,0.15);color:#4ADE80}
+.tag-yellow{background:rgba(245,158,11,0.15);color:#FBBF24}
+.tag-red{background:rgba(239,68,68,0.15);color:#F87171}
+.tag-gray{background:rgba(148,163,184,0.15);color:var(--text-secondary)}
+.tag-purple{background:rgba(99,102,241,0.15);color:#818CF8}
+.tag-cyan{background:rgba(0,240,255,0.15);color:#00F0FF}
+.tag-orange{background:rgba(249,115,22,0.15);color:#FB923C}
+
+/* Grid */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+@media(max-width:1024px){.grid-4{grid-template-columns:1fr 1fr}.grid-3{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.main{padding:16px}.grid-2,.grid-3,.grid-4{grid-template-columns:1fr}.header{flex-direction:column;gap:12px}.header-search{width:100%}.header-search:focus{width:100%}}
+
+/* Table */
+.data-table{width:100%;border-collapse:collapse}
+.data-table th{text-align:left;padding:10px 12px;font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;border-bottom:var(--border)}
+.data-table td{padding:10px 12px;font-size:13px;color:var(--text-primary);border-bottom:var(--border)}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--bg-glass)}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:300;display:none;align-items:center;justify-content:center;animation:fadeIn 0.2s}
+.modal-overlay.show{display:flex}
+.modal{background:var(--bg-card);backdrop-filter:blur(24px);border-radius:var(--radius-xl);border:var(--border);padding:28px;width:480px;max-width:90vw;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-drag)}
+.modal h3{font-size:17px;font-weight:600;margin-bottom:20px}
+.modal-close{float:right;background:transparent;border:none;color:var(--text-muted);font-size:18px;cursor:pointer;padding:4px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:6px}
+.form-group input,.form-group select{width:100%;padding:9px 12px;border-radius:var(--radius-md);border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none}
+.form-group input:focus,.form-group select:focus{border:var(--border-hover)}
+.form-group textarea{width:100%;padding:9px 12px;border-radius:var(--radius-md);border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none;resize:vertical;min-height:64px;font-family:inherit}
+.form-group textarea:focus{border:var(--border-hover)}
+
+/* ═══════════════════ LOGIN ═══════════════════ */
+.login-overlay{position:fixed;inset:0;background:var(--bg-primary);z-index:9999;display:flex;align-items:center;justify-content:center;transition:opacity 0.4s}
+.login-overlay.hidden{opacity:0;pointer-events:none}
+.login-box{width:400px;padding:40px;background:var(--bg-card);backdrop-filter:blur(24px);border-radius:var(--radius-xl);border:var(--border);box-shadow:0 0 60px var(--accent-glow)}
+.login-box .logo{width:48px;height:48px;border-radius:14px;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;color:#fff;margin:0 auto 16px;box-shadow:0 0 30px var(--accent-glow)}
+.login-box h1{text-align:center;font-size:22px;font-weight:700;margin-bottom:4px}
+.login-box p{text-align:center;font-size:13px;color:var(--text-secondary);margin-bottom:28px}
+.login-box .form-group{margin-bottom:16px}
+.login-box .form-group label{display:block;font-size:13px;font-weight:600;color:var(--text-secondary);margin-bottom:6px}
+.login-box .form-group input{width:100%;padding:11px 14px;border-radius:var(--radius-md);border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:14px;outline:none;transition:all var(--transition-fast)}
+.login-box .form-group input:focus{border:var(--border-hover);box-shadow:0 0 12px var(--accent-glow)}
+.login-box .login-btn{width:100%;padding:11px;border-radius:var(--radius-md);border:none;background:var(--accent-gradient);color:#fff;font-size:14px;font-weight:600;cursor:pointer;transition:all var(--transition-fast);box-shadow:0 0 20px var(--accent-glow);margin-top:4px}
+.login-box .login-btn:hover{transform:translateY(-1px);box-shadow:0 0 30px var(--accent-glow)}
+.login-box .login-error{text-align:center;font-size:12px;color:var(--error);margin-top:10px;height:20px}
+.login-box .login-footer{text-align:center;margin-top:20px;font-size:13px;color:var(--text-muted)}
+.login-box .login-footer a{color:var(--accent);cursor:pointer;text-decoration:none;font-weight:500}
+.login-box .login-footer a:hover{text-decoration:underline}
+.login-box .test-accounts{margin-top:20px;padding:16px;border-radius:var(--radius-md);background:var(--bg-glass);border:1px dashed var(--border)}
+.login-box .test-accounts-title{font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:8px;text-align:center}
+.login-box .test-account{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;border-radius:4px;font-size:12px;color:var(--text-secondary);cursor:pointer;transition:var(--transition-fast)}
+.login-box .test-account:hover{background:var(--accent-glow);color:var(--text-primary)}
+.login-box .test-account .role{font-size:10px;color:var(--text-muted)}
+
+/* Toast */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg-card);backdrop-filter:blur(20px);color:var(--text-primary);padding:12px 24px;border-radius:12px;border:var(--border);z-index:999;font-size:14px;font-weight:500;box-shadow:var(--shadow-drag);animation:fadeInUp 0.3s ease-out}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--bg-card);backdrop-filter:blur(20px);color:var(--text-primary);padding:12px 24px;border-radius:12px;border:var(--border);z-index:999;font-size:14px;font-weight:500;box-shadow:var(--shadow-drag);animation:fadeInUp 0.3s ease-out}
+
+/* Animations */
+@keyframes fadeInUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.animate-in{animation:fadeInUp 0.4s ease-out both}
+
+/* ═══════════════════════════════════ DASHBOARD SPECIFIC ═══════════════════════════════════ */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+.stat-card{background:var(--bg-card);backdrop-filter:blur(16px);border-radius:var(--radius-lg);border:var(--border);padding:20px 24px;cursor:pointer;transition:all var(--transition-base);position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent-gradient);opacity:0.5;transition:opacity var(--transition-base)}
+.stat-card:hover{background:var(--bg-card-hover);border:var(--border-hover);transform:translateY(-2px);box-shadow:var(--shadow-drag)}
+.stat-card:hover::before{opacity:1}
+.stat-card-icon{width:40px;height:40px;border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:12px}
+.stat-card .label{font-size:13px;color:var(--text-secondary);font-weight:500;margin-bottom:6px}
+.stat-card .value{font-size:28px;font-weight:700;letter-spacing:-1px}
+.dashboard-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.dashboard-grid .full-width{grid-column:1/-1}
+.widget{background:var(--bg-card);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-radius:var(--radius-lg);border:var(--border);transition:all var(--transition-base)}
+.widget:hover{border:var(--border-hover)}
+.widget.sortable-chosen{box-shadow:var(--shadow-drag);transform:scale(1.02);z-index:50}
+.widget.sortable-ghost{border:2px dashed var(--accent);background:var(--accent-glow);opacity:0.5}
+.widget.sortable-ghost>*{opacity:0}
+.widget-header{display:flex;align-items:center;padding:14px 20px;border-bottom:var(--border);cursor:grab;user-select:none}
+.widget-header:active{cursor:grabbing}
+.widget-header .drag-handle{color:var(--text-muted);font-size:14px;margin-right:10px;letter-spacing:2px;opacity:0.4;transition:opacity var(--transition-fast)}
+.widget-header:hover .drag-handle{opacity:0.8}
+.widget-header h3{flex:1;font-size:14px;font-weight:600}
+.widget-actions{display:flex;gap:4px}
+.widget-actions button{width:28px;height:28px;border-radius:6px;border:none;background:transparent;color:var(--text-muted);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;transition:all var(--transition-fast)}
+.widget-actions button:hover{background:var(--bg-glass);color:var(--text-primary)}
+.widget-actions button.pinned{color:var(--accent)}
+.widget-content{padding:16px 20px}
+.chart-container{width:100%;height:240px}
+.activity-list{list-style:none}
+.activity-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:var(--border)}
+.activity-item:last-child{border-bottom:none}
+.activity-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.activity-dot.success{background:var(--success);box-shadow:0 0 6px var(--success)}
+.activity-dot.warning{background:var(--warning);box-shadow:0 0 6px var(--warning)}
+.activity-dot.error{background:var(--error);box-shadow:0 0 6px var(--error)}
+.activity-dot.info{background:var(--info);box-shadow:0 0 6px var(--info)}
+.activity-text{flex:1;font-size:13px;color:var(--text-primary)}
+.activity-time{font-size:11px;color:var(--text-muted);white-space:nowrap}
+
+/* ═══════════════════════════════════ PAGE SPECIFIC ═══════════════════════════════════ */
+/* Products */
+.product-filters{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.product-filters input,.product-filters select{padding:8px 12px;border-radius:var(--radius-md);border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none}
+.product-filters input:focus,.product-filters select:focus{border:var(--border-hover)}
+.search-input{width:200px;padding:8px 12px;border-radius:var(--radius-md);border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none}
+.search-input:focus{border:var(--border-hover);width:240px}
+
+/* Projects */
+.project-card{background:var(--bg-card);backdrop-filter:blur(16px);border-radius:var(--radius-lg);border:var(--border);padding:20px 24px;cursor:pointer;transition:all var(--transition-base)}
+.project-card:hover{background:var(--bg-card-hover);border:var(--border-hover);transform:translateY(-2px);box-shadow:var(--shadow-drag)}
+.project-card h4{font-size:15px;font-weight:600;margin-bottom:8px}
+.project-card .meta{font-size:12px;color:var(--text-muted);margin-bottom:12px}
+.progress-bar{height:6px;border-radius:3px;background:var(--bg-glass);overflow:hidden;margin:8px 0}
+.progress-fill{height:100%;border-radius:3px;background:var(--accent-gradient);transition:width 0.6s ease}
+
+/* Design */
+.file-card{background:var(--bg-card);backdrop-filter:blur(16px);border-radius:var(--radius-lg);border:var(--border);padding:20px;cursor:pointer;transition:all var(--transition-base);text-align:center}
+.file-card:hover{background:var(--bg-card-hover);border:var(--border-hover);transform:translateY(-2px)}
+.file-icon{font-size:36px;margin-bottom:12px;display:block}
+.file-card h4{font-size:14px;font-weight:600}
+.file-card .meta{font-size:11px;color:var(--text-muted);margin-top:4px}
+
+/* Lifecycle timeline */
+.timeline{position:relative;padding:0;list-style:none}
+.timeline::before{content:'';position:absolute;left:16px;top:0;bottom:0;width:2px;background:var(--accent-glow)}
+.timeline-item{position:relative;padding:0 0 24px 44px}
+.timeline-item:last-child{padding-bottom:0}
+.timeline-dot{position:absolute;left:10px;top:2px;width:14px;height:14px;border-radius:50%;border:2px solid var(--accent);background:var(--bg-primary)}
+.timeline-item.done .timeline-dot{background:var(--success);border-color:var(--success);box-shadow:0 0 8px var(--success)}
+.timeline-item.active .timeline-dot{background:var(--accent);border-color:var(--accent);box-shadow:0 0 12px var(--accent-glow);animation:pulse 2s infinite}
+.timeline-item h4{font-size:14px;font-weight:600;margin-bottom:2px}
+.timeline-item .meta{font-size:12px;color:var(--text-muted)}
+@keyframes pulse{0%,100%{box-shadow:0 0 8px var(--accent-glow)}50%{box-shadow:0 0 20px var(--accent-glow)}}
+
+/* Firmware version list */
+.version-item{display:flex;align-items:center;gap:16px;padding:14px 0;border-bottom:var(--border)}
+.version-item:last-child{border-bottom:none}
+.version-tag{font-family:monospace;font-size:13px;font-weight:700;padding:4px 10px;border-radius:6px;background:var(--accent-glow);color:var(--accent)}
+.version-meta{flex:1}
+.version-meta .vname{font-size:14px;font-weight:600}
+.version-meta .vdetail{font-size:12px;color:var(--text-muted);margin-top:2px}
+.version-stats{display:flex;gap:16px;font-size:12px;color:var(--text-muted)}
+.version-stats span{display:flex;align-items:center;gap:4px}
+
+/* Admin panels */
+.admin-section{margin-bottom:24px}
+.admin-section h3{font-size:15px;font-weight:600;margin-bottom:12px;padding-bottom:8px;border-bottom:var(--border)}
+.admin-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:var(--border)}
+.admin-row:last-child{border-bottom:none}
+.admin-label{font-size:13px}
+.admin-desc{font-size:12px;color:var(--text-muted)}
+.toggle-switch{width:40px;height:22px;border-radius:11px;border:none;cursor:pointer;position:relative;transition:background var(--transition-fast);flex-shrink:0}
+.toggle-switch.on{background:var(--accent)}
+.toggle-switch.off{background:var(--text-muted)}
+.toggle-switch::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform var(--transition-fast);box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle-switch.on::after{transform:translateX(18px)}
+
+/* Overlay */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.4);z-index:150;opacity:0;pointer-events:none;transition:opacity var(--transition-base)}
+.overlay.show{opacity:1;pointer-events:auto}
+.modules-panel{position:fixed;right:-360px;top:0;bottom:0;width:340px;background:var(--bg-card);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-left:var(--border);z-index:200;padding:24px;transition:right var(--transition-base);box-shadow:-8px 0 32px rgba(0,0,0,0.2)}
+.modules-panel.open{right:0}
+.modules-panel h2{font-size:16px;font-weight:600;margin-bottom:20px}
+.module-manager-item{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:var(--border)}
+.module-manager-item:last-child{border-bottom:none}
+.module-toggle{width:40px;height:22px;border-radius:11px;border:none;cursor:pointer;position:relative;transition:background var(--transition-fast);flex-shrink:0}
+.module-toggle.on{background:var(--accent)}
+.module-toggle.off{background:var(--text-muted)}
+.module-toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform var(--transition-fast);box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.module-toggle.on::after{transform:translateX(18px)}
+.module-name{flex:1;font-size:13px;font-weight:500}
+.action-bar{display:flex;gap:8px;margin-bottom:16px;justify-content:flex-end}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN OVERLAY ═══════════════ -->
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-box">
+    <div class="logo">A</div>
+    <h1>安纳瑞 PDM</h1>
+    <p>产品开发生命周期管理系统</p>
+    <div class="form-group">
+      <label>用户名</label>
+      <input id="loginUser" placeholder="输入用户名" autocomplete="off" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <div class="form-group">
+      <label>密码</label>
+      <input id="loginPass" type="password" placeholder="输入密码" onkeydown="if(event.key==='Enter')doLogin()" />
+    </div>
+    <button class="login-btn" onclick="doLogin()">登 录</button>
+    <div class="login-error" id="loginError"></div>
+    <div class="login-footer">
+      还没有账号？<a onclick="showRegister()">立即注册</a>
+    </div>
+    <div class="test-accounts">
+      <div class="test-accounts-title">🔑 测试账号</div>
+      <div class="test-account" onclick="fillLogin('admin','123456')"><span>admin</span><span>系统管理员</span></div>
+      <div class="test-account" onclick="fillLogin('sunyue','123456')"><span>sunyue</span><span>产品经理</span></div>
+      <div class="test-account" onclick="fillLogin('Bryan','123456')"><span>Bryan</span><span>研发工程师</span></div>
+      <div class="test-account" onclick="fillLogin('kerry','123456')"><span>kerry</span><span>CEO</span></div>
+      <div class="test-account" onclick="fillLogin('dylan','123456')"><span>dylan</span><span>技术总监</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ REGISTER MODAL ═══════════════ -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal" style="width:420px">
+    <button class="modal-close" onclick="closeRegister()">✕</button>
+    <h3>注册新账号</h3>
+    <div class="form-group"><label>用户名 *</label><input id="regUser" placeholder="字母数字组合" /></div>
+    <div class="form-group"><label>密码 *</label><input id="regPass" type="password" placeholder="至少6位" /></div>
+    <div class="form-group"><label>确认密码 *</label><input id="regPass2" type="password" placeholder="再次输入密码" /></div>
+    <div class="form-group"><label>姓名</label><input id="regName" placeholder="真实姓名" /></div>
+    <div class="form-group"><label>角色</label>
+      <select id="regRole"><option value="产品经理">产品经理</option><option value="项目经理">项目经理</option><option value="研发工程师">研发工程师</option><option value="硬件工程师">硬件工程师</option><option value="认证工程师">认证工程师</option></select>
+    </div>
+    <div class="form-group"><label>邮箱</label><input id="regEmail" placeholder="email@annarui.com" /></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-ghost" onclick="closeRegister()">取消</button>
+      <button class="btn btn-primary" onclick="doRegister()">提交注册</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ SIDEBAR ═══════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-logo" title="安纳瑞 PDM">A</div>
+  <div class="sidebar-nav">
+    <button class="sidebar-btn active" data-page="dashboard" title="工作台">📊</button>
+    <button class="sidebar-btn" data-page="products" title="产品管理">📦</button>
+    <button class="sidebar-btn" data-page="projects" title="项目管理">📋</button>
+    <button class="sidebar-btn" data-page="design" title="设计协同">🎨</button>
+    <button class="sidebar-btn" data-page="suppliers" title="供应商">🤝</button>
+    <button class="sidebar-btn" data-page="lifecycle" title="生命周期">🔄</button>
+    <button class="sidebar-btn" data-page="firmware" title="固件管理"><span>⚡</span><span class="badge"></span></button>
+    <button class="sidebar-btn" data-page="analytics" title="数据分析">📈</button>
+    <button class="sidebar-btn" data-page="certifications" title="认证管理">🛡️</button>
+    <button class="sidebar-btn" data-page="admin" title="系统管理">⚙️</button>
+  </div>
+  <button class="sidebar-btn" data-page="settings" title="个人设置" style="margin-top:auto;">👤</button>
+</nav>
+
+<!-- ═══════════════ HEADER ═══════════════ -->
+<div class="main">
+  <header class="header">
+    <div class="header-left">
+      <h1 id="pageTitle">工作台</h1>
+      <span class="header-badge">v3.0</span>
+    </div>
+    <div class="header-right">
+      <input class="header-search" type="text" placeholder="搜索产品、项目、文件..." />
+      <div class="theme-switcher">
+        <button class="theme-btn active" data-theme-value="deep-space">🌌 Deep</button>
+        <button class="theme-btn" data-theme-value="moonlight">🌙 Moon</button>
+        <button class="theme-btn" data-theme-value="cyber">⚡ Cyber</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span id="headerUser" style="font-size:13px;color:var(--text-secondary);font-weight:500;display:none"></span>
+        <button class="btn btn-ghost btn-sm" id="logoutBtn" style="display:none" onclick="doLogout()">🚪 退出</button>
+      </div>
+    </div>
+  </header>
+
+<!-- ═══════════════ PAGE: DASHBOARD ═══════════════ -->
+<div class="page active" id="page-dashboard">
+  <div class="stats-row">
+    <div class="stat-card" onclick="navigateTo('products')">
+      <div class="stat-card-icon" style="background:rgba(59,130,246,0.12);color:#60A5FA">📦</div>
+      <div class="label">活跃产品</div><div class="value">18</div>
+    </div>
+    <div class="stat-card" onclick="navigateTo('projects')">
+      <div class="stat-card-icon" style="background:rgba(34,197,94,0.12);color:#4ADE80">📋</div>
+      <div class="label">活跃项目</div><div class="value">12</div>
+    </div>
+    <div class="stat-card" onclick="navigateTo('projects')">
+      <div class="stat-card-icon" style="background:rgba(245,158,11,0.12);color:#FBBF24">⏳</div>
+      <div class="label">待处理任务</div><div class="value">47</div>
+    </div>
+    <div class="stat-card" onclick="navigateTo('analytics')">
+      <div class="stat-card-icon" style="background:rgba(99,102,241,0.12);color:#818CF8">📈</div>
+      <div class="label">完成率</div>
+      <div class="value">76<small style="font-size:14px;font-weight:400">%</small></div>
+    </div>
+  </div>
+  <div class="action-bar">
+    <button class="btn btn-ghost" onclick="saveLayout()">💾 保存布局</button>
+    <button class="btn btn-ghost" onclick="resetLayout()">↺ 重置</button>
+    <button class="btn btn-ghost" onclick="toggleModulesPanel()">☰ 模块管理</button>
+  </div>
+  <div class="dashboard-grid" id="dashboardGrid">
+    <div class="widget" data-id="widget-lifecycle">
+      <div class="widget-header"><span class="drag-handle">⋮⋮</span><h3>产品生命周期分布</h3>
+        <div class="widget-actions"><button class="pin-btn" title="固定">📌</button><button class="hide-btn" title="隐藏">✕</button></div>
+      </div>
+      <div class="widget-content"><div class="chart-container" id="chart-lifecycle"></div></div>
+    </div>
+    <div class="widget" data-id="widget-progress">
+      <div class="widget-header"><span class="drag-handle">⋮⋮</span><h3>项目进度看板</h3>
+        <div class="widget-actions"><button class="pin-btn" title="固定">📌</button><button class="hide-btn" title="隐藏">✕</button></div>
+      </div>
+      <div class="widget-content"><div class="chart-container" id="chart-progress"></div></div>
+    </div>
+    <div class="widget full-width" data-id="widget-activity">
+      <div class="widget-header"><span class="drag-handle">⋮⋮</span><h3>最近动态</h3>
+        <div class="widget-actions"><button class="pin-btn" title="固定">📌</button><button class="hide-btn" title="隐藏">✕</button></div>
+      </div>
+      <div class="widget-content"><ul class="activity-list" id="activityList"></ul></div>
+    </div>
+    <div class="widget full-width" data-id="widget-table">
+      <div class="widget-header"><span class="drag-handle">⋮⋮</span><h3>产品列表</h3>
+        <div class="widget-actions"><button class="pin-btn" title="固定">📌</button><button class="hide-btn" title="隐藏">✕</button></div>
+      </div>
+      <div class="widget-content">
+        <table class="data-table">
+          <thead><tr><th>产品编码</th><th>型号</th><th>类型</th><th>生命周期</th><th>目标市场</th></tr></thead>
+          <tbody id="productTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE: PRODUCTS ═══════════════ -->
+<div class="page" id="page-products">
+  <div class="page-header">
+    <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
+    <div><h2>产品管理</h2><p>管理所有产品型号与生命周期</p></div>
+    <button class="btn btn-primary" onclick="openProductModal()">＋ 新建产品</button>
+  </div>
+  <div class="card">
+    <div class="product-filters">
+      <input class="search-input" placeholder="搜索产品..." oninput="filterProducts()" id="productSearch" />
+      <select onchange="filterProducts()" id="productStatusFilter"><option value="">全部状态</option><option value="in_development">研发中</option><option value="trial_handover">试产移交</option><option value="on_sale">在售</option><option value="discontinued">停产</option><option value="eol">退市</option></select>
+      <select onchange="filterProducts()" id="productTypeFilter"><option value="">全部类型</option><option value="AC Charger">AC Charger</option><option value="DC Charger">DC Charger</option><option value="Portable">Portable</option></select>
+    </div>
+    <table class="data-table">
+      <thead><tr><th>产品编码</th><th>型号</th><th>类型</th><th>目标市场</th><th>生命周期</th><th>操作</th></tr></thead>
+      <tbody id="productsTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE: PROJECTS ═══════════════ -->
+<div class="page" id="page-projects">
+  <div class="page-header">
+    <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
+    <div><h2>项目管理</h2><p>研发项目看板与进度追踪</p></div>
+    <button class="btn btn-primary" onclick="showToast('📋 新建项目表单已打开 (演示)')">＋ 新建项目</button>
+  </div>
+  <div class="grid-3" id="projectGrid"></div>
+</div>
+
+<!-- ═══════════════ PAGE: DESIGN ═══════════════ -->
+<div class="page" id="page-design">
+  <div class="page-header">
+    <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
+    <div><h2>设计协同</h2><p>设计文件版本管理与协同</p></div>
+    <button class="btn btn-primary" onclick="showToast('📤 文件上传对话框已打开 (演示)')">📤 上传文件</button>
+  </div>
+  <div class="grid-3" id="designGrid"></div>
+</div>
+
+<!-- ═══════════════ PAGE: SUPPLIERS ═══════════════ -->
+<div class="page" id="page-suppliers">
+  <div class="page-header">
+    <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
+    <div><h2>供应商管理</h2><p>供应商资质与外协任务跟踪</p></div>
+    <button class="btn btn-primary" onclick="showToast('🤝 新建供应商表单已打开 (演示)')">＋ 新增供应商</button>
+  </div>
+  <div class="card">
+    <table class="data-table">
+      <thead><tr><th>供应商名称</th><th>类型</th><th>联系人</th><th>评级</th><th>准时交付率</th><th>状态</th><th>操作</th></tr></thead>
+      <tbody id="suppliersTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE: LIFECYCLE ═══════════════ -->
+<div class="page" id="page-lifecycle">
+  <div class="page-header">
+    <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
+    <div><h2>生命周期管理</h2><p>产品状态流转与审批记录</p></div>
+    <button class="btn btn-ghost" onclick="showToast('🔄 状态流转申请已提交 (演示)')">提交流转</button>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">📌 当前产品</div>
+    <select onchange="renderLifecycle()" id="lifecycleProduct" style="padding:8px 12px;border-radius:var(--radius-md);border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none;width:240px">
+      <option value="AC-220-EU">AC-220-EU (ARC-7.2kW)</option>
+      <option value="DC-480-US">DC-480-US (DRC-150kW)</option>
+      <option value="PF-3.3-JP">PF-3.3-JP (PFC-3.3kW)</option>
+    </select>
+  </div>
+  <div class="card">
+    <ul class="timeline" id="lifecycleTimeline"></ul>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE: FIRMWARE ═══════════════ -->
+<div class="page" id="page-firmware">
+  <div class="page-header">
+    <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
+    <div><h2>固件管理</h2><p>固件版本发布与 OTA 升级任务</p></div>
+    <button class="btn btn-primary" onclick="showToast('⚡ 新建固件版本表单已打开 (演示)')">⚡ 发布新版本</button>
+  </div>
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title">📦 固件版本列表</div>
+      <div id="firmwareVersionList"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">📊 灰度升级进度</div>
+      <div class="chart-container" id="chart-firmware"></div>
+      <div style="margin-top:12px;text-align:center;font-size:13px;color:var(--text-secondary)">
+        <span style="color:var(--success)">●</span> 成功 1,247 &nbsp;
+        <span style="color:var(--warning)">●</span> 进行中 386 &nbsp;
+        <span style="color:var(--error)">●</span> 失败 23
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE: ANALYTICS ═══════════════ -->
+<div class="page" id="page-analytics">
+  <div class="page-header">
+    <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
+    <div><h2>数据分析</h2><p>产品开发全链路数据洞察</p></div>
+    <select onchange="showToast('📊 切换时间段: ' + this.value)" style="padding:8px 12px;border-radius:var(--radius-md);border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none">
+      <option value="本月">本月</option><option value="本季度">本季度</option><option value="本年">本年</option>
+    </select>
+  </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title">📈 产品开发趋势</div><div class="chart-container" id="chart-analytics-trend"></div></div>
+    <div class="card"><div class="card-title">🥧 产品类型分布</div><div class="chart-container" id="chart-analytics-pie"></div></div>
+    <div class="card"><div class="card-title">📊 任务完成统计</div><div class="chart-container" id="chart-analytics-task"></div></div>
+    <div class="card"><div class="card-title">⚠️ 技术问题分布</div><div class="chart-container" id="chart-analytics-issue"></div></div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE: CERTIFICATIONS ═══════════════ -->
+<div class="page" id="page-certifications">
+  <div class="page-header">
+    <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
+    <div><h2>认证管理</h2><p>产品认证证书跟踪与到期提醒</p></div>
+    <button class="btn btn-primary" onclick="showToast('🛡️ 新建认证记录表单已打开 (演示)')">＋ 新增认证</button>
+  </div>
+  <div class="card">
+    <table class="data-table">
+      <thead><tr><th>产品</th><th>认证类型</th><th>证书编号</th><th>颁发机构</th><th>颁发日期</th><th>到期日期</th><th>状态</th><th>操作</th></tr></thead>
+      <tbody id="certsTableBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE: ADMIN ═══════════════ -->
+<div class="page" id="page-admin">
+  <div class="page-header">
+    <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
+    <div><h2>系统管理</h2><p>用户管理、审计日志与系统配置</p></div>
+  </div>
+  <div class="grid-2">
+    <div class="card admin-section">
+      <h3>👥 用户管理</h3>
+      <div id="userList"></div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="showToast('👤 邀请用户表单已打开 (演示)')">＋ 邀请用户</button>
+    </div>
+    <div class="card admin-section">
+      <h3>⚙️ 系统配置</h3>
+      <div class="admin-row"><div><div class="admin-label">飞书集成</div><div class="admin-desc">与飞书审批、日历、消息同步</div></div><button class="toggle-switch on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button></div>
+      <div class="admin-row"><div><div class="admin-label">邮件通知</div><div class="admin-desc">认证到期、任务分配自动通知</div></div><button class="toggle-switch on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button></div>
+      <div class="admin-row"><div><div class="admin-label">自动备份</div><div class="admin-desc">每日凌晨 3:00 自动备份数据库</div></div><button class="toggle-switch on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button></div>
+      <div class="admin-row"><div><div class="admin-label">灰度升级默认值</div><div class="admin-desc">新固件任务默认灰度比例 30%</div></div><button class="toggle-switch off" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button></div>
+    </div>
+    <div class="card admin-section">
+      <h3>📋 审计日志</h3>
+      <div id="auditLogList"></div>
+    </div>
+    <div class="card admin-section">
+      <h3>📋 注册审核 <span id="pendingBadge" style="display:none;background:var(--error);color:#fff;padding:1px 8px;border-radius:10px;font-size:11px;margin-left:8px">0</span></h3>
+      <div id="pendingUsers"></div>
+      <p style="font-size:12px;color:var(--text-muted);margin-top:8px">新注册用户需要管理员审核后方可登录</p>
+    </div>
+    <div class="card admin-section">
+      <h3>🔌 集成服务</h3>
+      <div class="admin-row"><div><div class="admin-label">MinIO 对象存储</div><div class="admin-desc">设计文件、固件包存储</div></div><span style="font-size:12px;color:var(--success)">● 运行中</span></div>
+      <div class="admin-row"><div><div class="admin-label">Redis 缓存</div><div class="admin-desc">会话与任务队列</div></div><span style="font-size:12px;color:var(--success)">● 运行中</span></div>
+      <div class="admin-row"><div><div class="admin-label">PostgreSQL</div><div class="admin-desc">主数据库</div></div><span style="font-size:12px;color:var(--success)">● 运行中</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ PAGE: SETTINGS ═══════════════ -->
+<div class="page" id="page-settings">
+  <div class="page-header">
+    <button class="back-btn" onclick="navigateTo('dashboard')">← 工作台</button>
+    <div><h2>个人设置</h2><p>账户信息与偏好配置</p></div>
+    <button class="btn btn-ghost" onclick="saveSettings()">💾 保存设置</button>
+  </div>
+  <div class="card" style="margin-bottom:16px">
+    <div class="card-title">👤 个人信息</div>
+    <div style="display:flex;gap:24px;align-items:center;margin-bottom:20px">
+      <div style="width:64px;height:64px;border-radius:16px;background:var(--accent-gradient);display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;font-weight:700">张</div>
+      <div><div style="font-size:17px;font-weight:600">张明远</div><div style="font-size:13px;color:var(--text-secondary)">产品经理 · zhangmy@annarui.com</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="form-group"><label>姓名</label><input value="张明远" /></div>
+      <div class="form-group"><label>邮箱</label><input value="zhangmy@annarui.com" /></div>
+      <div class="form-group"><label>角色</label><input value="产品经理" /></div>
+      <div class="form-group"><label>电话</label><input value="+86 138-0000-0000" /></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🎨 界面偏好</div>
+    <div class="admin-row">
+      <div><div class="admin-label">语言</div><div class="admin-desc">界面显示语言</div></div>
+      <select style="padding:6px 10px;border-radius:6px;border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none"><option>中文 (简体)</option><option>English</option></select>
+    </div>
+    <div class="admin-row">
+      <div><div class="admin-label">侧边栏模式</div><div class="admin-desc">图标模式 / 完整模式</div></div>
+      <select style="padding:6px 10px;border-radius:6px;border:var(--border);background:var(--bg-glass);color:var(--text-primary);font-size:13px;outline:none"><option>图标模式</option><option>完整模式</option></select>
+    </div>
+    <div class="admin-row">
+      <div><div class="admin-label">通知偏好</div><div class="admin-desc">接收飞书消息通知</div></div>
+      <button class="toggle-switch on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button>
+    </div>
+    <div class="admin-row">
+      <div><div class="admin-label">每周摘要</div><div class="admin-desc">每周一发送项目进展摘要</div></div>
+      <button class="toggle-switch on" onclick="this.classList.toggle('on');this.classList.toggle('off')"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL ═══════════════ -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeProductModal()">✕</button>
+    <h3>新建产品</h3>
+    <div class="form-group"><label>产品型号 *</label><input id="modalModel" placeholder="例如 ARC-7.2kW" /></div>
+    <div class="form-group"><label>产品名称 *</label><input id="modalName" placeholder="例如 7.2kW AC 充电桩" /></div>
+    <div class="form-group"><label>产品编码</label><input id="modalCode" placeholder="例如 AC-220-EU" /></div>
+    <div class="form-group"><label>产品类型</label>
+      <select id="modalType"><option value="AC Charger">AC Charger</option><option value="DC Charger">DC Charger</option><option value="Portable">Portable</option></select>
+    </div>
+    <div class="form-group"><label>目标市场</label>
+      <select id="modalMarket"><option value="EU">EU</option><option value="US">US</option><option value="CN">CN</option><option value="JP">JP</option></select>
+    </div>
+    <div class="form-group"><label>产品描述</label><textarea id="modalDesc" placeholder="产品描述信息..."></textarea></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px">
+      <button class="btn btn-ghost" onclick="closeProductModal()">取消</button>
+      <button class="btn btn-primary" onclick="submitProduct()">创建产品</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODULE PANEL ═══════════════ -->
+<div class="overlay" id="overlay" onclick="toggleModulesPanel()"></div>
+<div class="modules-panel" id="modulesPanel">
+  <button class="btn btn-icon" onclick="toggleModulesPanel()" style="position:absolute;top:16px;right:16px">✕</button>
+  <h2>模块管理</h2>
+  <div id="moduleList"></div>
+  <p style="margin-top:24px;font-size:12px;color:var(--text-muted)">💡 拖拽卡片可自由排列顺序<br>关闭的模块不会显示在面板上</p>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════════════
+const PRODUCTS = [
+  { code:'AC-220-EU', model:'ARC-7.2kW', type:'AC Charger', status:'on_sale', market:'EU' },
+  { code:'DC-480-US', model:'DRC-150kW', type:'DC Charger', status:'trial_handover', market:'US' },
+  { code:'PF-3.3-JP', model:'PFC-3.3kW', type:'Portable', status:'in_development', market:'JP' },
+  { code:'AC-740-CN', model:'ARC-22kW', type:'AC Charger', status:'on_sale', market:'CN' },
+  { code:'DC-350-EU', model:'DRC-350kW', type:'DC Charger', status:'in_development', market:'EU' },
+  { code:'PF-7.4-US', model:'PFC-7.4kW', type:'Portable', status:'discontinued', market:'US' },
+  { code:'DC-600-CN', model:'DRC-600kW', type:'DC Charger', status:'in_development', market:'CN' },
+  { code:'AC-110-JP', model:'ARC-3.3kW', type:'AC Charger', status:'on_sale', market:'JP' },
+];
+const PROJECTS = [
+  { id:1, name:'DRC-150kW 超充桩研发', product:'DRC-150kW', status:'in_progress', progress:75, deadline:'2026-08', tasks:{total:24,done:18}, priority:'high' },
+  { id:2, name:'ARC-22kW 欧标升级', product:'ARC-22kW', status:'in_progress', progress:45, deadline:'2026-10', tasks:{total:16,done:7}, priority:'medium' },
+  { id:3, name:'PFC-3.3kW 便携产品', product:'PFC-3.3kW', status:'in_progress', progress:30, deadline:'2026-12', tasks:{total:20,done:6}, priority:'medium' },
+  { id:4, name:'ARC-7.2kW 美国认证', product:'ARC-7.2kW', status:'pending_approval', progress:100, deadline:'2026-07', tasks:{total:8,done:8}, priority:'high' },
+  { id:5, name:'DRC-350kW 兆瓦级充电', product:'DRC-350kW', status:'pending_approval', progress:10, deadline:'2027-03', tasks:{total:32,done:3}, priority:'low' },
+  { id:6, name:'ARC-3.3kW 日本市场', product:'ARC-3.3kW', status:'completed', progress:100, deadline:'2026-05', tasks:{total:12,done:12}, priority:'low' },
+];
+const DESIGN_FILES = [
+  { name:'ARC-7.2kW 外壳 v3', type:'STEP', version:3, author:'李工', updated:'2026-06-10', icon:'📐' },
+  { name:'DRC-150kW 电气图', type:'PDF', version:5, author:'王工', updated:'2026-06-08', icon:'📄' },
+  { name:'PFC-3.3kW PCB 布局', type:'IGS', version:2, author:'陈工', updated:'2026-06-05', icon:'🔌' },
+  { name:'ARC-22kW 散热仿真', type:'STL', version:1, author:'李工', updated:'2026-06-03', icon:'🧊' },
+  { name:'DRC-350kW 结构图', type:'DXF', version:1, author:'张工', updated:'2026-05-28', icon:'📐' },
+  { name:'PF-7.4kW 包装设计', type:'STEP', version:2, author:'王工', updated:'2026-05-20', icon:'📦' },
+];
+const SUPPLIERS = [
+  { name:'兴达电子', type:'design', contact:'陈经理', rating:4.8, delivery:97, status:'active' },
+  { name:'鸿达精密', type:'module_dev', contact:'李经理', rating:4.5, delivery:92, status:'active' },
+  { name:'华创科技', type:'design', contact:'王经理', rating:4.2, delivery:85, status:'active' },
+  { name:'锐科电源', type:'module_dev', contact:'张经理', rating:3.8, delivery:78, status:'suspended' },
+  { name:'博力电气', type:'design', contact:'刘经理', rating:4.6, delivery:95, status:'active' },
+];
+const FIRMWARE_VERSIONS = [
+  { version:'v2.4.1', model:'ARC-7.2kW', type:'full', released:'2026-06-12', success:1247, total:1656, status:'active' },
+  { version:'v1.8.3', model:'DRC-150kW', type:'incremental', released:'2026-06-01', success:892, total:1020, status:'active' },
+  { version:'v3.0.0', model:'ARC-22kW', type:'full', released:'2026-05-20', success:445, total:500, status:'active' },
+  { version:'v1.2.0', model:'PFC-3.3kW', type:'full', released:'2026-04-15', success:210, total:220, status:'rollback' },
+  { version:'v2.3.0', model:'ARC-7.2kW', type:'incremental', released:'2026-03-28', success:1560, total:1600, status:'superseded' },
+];
+const CERTS = [
+  { product:'AC-220-EU', type:'CE', number:'CE-2026-0421', issuer:'TÜV Rheinland', issued:'2026-01-15', expiry:'2029-01-15', status:'valid' },
+  { product:'AC-220-EU', type:'UKCA', number:'UK-2026-0312', issuer:'BSI', issued:'2026-02-01', expiry:'2029-02-01', status:'valid' },
+  { product:'DC-480-US', type:'FCC', number:'FCC-2025-1108', issuer:'FCC', issued:'2025-11-08', expiry:'2026-07-08', status:'expiring_soon' },
+  { product:'DC-480-US', type:'UL', number:'UL-2026-0110', issuer:'UL LLC', issued:'2026-01-10', expiry:'2029-01-10', status:'valid' },
+  { product:'PF-3.3-JP', type:'PSE', number:'PSE-2026-0203', issuer:'JET', issued:'2026-02-03', expiry:'2029-02-03', status:'valid' },
+  { product:'AC-740-CN', type:'CCC', number:'CCC-2025-0601', issuer:'CQC', issued:'2025-06-01', expiry:'2026-06-01', status:'expired' },
+  { product:'PF-7.4-US', type:'FCC', number:'FCC-2025-0508', issuer:'FCC', issued:'2025-05-08', expiry:'2028-05-08', status:'valid' },
+];
+const USERS = [
+  { name:'李明', role:'硬件工程师', email:'lim@annarui.com', status:'在线' },
+  { name:'王芳', role:'嵌入式工程师', email:'wangf@annarui.com', status:'在线' },
+  { name:'陈强', role:'项目经理', email:'chenq@annarui.com', status:'离线' },
+  { name:'张明远', role:'产品经理', email:'zhangmy@annarui.com', status:'在线' },
+  { name:'刘洋', role:'认证工程师', email:'liuy@annarui.com', status:'忙碌' },
+];
+const AUDIT_LOGS = [
+  { user:'张明远', action:'提交生命周期流转', target:'AC-220-EU', time:'10:32 2026-06-14' },
+  { user:'王芳', action:'上传设计文件', target:'DRC-150kW v5', time:'09:15 2026-06-14' },
+  { user:'陈强', action:'更新项目状态', target:'ARC-22kW 欧标升级', time:'17:20 2026-06-13' },
+  { user:'系统', action:'自动备份完成', target:'数据库', time:'03:00 2026-06-13' },
+  { user:'李工', action:'审批通过', target:'ARC-7.2kW 外壳 v3', time:'14:30 2026-06-12' },
+];
+const ACTIVITIES = [
+  { text:'产品 AC-220-EU 通过 CE 认证', time:'2 分钟前', type:'success' },
+  { text:'项目 DRC-150kW 研发阶段评审通过', time:'15 分钟前', type:'success' },
+  { text:'固件 v2.4.1 灰度升级完成 (87%)', time:'1 小时前', type:'info' },
+  { text:'供应商 兴达电子 评级更新为 A 级', time:'2 小时前', type:'info' },
+  { text:'DC-350-EU 项目延期风险 — 进度滞后 2 周', time:'3 小时前', type:'warning' },
+  { text:'ARC-22kW 试产报告提交，待审批', time:'5 小时前', type:'warning' },
+  { text:'PF-3.3-JP 设计文件 v3 上传 (STEP/IGS)', time:'6 小时前', type:'info' },
+  { text:'FCC 认证即将到期 — DRC-150kW (7 天)', time:'1 天前', type:'error' },
+];
+const STATUS_TAG = {
+  in_development:{c:'tag-blue',l:'研发中'}, trial_handover:{c:'tag-yellow',l:'试产移交'},
+  on_sale:{c:'tag-green',l:'在售'}, discontinued:{c:'tag-red',l:'停产'}, eol:{c:'tag-gray',l:'退市'}
+};
+
+// ═══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════════
+const PAGE_TITLES = {
+  dashboard:'工作台', products:'产品管理', projects:'项目管理', design:'设计协同',
+  suppliers:'供应商管理', lifecycle:'生命周期管理', firmware:'固件管理',
+  analytics:'数据分析', certifications:'认证管理', admin:'系统管理', settings:'个人设置'
+};
+
+document.querySelectorAll('.sidebar-btn[data-page]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const page = btn.dataset.page;
+    navigateTo(page);
+  });
+});
+
+function navigateTo(page) {
+  document.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.sidebar-btn[data-page="${page}"]`).classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById(`page-${page}`);
+  if (el) { el.classList.add('active'); }
+  document.getElementById('pageTitle').textContent = PAGE_TITLES[page] || page;
+
+  // Init page-specific content on first visit
+  if (page === 'projects') renderProjects();
+  if (page === 'design') renderDesignFiles();
+  if (page === 'suppliers') renderSuppliers();
+  if (page === 'firmware') { renderFirmware(); initFirmwareChart(); }
+  if (page === 'analytics') { initAnalyticsCharts(); }
+  if (page === 'certifications') renderCerts();
+  if (page === 'admin') renderAdmin();
+  if (page === 'lifecycle') renderLifecycle();
+  if (page === 'products') renderProductsTable();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD (preserved from original)
+// ═══════════════════════════════════════════════════════════════
+function populateDashboard() {
+  document.getElementById('productTableBody').innerHTML = PRODUCTS.map(p => {
+    const t = STATUS_TAG[p.status]||{c:'tag-gray',l:p.status};
+    return `<tr><td><strong>${p.code}</strong></td><td>${p.model}</td><td>${p.type}</td><td><span class="tag ${t.c}">${t.l}</span></td><td>${p.market}</td></tr>`;
+  }).join('');
+  document.getElementById('activityList').innerHTML = ACTIVITIES.map(a =>
+    `<li class="activity-item"><span class="activity-dot ${a.type}"></span><span class="activity-text">${a.text}</span><span class="activity-time">${a.time}</span></li>`
+  ).join('');
+}
+// Dashboard drag & drop, pin, hide, module panel
+let sortableInstance = null;
+const WIDGET_CONFIGS = [
+  {id:'widget-lifecycle',title:'产品生命周期分布',visible:true,pinned:false},
+  {id:'widget-progress',title:'项目进度看板',visible:true,pinned:false},
+  {id:'widget-activity',title:'最近动态',visible:true,pinned:false},
+  {id:'widget-table',title:'产品列表',visible:true,pinned:false},
+];
+let widgetStates = [];
+const STATE_KEY = 'pdm_dashboard_layout';
+
+function loadState() {
+  try {
+    const s = localStorage.getItem(STATE_KEY);
+    if(s){widgetStates=JSON.parse(s);applyWidgetStates();return}
+  }catch(e){}
+  widgetStates=WIDGET_CONFIGS.map(c=>({...c}));
+}
+function saveState() {
+  const grid=document.getElementById('dashboardGrid');
+  const order=Array.from(grid.querySelectorAll('.widget')).map(el=>el.dataset.id);
+  widgetStates.forEach(s=>{
+    const t=document.querySelector(`[data-module-id="${s.id}"]`);
+    if(t)s.visible=t.classList.contains('on');
+    const w=grid.querySelector(`[data-id="${s.id}"]`);
+    if(w){const p=w.querySelector('.pin-btn');s.pinned=p.classList.contains('pinned')}
+  });
+  const ordered=order.map(id=>widgetStates.find(s=>s.id===id)).filter(Boolean);
+  const missing=widgetStates.filter(s=>!order.includes(s.id));
+  widgetStates=[...ordered,...missing];
+  localStorage.setItem(STATE_KEY,JSON.stringify(widgetStates));
+}
+function applyWidgetStates(){
+  const grid=document.getElementById('dashboardGrid');
+  widgetStates.forEach(s=>{
+    const el=grid.querySelector(`[data-id="${s.id}"]`);
+    if(!el)return;el.style.display=s.visible?'':'none';
+    const p=el.querySelector('.pin-btn');
+    if(s.pinned)p.classList.add('pinned');else p.classList.remove('pinned');
+  });
+}
+function saveLayout(){saveState();showToast('💾 布局已保存')}
+function resetLayout(){
+  widgetStates=WIDGET_CONFIGS.map(c=>({...c}));localStorage.removeItem(STATE_KEY);
+  const grid=document.getElementById('dashboardGrid');
+  ['widget-lifecycle','widget-progress','widget-activity','widget-table'].forEach(id=>{
+    const el=grid.querySelector(`[data-id="${id}"]`);if(el)grid.appendChild(el);
+  });
+  applyWidgetStates();initDashboardCharts();showToast('↺ 布局已重置');
+}
+function toggleModulesPanel(){
+  document.getElementById('modulesPanel').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('show');
+  renderModulesPanel();
+}
+function renderModulesPanel(){
+  const list=document.getElementById('moduleList');
+  list.innerHTML=widgetStates.map(s=>`
+    <div class="module-manager-item">
+      <button class="module-toggle ${s.visible?'on':'off'}" data-module-id="${s.id}" onclick="this.classList.toggle('on');this.classList.toggle('off');saveState()"></button>
+      <span class="module-name">${s.title}</span>
+      <span style="font-size:11px;color:var(--text-muted)">${s.pinned?'📌':'⋮⋮'}</span>
+    </div>`).join('');
+}
+
+document.addEventListener('click',e=>{
+  const p=e.target.closest('.pin-btn');
+  if(p){p.classList.toggle('pinned');saveState();return}
+  const h=e.target.closest('.hide-btn');
+  if(h){const w=h.closest('.widget'),id=w.dataset.id,s=widgetStates.find(x=>x.id===id);if(s){s.visible=false;w.style.display='none';saveState();renderModulesPanel()}}
+});
+
+function initSortable(){
+  if(sortableInstance)sortableInstance.destroy();
+  sortableInstance=new Sortable(document.getElementById('dashboardGrid'),{
+    animation:300,easing:'cubic-bezier(0.4,0,0.2,1)',handle:'.widget-header',draggable:'.widget',
+    ghostClass:'sortable-ghost',chosenClass:'sortable-chosen',delay:100,delayOnTouchOnly:true,
+    onEnd:()=>saveState()
+  });
+}
+
+function getThemeColors(){
+  const s=getComputedStyle(document.documentElement);
+  return{accent:s.getPropertyValue('--accent').trim(),grid:s.getPropertyValue('--chart-grid').trim(),text:s.getPropertyValue('--chart-text').trim(),success:s.getPropertyValue('--success').trim(),warning:s.getPropertyValue('--warning').trim(),error:s.getPropertyValue('--error').trim(),info:s.getPropertyValue('--info').trim()};
+}
+function initDashboardCharts(){
+  const c=getThemeColors();
+  makePie('chart-lifecycle',[
+    {v:5,n:'研发中',c:'#60A5FA'},{v:3,n:'试产移交',c:'#FBBF24'},{v:7,n:'在售',c:'#4ADE80'},{v:2,n:'停产',c:'#F87171'},{v:1,n:'退市',c:'#94A3B8'}
+  ],c);
+  makeBar('chart-progress',['ARC-7.2kW','DRC-150kW','PFC-3.3kW','ARC-22kW','DRC-350kW'],[{v:100,c:c.success},{v:75,c:c.accent},{v:30,c:'#60A5FA'},{v:100,c:c.success},{v:15,c:c.warning}],c);
+}
+function makePie(id,data,colors){
+  const el=document.getElementById(id);if(!el)return;
+  const ch=echarts.getInstanceByDom(el)||echarts.init(el);
+  ch.setOption({tooltip:{trigger:'item'},legend:{bottom:0,textStyle:{color:colors.text,fontSize:11}},
+    series:[{type:'pie',radius:['45%','70%'],avoidLabelOverlap:true,itemStyle:{borderRadius:4,borderColor:'var(--bg-primary)',borderWidth:2},label:{show:false},
+      emphasis:{label:{show:true,fontSize:14,fontWeight:'bold'},itemStyle:{shadowBlur:10,shadowColor:colors.accent+'40'}},
+      data:data.map(d=>({value:d.v,name:d.n,itemStyle:{color:d.c}}))}]});
+}
+function makeBar(id,xData,data,colors){
+  const el=document.getElementById(id);if(!el)return;
+  const ch=echarts.getInstanceByDom(el)||echarts.init(el);
+  ch.setOption({tooltip:{trigger:'axis'},grid:{left:'8%',right:'8%',bottom:'18%',top:'10%'},
+    xAxis:{type:'category',data:xData,axisLabel:{color:colors.text,fontSize:10,rotate:20},axisLine:{lineStyle:{color:colors.grid}}},
+    yAxis:{type:'value',max:100,axisLabel:{color:colors.text,fontSize:10,formatter:'{value}%'},splitLine:{lineStyle:{color:colors.grid,type:'dashed'}}},
+    series:[{type:'bar',barWidth:'40%',itemStyle:{borderRadius:[4,4,0,0],color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:colors.accent},{offset:1,color:colors.accent+'60'}]}},
+      data:data.map(d=>typeof d.v==='number'?{value:d.v,itemStyle:d.c?{color:d.c}:undefined}:d)}]});
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PRODUCTS PAGE
+// ═══════════════════════════════════════════════════════════════
+function renderProductsTable() {
+  const tb = document.getElementById('productsTableBody');
+  const search = (document.getElementById('productSearch')?.value||'').toLowerCase();
+  const sf = document.getElementById('productStatusFilter')?.value||'';
+  const tf = document.getElementById('productTypeFilter')?.value||'';
+  const filtered = PRODUCTS.filter(p => {
+    if (search && !p.code.toLowerCase().includes(search) && !p.model.toLowerCase().includes(search)) return false;
+    if (sf && p.status !== sf) return false;
+    if (tf && p.type !== tf) return false;
+    return true;
+  });
+  tb.innerHTML = filtered.map(p => {
+    const t = STATUS_TAG[p.status]||{c:'tag-gray',l:p.status};
+    return `<tr>
+      <td><strong>${p.code}</strong></td><td>${p.model}</td><td>${p.type}</td><td>${p.market}</td>
+      <td><span class="tag ${t.c}">${t.l}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="showToast('📋 打开产品 ${p.code} 详情 (演示)')">查看</button>
+      <button class="btn btn-ghost btn-sm" onclick="showToast('✏️ 编辑产品 ${p.code} (演示)')">编辑</button></td>
+    </tr>`;
+  }).join('');
+}
+function filterProducts() {
+  renderProductsTable();
+}
+
+// Product modal
+function openProductModal() { document.getElementById('productModal').classList.add('show'); }
+function closeProductModal() { document.getElementById('productModal').classList.remove('show'); }
+function submitProduct() {
+  const model = document.getElementById('modalModel').value.trim();
+  if (!model) { showToast('⚠️ 请填写产品型号'); return; }
+  showToast(`✅ 产品 "${model}" 已创建成功 (演示)`);
+  closeProductModal();
+  document.getElementById('modalModel').value='';
+  document.getElementById('modalName').value='';
+  document.getElementById('modalCode').value='';
+}
+// Close modal on overlay click
+document.getElementById('productModal').addEventListener('click', function(e) {
+  if (e.target === this) closeProductModal();
+});
+
+// ═══════════════════════════════════════════════════════════════
+// PROJECTS PAGE
+// ═══════════════════════════════════════════════════════════════
+function renderProjects() {
+  const grid = document.getElementById('projectGrid');
+  grid.innerHTML = PROJECTS.map(p => {
+    const pct = p.progress;
+    const statusColor = p.status === 'completed' ? 'tag-green' : p.status === 'in_progress' ? 'tag-blue' : p.status === 'pending_approval' ? 'tag-yellow' : 'tag-gray';
+    const statusLabel = p.status === 'completed' ? '已完成' : p.status === 'in_progress' ? '进行中' : p.status === 'pending_approval' ? '待审批' : p.status;
+    const priorityIcon = p.priority === 'high' ? '🔴' : p.priority === 'medium' ? '🟡' : '🟢';
+    return `<div class="project-card" onclick="showToast('📋 打开项目「${p.name}」详情 (演示)')">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h4>${p.name}</h4>
+        <span class="tag ${statusColor}">${statusLabel}</span>
+      </div>
+      <div class="meta">${priorityIcon} ${p.product} · 截止 ${p.deadline}</div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary)">
+        <span>进度 ${pct}%</span>
+        <span>任务 ${p.tasks.done}/${p.tasks.total}</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showToast('📋 查看任务列表 (演示)')">任务</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showToast('📝 更新项目状态 (演示)')">更新</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DESIGN PAGE
+// ═══════════════════════════════════════════════════════════════
+function renderDesignFiles() {
+  const grid = document.getElementById('designGrid');
+  grid.innerHTML = DESIGN_FILES.map(f => `
+    <div class="file-card" onclick="showToast('📂 打开文件「${f.name}」预览 (演示)')">
+      <span class="file-icon">${f.icon}</span>
+      <h4>${f.name}</h4>
+      <div class="meta">${f.icon === '📄' ? 'PDF' : f.type} · v${f.version} · ${f.author}</div>
+      <div class="meta" style="margin-top:2px">${f.updated}</div>
+      <div style="display:flex;gap:4px;justify-content:center;margin-top:10px">
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showToast('📥 下载 ${f.name} (演示)')">下载</button>
+        <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showToast('📋 查看版本历史 (演示)')">历史</button>
+      </div>
+    </div>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SUPPLIERS PAGE
+// ═══════════════════════════════════════════════════════════════
+function renderSuppliers() {
+  const tb = document.getElementById('suppliersTableBody');
+  tb.innerHTML = SUPPLIERS.map(s => {
+    const sc = s.status === 'active' ? 'tag-green' : 'tag-red';
+    const sl = s.status === 'active' ? '合作中' : '暂停合作';
+    const tt = s.type === 'design' ? '设计供应商' : '模组开发商';
+    return `<tr>
+      <td><strong>${s.name}</strong></td><td>${tt}</td><td>${s.contact}</td>
+      <td><span style="color:var(--success)">★</span> ${s.rating}</td>
+      <td>${s.delivery}%</td>
+      <td><span class="tag ${sc}">${sl}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="showToast('📋 查看 ${s.name} 详情 (演示)')">查看</button>
+      <button class="btn btn-ghost btn-sm" onclick="showToast('📤 发起外协任务 (演示)')">外协</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LIFECYCLE PAGE
+// ═══════════════════════════════════════════════════════════════
+const LIFECYCLE_DATA = {
+  'AC-220-EU': [
+    { stage:'需求评审', date:'2026-01-15', status:'done' },
+    { stage:'方案设计', date:'2026-02-20', status:'done' },
+    { stage:'详细设计', date:'2026-03-10', status:'done' },
+    { stage:'样机试制', date:'2026-04-01', status:'done' },
+    { stage:'设计验证', date:'2026-04-25', status:'done' },
+    { stage:'小批试产', date:'2026-05-15', status:'done' },
+    { stage:'认证测试', date:'2026-06-01', status:'done' },
+    { stage:'量产发布', date:'2026-07-01', status:'active' },
+  ],
+  'DC-480-US': [
+    { stage:'需求评审', date:'2026-02-01', status:'done' },
+    { stage:'方案设计', date:'2026-03-10', status:'done' },
+    { stage:'详细设计', date:'2026-04-15', status:'done' },
+    { stage:'样机试制', date:'2026-05-01', status:'done' },
+    { stage:'设计验证', date:'2026-06-01', status:'active' },
+    { stage:'小批试产', date:'2026-07-15', status:'pending' },
+    { stage:'认证测试', date:'2026-09-01', status:'pending' },
+    { stage:'量产发布', date:'2026-10-01', status:'pending' },
+  ],
+  'PF-3.3-JP': [
+    { stage:'需求评审', date:'2026-03-01', status:'done' },
+    { stage:'方案设计', date:'2026-04-01', status:'done' },
+    { stage:'详细设计', date:'2026-05-10', status:'active' },
+    { stage:'样机试制', date:'2026-06-15', status:'pending' },
+    { stage:'设计验证', date:'2026-07-20', status:'pending' },
+    { stage:'小批试产', date:'2026-09-01', status:'pending' },
+    { stage:'认证测试', date:'2026-10-15', status:'pending' },
+    { stage:'量产发布', date:'2026-12-01', status:'pending' },
+  ],
+};
+function renderLifecycle() {
+  const sel = document.getElementById('lifecycleProduct');
+  const code = sel.value;
+  const stages = LIFECYCLE_DATA[code] || LIFECYCLE_DATA['AC-220-EU'];
+  const timeline = document.getElementById('lifecycleTimeline');
+  timeline.innerHTML = stages.map(s => `
+    <li class="timeline-item ${s.status}">
+      <span class="timeline-dot"></span>
+      <h4>${s.stage}</h4>
+      <div class="meta">${s.date} ${s.status === 'done' ? '✅ 已完成' : s.status === 'active' ? '🔄 进行中' : '⏳ 待开始'}</div>
+    </li>`).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FIRMWARE PAGE
+// ═══════════════════════════════════════════════════════════════
+function renderFirmware() {
+  const list = document.getElementById('firmwareVersionList');
+  list.innerHTML = FIRMWARE_VERSIONS.map(f => {
+    const sc = f.status === 'active' ? 'tag-green' : f.status === 'rollback' ? 'tag-red' : 'tag-gray';
+    const sl = f.status === 'active' ? '当前' : f.status === 'rollback' ? '已回滚' : '已取代';
+    return `<div class="version-item">
+      <span class="version-tag">${f.version}</span>
+      <div class="version-meta">
+        <div class="vname">${f.model} <span class="tag ${sc}" style="margin-left:8px">${sl}</span></div>
+        <div class="vdetail">${f.type === 'full' ? '完整包' : '增量包'} · 发布: ${f.released}</div>
+      </div>
+      <div class="version-stats">
+        <span>✅ ${f.success}</span>
+        <span>📊 ${f.total}</span>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();showToast('⚡ 创建灰度升级任务 (演示)')">灰度</button>
+    </div>`;
+  }).join('');
+}
+function initFirmwareChart() {
+  const c = getThemeColors();
+  makePie('chart-firmware',[
+    {v:1247,n:'成功',c:c.success},{v:386,n:'进行中',c:c.warning},{v:23,n:'失败',c:c.error}
+  ],c);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ANALYTICS PAGE
+// ═══════════════════════════════════════════════════════════════
+function initAnalyticsCharts() {
+  const c = getThemeColors();
+  // Trend line chart
+  const tEl = document.getElementById('chart-analytics-trend');
+  if(tEl){
+    const tCh = echarts.getInstanceByDom(tEl)||echarts.init(tEl);
+    tCh.setOption({tooltip:{trigger:'axis'},grid:{left:'10%',right:'8%',bottom:'15%'},
+      xAxis:{type:'category',data:['1月','2月','3月','4月','5月','6月'],axisLabel:{color:c.text,fontSize:10},axisLine:{lineStyle:{color:c.grid}}},
+      yAxis:{type:'value',axisLabel:{color:c.text,fontSize:10},splitLine:{lineStyle:{color:c.grid,type:'dashed'}}},
+      series:[{type:'line',smooth:true,data:[12,15,18,22,26,30],lineStyle:{color:c.accent,width:3},areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:c.accent+'40'},{offset:1,color:c.accent+'00'}]}},symbol:'circle',symbolSize:6}]});
+  }
+  // Pie type distribution
+  makePie('chart-analytics-pie',[
+    {v:45,n:'AC Charger',c:c.accent},{v:35,n:'DC Charger',c:c.info},{v:20,n:'Portable',c:c.success}
+  ],c);
+  // Task stats bar
+  makeBar('chart-analytics-task',['待开始','进行中','已完成','已阻塞'],[
+    {v:47,c:c.warning},{v:38,c:c.accent},{v:156,c:c.success},{v:12,c:c.error}
+  ],c);
+  // Issue distribution
+  makePie('chart-analytics-issue',[
+    {v:5,n:'严重',c:c.error},{v:18,n:'主要',c:c.warning},{v:42,n:'次要',c:c.accent}
+  ],c);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CERTIFICATIONS PAGE
+// ═══════════════════════════════════════════════════════════════
+function renderCerts() {
+  const tb = document.getElementById('certsTableBody');
+  tb.innerHTML = CERTS.map(c => {
+    const sc = c.status === 'valid' ? 'tag-green' : c.status === 'expiring_soon' ? 'tag-yellow' : 'tag-red';
+    const sl = c.status === 'valid' ? '有效' : c.status === 'expiring_soon' ? '即将到期' : '已过期';
+    return `<tr>
+      <td><strong>${c.product}</strong></td><td><span class="tag tag-cyan">${c.type}</span></td>
+      <td style="font-family:monospace;font-size:12px">${c.number}</td><td>${c.issuer}</td>
+      <td>${c.issued}</td><td>${c.expiry}</td>
+      <td><span class="tag ${sc}">${sl}</span></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="showToast('📄 查看证书文件 (演示)')">查看</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ADMIN PAGE
+// ═══════════════════════════════════════════════════════════════
+function renderAdmin() {
+  // Users
+  const ul = document.getElementById('userList');
+  ul.innerHTML = USERS.map(u => {
+    const sc = u.status === '在线' ? 'tag-green' : u.status === '忙碌' ? 'tag-yellow' : 'tag-gray';
+    return `<div class="admin-row">
+      <div>
+        <div class="admin-label">${u.name} <span class="tag ${sc}" style="margin-left:8px">${u.status}</span></div>
+        <div class="admin-desc">${u.role} · ${u.email}</div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="showToast('✏️ 编辑用户 ${u.name} (演示)')">编辑</button>
+    </div>`;
+  }).join('');
+  // Audit logs
+  const al = document.getElementById('auditLogList');
+  al.innerHTML = AUDIT_LOGS.map(l =>
+    `<div class="admin-row">
+      <div>
+        <div class="admin-label">${l.user} · ${l.action}</div>
+        <div class="admin-desc">${l.target} · ${l.time}</div>
+      </div>
+    </div>`
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════════════════════
+function initTheme() {
+  const saved = localStorage.getItem('pdm_dashboard_theme') || 'deep-space';
+  document.documentElement.setAttribute('data-theme', saved);
+  document.querySelectorAll('.theme-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.themeValue === saved);
+  });
+}
+document.querySelectorAll('.theme-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const t = btn.dataset.themeValue;
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('pdm_dashboard_theme', t);
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    // Re-init all visible charts
+    if (document.getElementById('page-dashboard').classList.contains('active')) initDashboardCharts();
+    if (document.getElementById('page-analytics').classList.contains('active')) initAnalyticsCharts();
+    if (document.getElementById('page-firmware').classList.contains('active')) initFirmwareChart();
+  });
+});
+const themeObserver = new MutationObserver(() => {
+  if (document.getElementById('page-dashboard').classList.contains('active')) initDashboardCharts();
+});
+themeObserver.observe(document.documentElement, {attributes:true, attributeFilter:['data-theme']});
+
+// ═══════════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════════
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; }, 2000);
+  setTimeout(() => t.remove(), 2500);
+}
+
+function saveSettings() {
+  const name = document.querySelector('#page-settings input')?.value || '';
+  const email = document.querySelectorAll('#page-settings input')[1]?.value || '';
+  showToast('✅ 设置已保存: ' + name + ' · ' + email);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// AUTH SYSTEM — Login / Register / Approve / Logout
+// ═══════════════════════════════════════════════════════════════
+
+const DEFAULT_USERS = [
+  { user:'admin', pass:'123456', name:'系统管理员', role:'系统管理员', email:'admin@annarui.com', status:'approved' },
+  { user:'sunyue', pass:'123456', name:'孙越', role:'产品经理', email:'sunyue@annarui.com', status:'approved' },
+  { user:'Bryan', pass:'123456', name:'Bryan', role:'研发工程师', email:'bryan@annarui.com', status:'approved' },
+  { user:'kerry', pass:'123456', name:'Kerry', role:'CEO', email:'kerry@annarui.com', status:'approved' },
+  { user:'dylan', pass:'123456', name:'Dylan', role:'技术总监', email:'dylan@annarui.com', status:'approved' },
+];
+
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem('pdm_users')) || DEFAULT_USERS; }
+  catch(e) { return DEFAULT_USERS; }
+}
+
+function saveUsers(users) {
+  localStorage.setItem('pdm_users', JSON.stringify(users));
+}
+
+// Init users on first visit
+if (!localStorage.getItem('pdm_users')) {
+  saveUsers(DEFAULT_USERS);
+  localStorage.setItem('pdm_users_init', '1');
+}
+
+function getCurrentUser() {
+  try { return JSON.parse(localStorage.getItem('pdm_current_user')); }
+  catch(e) { return null; }
+}
+
+function fillLogin(user, pass) {
+  document.getElementById('loginUser').value = user;
+  document.getElementById('loginPass').value = pass;
+  document.getElementById('loginError').textContent = '';
+}
+
+function doLogin() {
+  const user = document.getElementById('loginUser').value.trim();
+  const pass = document.getElementById('loginPass').value.trim();
+  const err = document.getElementById('loginError');
+
+  if (!user || !pass) { err.textContent = '⚠️ 请输入用户名和密码'; return; }
+
+  const users = getUsers();
+  const found = users.find(u => u.user === user && u.pass === pass);
+
+  if (!found) { err.textContent = '❌ 用户名或密码错误'; return; }
+  if (found.status !== 'approved') { err.textContent = '⏳ 账号待审核，请等待管理员批准'; return; }
+
+  err.textContent = '';
+  localStorage.setItem('pdm_current_user', JSON.stringify(found));
+  document.getElementById('loginOverlay').classList.add('hidden');
+  document.getElementById('headerUser').textContent = '👤 ' + found.name + ' · ' + found.role;
+  document.getElementById('headerUser').style.display = '';
+  document.getElementById('logoutBtn').style.display = '';
+  showToast('✅ 欢迎回来，' + found.name);
+}
+
+function showRegister() {
+  document.getElementById('registerModal').classList.add('show');
+}
+function closeRegister() {
+  document.getElementById('registerModal').classList.remove('show');
+}
+document.getElementById('registerModal')?.addEventListener('click', function(e) {
+  if (e.target === this) closeRegister();
+});
+
+function doRegister() {
+  const user = document.getElementById('regUser').value.trim();
+  const pass = document.getElementById('regPass').value;
+  const pass2 = document.getElementById('regPass2').value;
+  const name = document.getElementById('regName').value.trim();
+  const role = document.getElementById('regRole').value;
+  const email = document.getElementById('regEmail').value.trim();
+
+  if (!user || !pass || !name) { showToast('⚠️ 请填写必填项'); return; }
+  if (pass.length < 6) { showToast('⚠️ 密码至少6位'); return; }
+  if (pass !== pass2) { showToast('⚠️ 两次密码不一致'); return; }
+
+  const users = getUsers();
+  if (users.find(u => u.user === user)) { showToast('⚠️ 用户名已存在'); return; }
+
+  users.push({ user, pass, name, role, email, status:'pending' });
+  saveUsers(users);
+  closeRegister();
+  document.getElementById('regUser').value = '';
+  document.getElementById('regPass').value = '';
+  document.getElementById('regPass2').value = '';
+  document.getElementById('regName').value = '';
+  document.getElementById('regEmail').value = '';
+  showToast('📋 注册成功！请等待管理员审核');
+}
+
+function doLogout() {
+  localStorage.removeItem('pdm_current_user');
+  document.getElementById('loginOverlay').classList.remove('hidden');
+  document.getElementById('headerUser').style.display = 'none';
+  document.getElementById('logoutBtn').style.display = 'none';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginError').textContent = '';
+}
+
+function renderPendingUsers() {
+  const el = document.getElementById('pendingUsers');
+  const users = getUsers();
+  const pending = users.filter(u => u.status === 'pending');
+  const badge = document.getElementById('pendingBadge');
+
+  if (badge) {
+    if (pending.length > 0) {
+      badge.style.display = 'inline';
+      badge.textContent = pending.length;
+    } else {
+      badge.style.display = 'none';
+    }
+  }
+
+  if (!el) return;
+  if (pending.length === 0) {
+    el.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:8px 0">✅ 暂无待审核用户</div>';
+    return;
+  }
+
+  el.innerHTML = pending.map(u => `
+    <div class="admin-row">
+      <div>
+        <div class="admin-label">${u.name || u.user} <span style="font-size:11px;color:var(--text-muted)">@${u.user}</span></div>
+        <div class="admin-desc">${u.role} · ${u.email || '无邮箱'}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-primary btn-sm" onclick="approveUser('${u.user}')">批准</button>
+        <button class="btn btn-ghost btn-sm" onclick="rejectUser('${u.user}')">拒绝</button>
+      </div>
+    </div>`).join('');
+}
+
+function approveUser(username) {
+  const users = getUsers();
+  const idx = users.findIndex(u => u.user === username);
+  if (idx === -1) return;
+  users[idx].status = 'approved';
+  saveUsers(users);
+  renderPendingUsers();
+  showToast('✅ 已批准用户: ' + username);
+}
+
+function rejectUser(username) {
+  const users = getUsers();
+  const idx = users.findIndex(u => u.user === username);
+  if (idx === -1) return;
+  users.splice(idx, 1);
+  saveUsers(users);
+  renderPendingUsers();
+  showToast('🗑️ 已拒绝用户: ' + username);
+}
+
+// Update the renderAdmin to also render pending users
+const origRenderAdmin = renderAdmin;
+renderAdmin = function() {
+  if (origRenderAdmin) origRenderAdmin();
+  renderPendingUsers();
+};
+
+// Check auth on page load
+function checkAuth() {
+  const user = getCurrentUser();
+  if (user) {
+    document.getElementById('loginOverlay').classList.add('hidden');
+    document.getElementById('headerUser').textContent = '👤 ' + user.name + ' · ' + user.role;
+    document.getElementById('headerUser').style.display = '';
+    document.getElementById('logoutBtn').style.display = '';
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  checkAuth();
+  initTheme();
+  loadState();
+  populateDashboard();
+  initDashboardCharts();
+  initSortable();
+  renderModulesPanel();
+});
+if (document.readyState !== 'loading') {
+  setTimeout(() => {
+    checkAuth();
+    initTheme();
+    loadState();
+    populateDashboard();
+    initDashboardCharts();
+    initSortable();
+    renderModulesPanel();
+  }, 0);
+}
+</script>
+</body>
+</html>

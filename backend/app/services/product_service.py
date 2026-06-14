@@ -3,6 +3,7 @@ from typing import Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.event_bus import Topics, event_bus
+from app.core.exceptions import BadRequestError, NotFoundError
 from app.core.utils import update_entity_attrs
 from app.middleware.audit import AuditLogger
 from app.models.product import LifecycleChangeLog, Product
@@ -60,7 +61,7 @@ class ProductService:
     async def update_product(self, product_id: str, data: dict, updated_by: str | None = None) -> Product:
         product = await self.product_repo.get_by_id(product_id)
         if not product:
-            raise ValueError("Product not found")
+            raise NotFoundError("Product not found")
         old_values = {"name": product.name, "model": product.model, "lifecycle_status": product.lifecycle_status}
         update_entity_attrs(product, data)
         product = await self.product_repo.update(product)
@@ -71,11 +72,11 @@ class ProductService:
     async def transition_lifecycle(self, product_id: str, to_status: str, changed_by: str, reason: str | None = None) -> tuple[Product, LifecycleChangeLog]:
         product = await self.product_repo.get_by_id(product_id)
         if not product:
-            raise ValueError("Product not found")
+            raise NotFoundError("Product not found")
 
         valid_next = self.VALID_TRANSITIONS.get(product.lifecycle_status, [])
         if to_status not in valid_next:
-            raise ValueError(
+            raise BadRequestError(
                 f"Invalid transition: {product.lifecycle_status} -> {to_status}. "
                 f"Allowed: {valid_next}"
             )

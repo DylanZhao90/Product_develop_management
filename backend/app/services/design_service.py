@@ -1,5 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import NotFoundError
 from app.core.minio_client import get_file_url, upload_file
 from app.core.utils import update_entity_attrs
 from app.middleware.audit import AuditLogger
@@ -71,7 +72,7 @@ class DesignService:
     async def update_design_file(self, file_id: str, data: dict, updated_by: str | None = None) -> DesignFile:
         design_file = await self.repo.get_by_id(file_id)
         if not design_file:
-            raise ValueError("Design file not found")
+            raise NotFoundError("Design file not found")
         old_values = {"file_name": design_file.file_name, "is_current": design_file.is_current}
         update_entity_attrs(design_file, data)
         design_file = await self.repo.update(design_file)

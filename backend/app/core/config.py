@@ -35,7 +35,11 @@ class Settings(BaseSettings):
     feishu_redirect_uri: str = "http://localhost:5173/auth/callback"
 
     # CORS
-    cors_origins: list[str] = ["http://localhost:5173", "http://localhost:3000"]
+    cors_origins: list[str] = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://pdm.anariev.com",
+    ]
 
     # JWT
     jwt_algorithm: str = "HS256"

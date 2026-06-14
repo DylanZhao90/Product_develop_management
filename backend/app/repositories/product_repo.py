@@ -1,7 +1,7 @@
-import uuid
+import uuid as uuid_lib
 from typing import Sequence
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.product import LifecycleChangeLog, Product
@@ -48,7 +48,13 @@ class ProductRepository(BaseRepository[Product]):
         return result.scalars().all(), total
 
     async def generate_code(self, product_type: str | None = None) -> str:
-        """Generate unique product code like AC-2026-0001. Retries once on collision."""
+        """Generate unique product code like AC-2026-0001.
+
+        Uses PostgreSQL advisory lock to prevent race conditions during
+        concurrent code generation. Falls back to UUID suffix on collision.
+        """
+        from datetime import datetime
+
         prefix = "PD"
         if product_type == "ac_charger":
             prefix = "AC"
@@ -56,21 +62,26 @@ class ProductRepository(BaseRepository[Product]):
             prefix = "DC"
         elif product_type == "portable":
             prefix = "PT"
-        year = "2026"
+        year = str(datetime.now().year)
+
+        # Use PostgreSQL advisory lock to serialise code generation
+        lock_id = hash(f"product_code_{prefix}_{year}") % (2**31)
+        await self.db.execute(text("SELECT pg_advisory_xact_lock(:id)"), {"id": lock_id})
+
+        result = await self.db.execute(
+            select(func.count(Product.id)).where(Product.code.like(f"{prefix}-{year}-%"))
+        )
+        count = result.scalar() or 0
 
         for _ in range(2):
-            result = await self.db.execute(
-                select(func.count(Product.id)).where(Product.code.like(f"{prefix}-{year}-%"))
-            )
-            count = result.scalar() or 0
             code = f"{prefix}-{year}-{count + 1:04d}"
-            # Check uniqueness — avoid race condition
             existing = await self.db.execute(select(Product.id).where(Product.code == code))
             if not existing.scalar_one_or_none():
                 return code
+            count += 1
+
         # Fallback with UUID suffix on double collision (extremely unlikely)
-        import uuid
-        return f"{prefix}-{year}-{uuid.uuid4().hex[:4].upper()}"
+        return f"{prefix}-{year}-{uuid_lib.uuid4().hex[:4].upper()}"
 
 
 class LifecycleChangeLogRepository(BaseRepository[LifecycleChangeLog]):

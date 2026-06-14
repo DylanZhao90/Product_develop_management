@@ -3,6 +3,7 @@ import hashlib
 from fastapi import UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import BadRequestError, NotFoundError
 from app.core.minio_client import get_file_url, upload_file
 from app.core.utils import update_entity_attrs
 from app.middleware.audit import AuditLogger
@@ -48,13 +49,13 @@ class FirmwareService:
         release_type: str, created_by: str,
     ) -> FirmwareVersion:
         if file.size and file.size > MAX_FIRMWARE_SIZE:
-            raise ValueError(
+            raise BadRequestError(
                 f"Firmware file too large: {file.size} bytes exceeds limit of {MAX_FIRMWARE_SIZE} bytes"
             )
 
         content = await file.read()
         if len(content) > MAX_FIRMWARE_SIZE:
-            raise ValueError(
+            raise BadRequestError(
                 f"Firmware file too large: {len(content)} bytes exceeds limit of {MAX_FIRMWARE_SIZE} bytes"
             )
 
@@ -138,7 +139,7 @@ class FirmwareService:
     async def update_upgrade_task(self, task_id: str, data: dict, updated_by: str | None = None) -> FirmwareUpgradeTask:
         task = await self.task_repo.get_by_id(task_id)
         if not task:
-            raise ValueError("Upgrade task not found")
+            raise NotFoundError("Upgrade task not found")
         old_values = {"status": task.status, "gray_scale_percent": task.gray_scale_percent}
         update_entity_attrs(task, data)
         task = await self.task_repo.update(task)
@@ -149,7 +150,7 @@ class FirmwareService:
     async def cancel_upgrade_task(self, task_id: str, cancelled_by: str | None = None) -> FirmwareUpgradeTask:
         task = await self.task_repo.get_by_id(task_id)
         if not task:
-            raise ValueError("Upgrade task not found")
+            raise NotFoundError("Upgrade task not found")
         old_status = task.status
         task.status = "failed"
         task = await self.task_repo.update(task)

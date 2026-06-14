@@ -1,6 +1,7 @@
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.exceptions import NotFoundError
 from app.core.utils import update_entity_attrs
 from app.middleware.audit import AuditLog, AuditLogger
 from app.models.user import User
@@ -40,7 +41,7 @@ class AdminService:
     async def update_user(self, user_id: str, data: dict, updated_by: str | None = None) -> User:
         user = await self.user_repo.get_by_id(user_id)
         if not user:
-            raise ValueError("User not found")
+            raise NotFoundError("User not found")
         old_values = {"name": user.name, "role": user.role, "is_active": user.is_active}
         update_entity_attrs(user, data)
         await self.db.flush()

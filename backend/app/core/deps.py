@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -18,12 +18,25 @@ DBSessionDep = Annotated[AsyncSession, Depends(get_db)]
 async def get_current_user(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(security_scheme)],
     db: DBSessionDep,
+    request: Request | None = None,
 ) -> User:
-    """Extract and validate the current user from JWT token."""
-    if credentials is None:
+    """Extract and validate the current user from JWT token.
+
+    Token sources (checked in order):
+    1. Authorization header (Bearer token) — API clients
+    2. httpOnly cookie (access_token) — browser SPA
+    """
+    token: str | None = None
+
+    if credentials is not None:
+        token = credentials.credentials
+    elif request is not None:
+        token = request.cookies.get("access_token")
+
+    if token is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
-    payload = verify_token(credentials.credentials)
+    payload = verify_token(token)
     if payload is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
 

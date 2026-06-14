@@ -1,5 +1,6 @@
 """Authentication service with Feishu SSO integration."""
 
+from app.core.exceptions import ForbiddenError, NotFoundError
 from app.core.security import create_access_token, create_refresh_token
 from app.middleware.audit import AuditLogger
 from app.models.user import User
@@ -36,7 +37,7 @@ class AuthService:
             await AuditLogger.log(self.db, user_id=str(user.id), action="user.register", resource_type="user", resource_id=str(user.id), new_value={"name": user.name, "role": "engineer", "source": "feishu_sso"})
 
         if not user.is_active:
-            raise ValueError("User account is deactivated")
+            raise ForbiddenError("User account is deactivated")
 
         access_token = create_access_token(subject=str(user.id))
         refresh_token = create_refresh_token(subject=str(user.id))
@@ -59,7 +60,7 @@ class AuthService:
     async def get_current_user_info(self, user_id: str) -> dict:
         user = await self.user_repo.get_by_id(user_id)
         if not user:
-            raise ValueError("User not found")
+            raise NotFoundError("User not found")
         return {
             "id": str(user.id),
             "feishu_open_id": user.feishu_open_id,
