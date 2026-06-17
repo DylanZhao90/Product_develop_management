@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { analyticsApi } from "../../services/api";
 import { useLocale } from "../../locales";
 import { useEChartsColors } from "../../theme/echartsTheme";
-import ReactECharts from "echarts-for-react";
+import ReactEChartsCore from "echarts-for-react/lib/core";
 import * as echarts from "echarts/core";
 import { BarChart, LineChart, PieChart } from "echarts/charts";
 import {
@@ -159,7 +159,9 @@ function LifecycleSankey({ flows, totalProducts, ec }: { flows: LifecycleAnalyti
     }],
   }), [flows, totalProducts, t]);
   return (
-    <ReactECharts echarts={echarts} option={option} style={{ height: "100%", width: "100%" }} />
+    <ReactEChartsCore echarts={echarts} option={option}
+      onChartReady={(chart: { resize: () => void }) => setTimeout(() => chart.resize(), 0)}
+    />
   );
 }
 
@@ -263,7 +265,7 @@ function StageDeepDivePanel({ data, stageKey, ec }: { data: LifecycleAnalyticsDa
                 📈 {t("analytics.monthlyEntries")} Trend
               </div>
               <div className="mini-chart">
-                <ReactECharts
+                <ReactEChartsCore
                   echarts={echarts}
                   option={makeLineOption(entryMonths, [{ name: t("product.status." + stageKey), data: entryCounts, color: meta.color }])}
                   style={{ height: "100%" }}
@@ -278,7 +280,7 @@ function StageDeepDivePanel({ data, stageKey, ec }: { data: LifecycleAnalyticsDa
                 ⏱️ {t("analytics.durationDist")}
               </div>
               <div className="mini-chart">
-                <ReactECharts
+                <ReactEChartsCore
                   echarts={echarts}
                   option={makeBarOption(durRanges, durCounts, meta.color)}
                   style={{ height: "100%" }}
@@ -328,7 +330,7 @@ function getStageSpecificMetrics(
             <div className="chart-card">
               <div className="chart-title-sm">🔧 R&D Resource Allocation</div>
               <div style={{ height: 190 }}>
-                <ReactECharts echarts={echarts} option={makePieOption(rndTypes, [ec.colors[0], ec.colors[6], ec.colors[7], ec.colors[1]])} style={{ height: "100%" }} />
+                <ReactEChartsCore echarts={echarts} option={makePieOption(rndTypes, [ec.colors[0], ec.colors[6], ec.colors[7], ec.colors[1]])} style={{ height: "100%" }} />
               </div>
             </div>
           </Col>
@@ -336,7 +338,7 @@ function getStageSpecificMetrics(
             <div className="chart-card">
               <div className="chart-title-sm">📊 Development Phase Distribution</div>
               <div style={{ height: 190 }}>
-                <ReactECharts echarts={echarts} option={makeBarOption(phases.map((p) => p.name), phases.map((p) => p.value), ec.colors[0])} style={{ height: "100%" }} />
+                <ReactEChartsCore echarts={echarts} option={makeBarOption(phases.map((p) => p.name), phases.map((p) => p.value), ec.colors[0])} style={{ height: "100%" }} />
               </div>
             </div>
           </Col>
@@ -363,7 +365,7 @@ function getStageSpecificMetrics(
             <div className="chart-card">
               <div className="chart-title-sm">✅ Handover Outcome Distribution</div>
               <div style={{ height: 190 }}>
-                <ReactECharts echarts={echarts} option={makePieOption(handoverTypes, [ec.colors[1], ec.colors[2], ec.colors[3]])} style={{ height: "100%" }} />
+                <ReactEChartsCore echarts={echarts} option={makePieOption(handoverTypes, [ec.colors[1], ec.colors[2], ec.colors[3]])} style={{ height: "100%" }} />
               </div>
             </div>
           </Col>
@@ -371,7 +373,7 @@ function getStageSpecificMetrics(
             <div className="chart-card">
               <div className="chart-title-sm">🏭 Department Handover Distribution</div>
               <div style={{ height: 190 }}>
-                <ReactECharts echarts={echarts} option={makeBarOption(handoverByDept.map((h) => h.name), handoverByDept.map((h) => h.value), ec.colors[2])} style={{ height: "100%" }} />
+                <ReactEChartsCore echarts={echarts} option={makeBarOption(handoverByDept.map((h) => h.name), handoverByDept.map((h) => h.value), ec.colors[2])} style={{ height: "100%" }} />
               </div>
             </div>
           </Col>
@@ -398,7 +400,7 @@ function getStageSpecificMetrics(
               <div className="chart-title-sm">🌍 Market Distribution</div>
               <div style={{ height: 190 }}>
                 {marketPie.length > 0 ? (
-                  <ReactECharts echarts={echarts} option={makePieOption(marketPie, [ec.colors[0], ec.colors[1], ec.colors[6], ec.colors[7], ec.colors[8]])} style={{ height: "100%" }} />
+                  <ReactEChartsCore echarts={echarts} option={makePieOption(marketPie, [ec.colors[0], ec.colors[1], ec.colors[6], ec.colors[7], ec.colors[8]])} style={{ height: "100%" }} />
                 ) : (
                   <div className="chart-empty"><Typography.Text type="secondary">{marketPie.length === 0 ? "No market data" : "Loading..."}</Typography.Text></div>
                 )}
@@ -409,7 +411,7 @@ function getStageSpecificMetrics(
             <div className="chart-card">
               <div className="chart-title-sm">🔌 Product Type Distribution</div>
               <div style={{ height: 190 }}>
-                <ReactECharts echarts={echarts} option={makeBarOption(typeData.map((t) => t.name), typeData.map((t) => t.value), ec.colors[0])} style={{ height: "100%" }} />
+                <ReactEChartsCore echarts={echarts} option={makeBarOption(typeData.map((t) => t.name), typeData.map((t) => t.value), ec.colors[0])} style={{ height: "100%" }} />
               </div>
             </div>
           </Col>
@@ -435,7 +437,7 @@ function getStageSpecificMetrics(
             <div className="chart-card">
               <div className="chart-title-sm">⛔ Discontinuation Reasons</div>
               <div style={{ height: 190 }}>
-                <ReactECharts echarts={echarts} option={makePieOption(reasons, [ec.colors[3], ec.colors[2], ec.colors[0], ec.colors[6], ec.colors[7]])} style={{ height: "100%" }} />
+                <ReactEChartsCore echarts={echarts} option={makePieOption(reasons, [ec.colors[3], ec.colors[2], ec.colors[0], ec.colors[6], ec.colors[7]])} style={{ height: "100%" }} />
               </div>
             </div>
           </Col>
@@ -443,7 +445,7 @@ function getStageSpecificMetrics(
             <div className="chart-card">
               <div className="chart-title-sm">🔄 Replacement Tracking</div>
               <div style={{ height: 190 }}>
-                <ReactECharts echarts={echarts} option={makePieOption(replacementStatus, [ec.colors[1], ec.colors[4]])} style={{ height: "100%" }} />
+                <ReactEChartsCore echarts={echarts} option={makePieOption(replacementStatus, [ec.colors[1], ec.colors[4]])} style={{ height: "100%" }} />
               </div>
             </div>
           </Col>
@@ -469,7 +471,7 @@ function getStageSpecificMetrics(
             <div className="chart-card">
               <div className="chart-title-sm">🛟 End-of-Life Support Status</div>
               <div style={{ height: 190 }}>
-                <ReactECharts echarts={echarts} option={makePieOption(supportStatus, [ec.colors[1], ec.colors[2], ec.colors[4]])} style={{ height: "100%" }} />
+                <ReactEChartsCore echarts={echarts} option={makePieOption(supportStatus, [ec.colors[1], ec.colors[2], ec.colors[4]])} style={{ height: "100%" }} />
               </div>
             </div>
           </Col>
@@ -477,7 +479,7 @@ function getStageSpecificMetrics(
             <div className="chart-card">
               <div className="chart-title-sm">📅 Product Lifecycle Span</div>
               <div style={{ height: 190 }}>
-                <ReactECharts echarts={echarts} option={makeBarOption(lifecycleSpan.map((l) => l.name), lifecycleSpan.map((l) => l.value), ec.colors[4])} style={{ height: "100%" }} />
+                <ReactEChartsCore echarts={echarts} option={makeBarOption(lifecycleSpan.map((l) => l.name), lifecycleSpan.map((l) => l.value), ec.colors[4])} style={{ height: "100%" }} />
               </div>
             </div>
           </Col>
