@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   Layout,
@@ -62,11 +62,25 @@ const menuLabelKeys: Record<string, string> = {
 
 export default function MainLayout() {
   const [collapsed, setCollapsed] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuthStore();
   const { language, setLanguage, themeId, setTheme } = useAppStore();
   const { t } = useLocale();
+
+  useEffect(() => {
+    const check = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (mobile) setCollapsed(true);
+    };
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  const toggleSidebar = () => setCollapsed((c) => !c);
 
   const selectedKey = "/" + location.pathname.split("/")[1];
 
@@ -152,18 +166,27 @@ export default function MainLayout() {
         collapsible
         collapsed={collapsed}
         width={232}
-        collapsedWidth={64}
+        collapsedWidth={isMobile ? 0 : 64}
+        breakpoint="lg"
         style={{
           borderRight: "1px solid rgba(255,255,255,0.04)",
+          ...(isMobile && {
+            position: "fixed",
+            zIndex: 1000,
+            height: "100vh",
+            left: collapsed ? -232 : 0,
+            transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+            boxShadow: collapsed ? "none" : "4px 0 24px rgba(0,0,0,0.3)",
+          }),
         }}
       >
         {/* Brand — professional SVG logo */}
         <div className="sidebar-brand">
-          {collapsed ? (
-            <Logo iconSize={28} showText={false} variant="sidebar" />
-          ) : (
-            <Logo iconSize={32} showText={true} variant="sidebar" />
-          )}
+          <Logo
+            iconSize={collapsed ? 28 : 32}
+            showText={!collapsed}
+            variant="sidebar"
+          />
         </div>
 
         {/* Navigation */}
@@ -211,7 +234,7 @@ export default function MainLayout() {
                   <MenuFoldOutlined style={{ fontSize: 16 }} />
                 )
               }
-              onClick={() => setCollapsed(!collapsed)}
+              onClick={toggleSidebar}
               style={{ color: "var(--color-text-secondary)" }}
             />
             <Typography.Text
@@ -278,6 +301,19 @@ export default function MainLayout() {
           </div>
         </Content>
       </Layout>
+
+      {/* Mobile sidebar backdrop */}
+      {isMobile && !collapsed && (
+        <div
+          onClick={() => setCollapsed(true)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(0,0,0,0.4)",
+            zIndex: 999,
+          }}
+        />
+      )}
     </Layout>
   );
 }
