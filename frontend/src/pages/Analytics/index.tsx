@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import { Card, Col, Row, Typography, Statistic } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import { analyticsApi } from "../../services/api";
@@ -113,6 +113,31 @@ function StageStatCard({ status, count, active, onClick }: { status: LifecycleSt
   );
 }
 
+// ── Direct ECharts Sankey render (avoids echarts-for-react sizing issues) ──
+function LifecycleSankeyCanvas({ option }: { option: Record<string, unknown> }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const chartRef = useRef<echarts.ECharts | null>(null);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    if (!chartRef.current) {
+      chartRef.current = echarts.init(ref.current, null, { height: 500 });
+      chartRef.current.setOption(option);
+    } else {
+      chartRef.current.setOption(option);
+    }
+    const onResize = () => chartRef.current?.resize();
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      chartRef.current?.dispose();
+      chartRef.current = null;
+    };
+  }, [option]);
+
+  return <div ref={ref} className="sankey-chart-container" style={{ height: 500 }} />;
+}
+
 // ── Enhanced Sankey with Flow Rates ──
 function LifecycleSankey({ flows, totalProducts, ec }: { flows: LifecycleAnalyticsData["flows"]; totalProducts: number; ec: ReturnType<typeof useEChartsColors> }) {
   const { t } = useLocale();
@@ -159,9 +184,7 @@ function LifecycleSankey({ flows, totalProducts, ec }: { flows: LifecycleAnalyti
     }],
   }), [flows, totalProducts, t]);
   return (
-    <ReactEChartsCore echarts={echarts} option={option} style={{ height: "100%", width: "100%" }}
-      onChartReady={(chart: { resize: () => void }) => setTimeout(() => chart.resize(), 0)}
-    />
+    <LifecycleSankeyCanvas option={option} />
   );
 }
 
