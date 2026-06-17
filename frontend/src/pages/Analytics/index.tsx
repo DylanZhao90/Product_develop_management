@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { Card, Col, Row, Typography, Statistic } from "antd";
 import { useQuery } from "@tanstack/react-query";
 import { analyticsApi } from "../../services/api";
@@ -31,15 +31,6 @@ const STAGE_META: Record<LifecycleStatus, { color: string; icon: string; order: 
 } as const;
 
 const STAGE_ORDER: LifecycleStatus[] = ["in_development", "trial_handover", "on_sale", "discontinued", "eol"];
-
-/** Compute responsive sankey chart height based on viewport width */
-function getSankeyHeight(): number {
-  const w = window.innerWidth;
-  if (w < 480) return 260;
-  if (w < 768) return 320;
-  if (w >= 1200) return 600;
-  return 500;
-}
 
 // ── Reusable chart option makers (labels ALWAYS visible) ──
 
@@ -125,14 +116,6 @@ function StageStatCard({ status, count, active, onClick }: { status: LifecycleSt
 // ── Enhanced Sankey with Flow Rates ──
 function LifecycleSankey({ flows, totalProducts, ec }: { flows: LifecycleAnalyticsData["flows"]; totalProducts: number; ec: ReturnType<typeof useEChartsColors> }) {
   const { t } = useLocale();
-  const [chartH, setChartH] = useState(() => getSankeyHeight());
-
-  useEffect(() => {
-    const onResize = () => setChartH(getSankeyHeight());
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
   const nodes = STAGE_ORDER.map((s) => ({
     name: t("product.status." + s),
     itemStyle: { color: STAGE_META[s].color },
@@ -176,7 +159,7 @@ function LifecycleSankey({ flows, totalProducts, ec }: { flows: LifecycleAnalyti
     }],
   }), [flows, totalProducts, t]);
   return (
-    <ReactEChartsCore echarts={echarts} option={option} style={{ height: chartH + "px", width: "100%" }} />
+    <ReactEChartsCore echarts={echarts} option={option} style={{ height: "500px" }} />
   );
 }
 
