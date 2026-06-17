@@ -176,7 +176,9 @@ function LifecycleSankey({ flows, totalProducts, ec }: { flows: LifecycleAnalyti
     }],
   }), [flows, totalProducts, t]);
   return (
-    <ReactEChartsCore echarts={echarts} option={option} opts={{ height: chartH }} />
+    <ReactEChartsCore echarts={echarts} option={option} style={{ height: chartH, width: "100%" }}
+      onChartReady={(chart: { resize: () => void }) => setTimeout(() => chart.resize(), 100)}
+    />
   );
 }
 
