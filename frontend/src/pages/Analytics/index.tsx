@@ -159,9 +159,7 @@ function LifecycleSankey({ flows, totalProducts, ec }: { flows: LifecycleAnalyti
     }],
   }), [flows, totalProducts, t]);
   return (
-    <div className="sankey-chart-container">
-      <ReactEChartsCore echarts={echarts} option={option} style={{ height: "100%", width: "100%" }} />
-    </div>
+    <ReactEChartsCore echarts={echarts} option={option} style={{ height: "100%", width: "100%" }} />
   );
 }
 
