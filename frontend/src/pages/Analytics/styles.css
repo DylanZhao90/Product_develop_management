@@ -66,18 +66,16 @@
 /* Chart container: fixed tall height so ECharts renders at correct size */
 .sankey-chart-container {
   width: 100%;
-  height: 500px;
 }
 
-.sankey-chart-container > div {
-  width: 100% !important;
-  height: 100% !important;
+.sankey-chart-container .echarts-for-react {
+  height: 500px !important;
 }
 
 /* On larger screens, increase chart height */
 @media (min-width: 1200px) {
-  .sankey-chart-container {
-    height: 600px;
+  .sankey-chart-container .echarts-for-react {
+    height: 600px !important;
   }
 }
 
@@ -270,7 +268,7 @@
   }
 
   /* ── Sankey card: reduce height on mobile ── */
-  .sankey-chart-container {
+  .sankey-chart-container .echarts-for-react {
     height: 320px !important;
   }
   .sankey-card .ant-card-body {
@@ -331,7 +329,7 @@
   }
 
   /* ── Sankey ── */
-  .sankey-chart-container {
+  .sankey-chart-container .echarts-for-react {
     height: 260px !important;
   }
 
