@@ -57,17 +57,33 @@
   background: var(--color-bg-card) !important;
 }
 
-/* Sankey chart fills available space inside the flex card body */
+/* Sankey body: flex column so chart fills remaining space */
+.sankey-body {
+  display: flex;
+  flex-direction: column;
+  min-height: 520px;
+}
+
+/* Sankey chart fills available vertical space inside .sankey-body */
 .sankey-chart-container {
   flex: 1;
-  min-height: 500px;
+  min-height: 0;
   width: 100%;
 }
 
-/* On larger screens, let the sankey card expand vertically */
+.sankey-chart-container > div {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 450px;
+}
+
+/* On larger screens, expand the chart to use more vertical space */
 @media (min-width: 1200px) {
-  .sankey-card {
-    min-height: 640px;
+  .sankey-body {
+    min-height: 680px;
+  }
+  .sankey-chart-container > div {
+    min-height: 580px;
   }
 }
 
@@ -260,11 +276,11 @@
   }
 
   /* ── Sankey card: allow scroll / reduce min-height ── */
-  .sankey-chart-container {
-    min-height: 320px !important;
+  .sankey-body {
+    min-height: 350px !important;
   }
-  .sankey-card .ant-card-body {
-    padding: 14px !important;
+  .sankey-chart-container > div {
+    min-height: 250px !important;
   }
 
   /* ── Flow rate items: wrap properly, reduce size ── */
@@ -321,8 +337,11 @@
   }
 
   /* ── Sankey ── */
-  .sankey-chart-container {
-    min-height: 260px !important;
+  .sankey-body {
+    min-height: 280px !important;
+  }
+  .sankey-chart-container > div {
+    min-height: 180px !important;
   }
 
   /* ── Flow rates: single column ── */

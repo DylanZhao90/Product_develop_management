@@ -555,7 +555,7 @@ export default function Analytics() {
       </div>
 
       {/* ── Row 2: Enhanced Sankey with Flow Rates ── */}
-      <Card className="sankey-card" styles={{ body: { display: "flex", flexDirection: "column", padding: "20px" } }}>
+      <Card className="sankey-card" styles={{ body: { padding: "20px" } }}>
         <div className="stage-card-header" style={{ marginBottom: 16 }}>
           <span className="stage-badge" style={{ background: "linear-gradient(90deg, #3b82f6, #6b7280)", width: 12, height: 12 }} />
           <h3>♻️ {t("analytics.lifecycleFlow")}</h3>
@@ -564,8 +564,10 @@ export default function Analytics() {
           </span>
         </div>
         {lifecycleData.flows.length > 0 ? (
-          <>
-            <LifecycleSankey flows={lifecycleData.flows} totalProducts={lifecycleData.total_products} ec={ec} />
+          <div className="sankey-body">
+            <div className="sankey-chart-container">
+              <LifecycleSankey flows={lifecycleData.flows} totalProducts={lifecycleData.total_products} ec={ec} />
+            </div>
             {/* Flow rate labels row */}
             <Row gutter={[16, 8]} style={{ marginTop: 12, borderTop: "1px solid var(--color-border-light)", paddingTop: 16 }}>
               {lifecycleData.flows.map((f, i) => {
@@ -588,7 +590,7 @@ export default function Analytics() {
                 );
               })}
             </Row>
-          </>
+          </div>
         ) : (
           <Typography.Text type="secondary">{t("analytics.noFlow")}</Typography.Text>
         )}
