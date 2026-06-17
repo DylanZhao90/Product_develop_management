@@ -2,38 +2,84 @@ import type { User, PaginatedResponse } from "../api-types";
 
 const ROLES = ["admin", "pm", "designer", "engineer", "supplier", "cert_specialist", "ops"];
 
+const NAMES = ["张明", "李华", "王芳", "赵强", "陈静", "刘洋", "周磊", "吴婷", "郑鹏", "孙悦"];
+
 function randomRole() {
   return ROLES[Math.floor(Math.random() * ROLES.length)];
 }
 
-function randomDate(daysAgo: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() - Math.floor(Math.random() * daysAgo));
-  return d.toISOString();
+// ── In-memory user store (survives within session) ──
+// Created users are pushed here so add/edit/delete actually persist in mock mode.
+let userStore: User[] | null = null;
+
+function getBaseUsers(): User[] {
+  return Array.from({ length: 10 }, (_, i) => ({
+    id: `mock-user-${String(i + 1).padStart(3, "0")}`,
+    feishu_open_id: `ou_${Math.random().toString(36).substring(2, 10)}`,
+    name: NAMES[i],
+    email: `user${i + 1}@pdm.local`,
+    avatar_url: null,
+    role: randomRole(),
+    supplier_id: null,
+    language_pref: "zh-CN",
+    is_active: i % 3 !== 2,
+  }));
+}
+
+function getStore(): User[] {
+  if (!userStore) userStore = getBaseUsers();
+  return userStore;
+}
+
+/** Reset store (for testing) */
+export function resetUserStore(): void {
+  userStore = null;
+}
+
+/**
+ * Add a user to the mock store. Returns the created user.
+ */
+export function addMockUser(data: Record<string, unknown>): User {
+  const store = getStore();
+  const newUser: User = {
+    id: `mock-user-${Date.now()}`,
+    feishu_open_id: null,
+    name: (data.name as string) || "新用户",
+    email: (data.email as string) || null,
+    avatar_url: null,
+    role: (data.role as string) || "engineer",
+    supplier_id: null,
+    language_pref: "zh-CN",
+    is_active: true,
+  };
+  store.push(newUser);
+  return newUser;
+}
+
+/**
+ * Update a user in the mock store. Returns the updated user.
+ */
+export function updateMockUser(id: string, data: Record<string, unknown>): User | null {
+  const store = getStore();
+  const idx = store.findIndex((u) => u.id === id);
+  if (idx === -1) return null;
+  store[idx] = { ...store[idx], ...data } as User;
+  return store[idx];
 }
 
 /**
  * Mock 10 users for admin user management (fallback when backend is unavailable).
+ * Includes any users added via addMockUser during the session.
  */
 export function buildMockUsers(params?: Record<string, unknown>): PaginatedResponse<User> {
   const search = (params?.search as string) || "";
   const page = (params?.page as number) || 1;
   const pageSize = (params?.page_size as number) || 20;
 
-  const allUsers: User[] = Array.from({ length: 10 }, (_, i) => ({
-    id: `mock-user-${String(i + 1).padStart(3, "0")}`,
-    feishu_open_id: `ou_${Math.random().toString(36).substring(2, 10)}`,
-    name: ["张明", "李华", "王芳", "赵强", "陈静", "刘洋", "周磊", "吴婷", "郑鹏", "孙悦"][i],
-    email: `user${i + 1}@pdm.local`,
-    avatar_url: null,
-    role: randomRole(),
-    supplier_id: null,
-    language_pref: "zh-CN",
-    is_active: i % 3 !== 2, // 2 out of 3 are active
-  }));
+  const allUsers = getStore();
 
   const filtered = search
-    ? allUsers.filter((u) => u.name.includes(search) || u.email?.includes(search))
+    ? allUsers.filter((u) => u.name?.includes(search) || u.email?.includes(search))
     : allUsers;
 
   const total = filtered.length;
@@ -70,7 +116,7 @@ export function buildMockAuditLogs(params?: Record<string, unknown>): PaginatedR
 
   const logs: Record<string, unknown>[] = Array.from({ length: 20 }, (_, i) => {
     const created = new Date();
-    created.setMinutes(created.getMinutes() - i * 15); // time descending
+    created.setMinutes(created.getMinutes() - i * 15);
     return {
       id: `audit-mock-${String(i + 1).padStart(3, "0")}`,
       action: actions[Math.floor(Math.random() * actions.length)],

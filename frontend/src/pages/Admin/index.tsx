@@ -458,6 +458,7 @@ export default function Admin() {
                 const reader = new FileReader();
                 reader.onload = (e) => {
                   brandForm.setFieldValue("brandLogoSrc", e.target?.result as string);
+                  message.success("Logo 图片已加载，点击保存按钮后生效");
                 };
                 reader.readAsDataURL(file);
                 return false;
@@ -1183,6 +1184,8 @@ export default function Admin() {
         onCancel={() => { setEditUserOpen(false); setSelectedUser(null); }}
         confirmLoading={updateUserMutation.isPending}>
         <Form form={editForm} layout="vertical">
+          <Form.Item name="name" label={t("admin.name")} rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item name="email" label={t("admin.email")}><Input /></Form.Item>
           <Form.Item name="role" label={t("admin.role")}>
             <Select options={Object.keys(roleColors).map((k) => ({ label: k, value: k }))} />
           </Form.Item>

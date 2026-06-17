@@ -871,20 +871,11 @@ export const adminApi = {
       const res = await api.post<ApiResponse<User>>("/admin/users", data);
       return { data: res.data };
     } catch {
+      const { addMockUser } = await import("./__mocks__/admin");
       return {
         data: {
           success: true,
-          data: {
-            id: `mock-user-${Date.now()}`,
-            name: data.name as string,
-            email: (data.email as string) || null,
-            role: (data.role as string) || "engineer",
-            is_active: true,
-            feishu_open_id: null,
-            avatar_url: null,
-            supplier_id: null,
-            language_pref: "zh-CN",
-          } as User,
+          data: addMockUser(data),
         },
       };
     }
@@ -894,7 +885,9 @@ export const adminApi = {
       const res = await api.patch<ApiResponse<User>>(`/admin/users/${id}`, data);
       return { data: res.data };
     } catch {
-      return { data: { success: true, data: data as unknown as User } };
+      const { updateMockUser } = await import("./__mocks__/admin");
+      const updated = updateMockUser(id, data);
+      return { data: { success: true, data: updated || (data as unknown as User) } };
     }
   },
   deleteUser: (id: string) => api.delete<ApiResponse<{ message: string }>>(`/admin/users/${id}`),

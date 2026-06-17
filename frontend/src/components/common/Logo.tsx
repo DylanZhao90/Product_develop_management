@@ -24,17 +24,20 @@ interface LogoProps {
 
 const STORAGE_KEY = "pdm_system_settings";
 
-function loadBrandLogoSrc(): string {
+function loadBrandSettings(): { src: string; name: string } {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const settings = JSON.parse(raw);
-      return settings.brandLogoSrc || "";
+      return {
+        src: settings.brandLogoSrc || "",
+        name: settings.brandName || "安纳瑞 PDM",
+      };
     }
   } catch {
     /* ignore */
   }
-  return "";
+  return { src: "", name: "安纳瑞 PDM" };
 }
 
 export default function Logo({
@@ -43,15 +46,15 @@ export default function Logo({
   textColor,
   variant = "sidebar",
 }: LogoProps) {
-  // For sidebar variant, subscribe to localStorage brandLogoSrc for reactivity
-  const [customLogoSrc, setCustomLogoSrc] = useState<string>(() =>
-    variant === "sidebar" ? loadBrandLogoSrc() : ""
+  // For sidebar variant, subscribe to localStorage brand settings for reactivity
+  const [brandSettings, setBrandSettings] = useState<{ src: string; name: string }>(() =>
+    variant === "sidebar" ? loadBrandSettings() : { src: "", name: "安纳瑞 PDM" }
   );
 
   useEffect(() => {
     if (variant !== "sidebar") return;
 
-    const sync = () => setCustomLogoSrc(loadBrandLogoSrc());
+    const sync = () => setBrandSettings(loadBrandSettings());
 
     // Initial load
     sync();
@@ -68,7 +71,7 @@ export default function Logo({
   }, [variant]);
 
   // If a custom brand logo is set in localStorage, render it as an <img>
-  if (variant === "sidebar" && customLogoSrc) {
+  if (variant === "sidebar" && brandSettings.src) {
     return (
       <div
         style={{
@@ -79,7 +82,7 @@ export default function Logo({
         }}
       >
         <img
-          src={customLogoSrc}
+          src={brandSettings.src}
           alt="brand"
           style={{
             width: iconSize,
@@ -98,7 +101,7 @@ export default function Logo({
               lineHeight: 1.2,
             }}
           >
-            安纳瑞 PDM
+            {brandSettings.name}
           </span>
         )}
       </div>

@@ -136,8 +136,8 @@ function LifecycleSankey({ flows, totalProducts, ec }: { flows: LifecycleAnalyti
       layoutIterations: 0,
       emphasis: { focus: "adjacency" as const },
       nodeAlign: "left" as const,
-      nodeWidth: 22,
-      nodeGap: 14,
+      nodeWidth: 28,
+      nodeGap: 18,
       data: nodes,
       links: flows.map((f) => {
         const fromName = t("product.status." + f.from);
@@ -160,7 +160,7 @@ function LifecycleSankey({ flows, totalProducts, ec }: { flows: LifecycleAnalyti
       lineStyle: { color: "gradient", curveness: 0.5, opacity: 0.6 },
     }],
   }), [flows, totalProducts, t]);
-  return <ReactEChartsCore echarts={echarts} option={option} style={{ height: 300 }} />;
+  return <ReactEChartsCore echarts={echarts} option={option} style={{ height: 420 }} />;
 }
 
 // ── Per-Stage Deep Dive Panel ──
