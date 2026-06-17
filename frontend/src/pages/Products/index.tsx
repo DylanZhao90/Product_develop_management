@@ -3,12 +3,15 @@ import { useNavigate } from "react-router-dom";
 import {
   Button,
   Card,
+  Col,
   Form,
   Input,
   Modal,
   ProTable,
+  Row,
   Select,
   Space,
+  Statistic,
   Tag,
   Typography,
   message,
@@ -25,6 +28,12 @@ const statusColors: Record<string, string> = {
   on_sale: "green",
   discontinued: "red",
   eol: "default",
+};
+
+const typeColors: Record<string, string> = {
+  ac_charger: "purple",
+  dc_charger: "cyan",
+  portable: "lime",
 };
 
 export default function Products() {
@@ -89,7 +98,7 @@ export default function Products() {
       key: "type",
       width: 100,
       render: (v: string) => (
-        <Tag>{v === "ac_charger" ? "AC" : v === "dc_charger" ? "DC" : v === "portable" ? "Portable" : v || "-"}</Tag>
+        <Tag color={typeColors[v] || "default"}>{v === "ac_charger" ? "AC" : v === "dc_charger" ? "DC" : v === "portable" ? "Portable" : v || "-"}</Tag>
       ),
     },
     {
@@ -114,6 +123,80 @@ export default function Products() {
           {t("common.total", { count: data?.data?.total || 0 })}
         </Typography.Text>
       </div>
+
+      {/* Stat Summary Cards */}
+      {(() => {
+        const rows = data?.data?.data || [];
+        const counts = { in_development: 0, trial_handover: 0, on_sale: 0, discontinued: 0, eol: 0 };
+        const typeCounts = { ac_charger: 0, dc_charger: 0, portable: 0 };
+        rows.forEach((r: any) => {
+          const s = r.lifecycle_status as string;
+          const t = r.type as string;
+          if (s in counts) counts[s as keyof typeof counts]++;
+          if (t in typeCounts) typeCounts[t as keyof typeof typeCounts]++;
+        });
+        return (
+          <div style={{ marginBottom: 16 }}>
+            <Row gutter={[12, 12]}>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Total" value={data?.data?.total || 0} valueStyle={{ color: "#4f6ef6", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="In Development" value={counts.in_development} valueStyle={{ color: "#1677ff", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Trial Handover" value={counts.trial_handover} valueStyle={{ color: "#fa8c16", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="On Sale" value={counts.on_sale} valueStyle={{ color: "#22c55e", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Discontinued" value={counts.discontinued} valueStyle={{ color: "#ef4444", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="EOL" value={counts.eol} valueStyle={{ color: "#8c8c8c", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+            </Row>
+            <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic
+                    title={<span>AC <small style={{ color: "#888", fontWeight: 400 }}>Charger</small></span>}
+                    value={typeCounts.ac_charger}
+                    valueStyle={{ color: "#722ed1", fontSize: 22, fontWeight: 700 }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic
+                    title={<span>DC <small style={{ color: "#888", fontWeight: 400 }}>Charger</small></span>}
+                    value={typeCounts.dc_charger}
+                    valueStyle={{ color: "#13c2c2", fontSize: 22, fontWeight: 700 }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Portable" value={typeCounts.portable} valueStyle={{ color: "#a0d911", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+            </Row>
+          </div>
+        );
+      })()}
 
       <Card
         extra={

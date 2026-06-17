@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Card, Table, Tag, Typography, Space, Select, Button, Modal, Form, Input, message } from "antd";
+import { Card, Col, Row, Statistic, Table, Tag, Typography, Space, Select, Button, Modal, Form, Input, message } from "antd";
 import { SwapOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { productApi } from "../../services/api";
@@ -92,6 +92,64 @@ export default function Lifecycle() {
           {t("common.total", { count: total })}
         </Typography.Text>
       </div>
+
+      {/* Stat Summary Cards */}
+      {(() => {
+        const rows = products;
+        const counts = { in_development: 0, trial_handover: 0, on_sale: 0, discontinued: 0, eol: 0 };
+        rows.forEach((r: any) => {
+          const s = r.lifecycle_status as string;
+          if (s in counts) counts[s as keyof typeof counts]++;
+        });
+        const transitionableCount = rows.filter((r: any) =>
+          (VALID_TRANSITIONS[r.lifecycle_status as string] || []).length > 0
+        ).length;
+        return (
+          <div style={{ marginBottom: 16 }}>
+            <Row gutter={[12, 12]}>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Total" value={total} valueStyle={{ color: "#4f6ef6", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic
+                    title={<span>In Development <Tag color="blue" style={{ fontSize: 10, marginLeft: 4 }}>{counts.in_development}</Tag></span>}
+                    value={counts.in_development}
+                    valueStyle={{ color: "#1677ff", fontSize: 22, fontWeight: 700 }}
+                  />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Trial Handover" value={counts.trial_handover} valueStyle={{ color: "#fa8c16", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="On Sale" value={counts.on_sale} valueStyle={{ color: "#22c55e", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Discontinued" value={counts.discontinued} valueStyle={{ color: "#ef4444", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="EOL" value={counts.eol} valueStyle={{ color: "#8c8c8c", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Transitionable" value={transitionableCount} valueStyle={{ color: "#1890ff", fontSize: 22, fontWeight: 700 }} suffix={<SwapOutlined style={{ fontSize: 16 }} />} />
+                </Card>
+              </Col>
+            </Row>
+          </div>
+        );
+      })()}
 
       <Card>
         <Space style={{ marginBottom: 16 }}>

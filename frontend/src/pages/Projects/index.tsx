@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Form, Input, Modal, Select, Space, Tag, Typography, message, Table } from "antd";
+import { Button, Card, Col, Form, Input, Modal, Row, Select, Space, Statistic, Table, Tag, Typography, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { projectApi, productApi } from "../../services/api";
@@ -81,6 +81,67 @@ export default function Projects() {
           {t("common.total", { count: data?.data?.total || 0 })}
         </Typography.Text>
       </div>
+
+      {/* Stat Summary Cards */}
+      {(() => {
+        const rows = data?.data?.data || [];
+        const counts = { pending_approval: 0, approved: 0, in_progress: 0, completed: 0, closed: 0 };
+        const typeCounts = { new_product: 0, version_upgrade: 0 };
+        rows.forEach((r: any) => {
+          const s = r.status as string;
+          const t = r.type as string;
+          if (s in counts) counts[s as keyof typeof counts]++;
+          if (t in typeCounts) typeCounts[t as keyof typeof typeCounts]++;
+        });
+        return (
+          <div style={{ marginBottom: 16 }}>
+            <Row gutter={[12, 12]}>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Total" value={data?.data?.total || 0} valueStyle={{ color: "#4f6ef6", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Pending" value={counts.pending_approval} valueStyle={{ color: "#faad14", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Approved" value={counts.approved} valueStyle={{ color: "#1677ff", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="In Progress" value={counts.in_progress} valueStyle={{ color: "#1890ff", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Completed" value={counts.completed} valueStyle={{ color: "#22c55e", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Closed" value={counts.closed} valueStyle={{ color: "#8c8c8c", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+            </Row>
+            <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="New Product" value={typeCounts.new_product} valueStyle={{ color: "#722ed1", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Version Upgrade" value={typeCounts.version_upgrade} valueStyle={{ color: "#13c2c2", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+            </Row>
+          </div>
+        );
+      })()}
 
       <Card
         extra={

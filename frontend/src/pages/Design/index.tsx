@@ -1,9 +1,17 @@
 import { useState } from "react";
-import { Card, Table, Tag, Typography, Space, Select, Input, Button, Modal, Form, Upload, message } from "antd";
+import { Card, Col, Row, Statistic, Table, Tag, Typography, Space, Select, Input, Button, Modal, Form, Upload, message } from "antd";
 import { SearchOutlined, UploadOutlined, DownloadOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { designApi } from "../../services/api";
 import { useLocale } from "../../locales";
+
+const fileTypeColors: Record<string, string> = {
+  step: "blue",
+  igs: "cyan",
+  pdf: "red",
+  stl: "purple",
+  dxf: "orange",
+};
 
 export default function Design() {
   const { t } = useLocale();
@@ -58,7 +66,7 @@ export default function Design() {
       dataIndex: "file_type",
       key: "file_type",
       width: 80,
-      render: (v: string) => <Tag>{v?.toUpperCase()}</Tag>,
+      render: (v: string) => <Tag color={fileTypeColors[v?.toLowerCase()] || "default"}>{v?.toUpperCase()}</Tag>,
     },
     { title: t("design.version"), dataIndex: "version", key: "version", width: 60 },
     {
@@ -103,6 +111,46 @@ export default function Design() {
           {t("common.total", { count: total })}
         </Typography.Text>
       </div>
+
+      {/* Stat Summary Cards */}
+      {(() => {
+        const rows = files;
+        const fileTypeCounts: Record<string, number> = {};
+        let currentCount = 0;
+        rows.forEach((r: Record<string, unknown>) => {
+          const ft = (r.file_type as string)?.toLowerCase();
+          if (ft) fileTypeCounts[ft] = (fileTypeCounts[ft] || 0) + 1;
+          if (r.is_current) currentCount++;
+        });
+        return (
+          <div style={{ marginBottom: 16 }}>
+            <Row gutter={[12, 12]}>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Total Files" value={total} valueStyle={{ color: "#4f6ef6", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Current" value={currentCount} valueStyle={{ color: "#22c55e", fontSize: 22, fontWeight: 700 }} suffix={<Tag color="green" style={{ fontSize: 10 }}>Latest</Tag>} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Archived" value={rows.length - currentCount} valueStyle={{ color: "#8c8c8c", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              {Object.entries(fileTypeCounts).map(([ft, cnt]) => (
+                <Col xs={12} sm={6} lg={3} key={ft}>
+                  <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                    <Statistic title={ft.toUpperCase()} value={cnt} valueStyle={{ color: fileTypeColors[ft] || "#4f6ef6", fontSize: 22, fontWeight: 700 }} />
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+          </div>
+        );
+      })()}
 
       <Card
         extra={<Button type="primary" icon={<UploadOutlined />} onClick={() => setUploadModalOpen(true)}>{t("common.upload")}</Button>}

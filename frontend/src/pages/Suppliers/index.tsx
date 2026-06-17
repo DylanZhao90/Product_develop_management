@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Table, Tag, Typography, Space, Select, Input, Button, Modal, Form, message } from "antd";
+import { Card, Col, Row, Statistic, Table, Tag, Typography, Space, Select, Input, Button, Modal, Form, message } from "antd";
 import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supplierApi } from "../../services/api";
 import { useLocale } from "../../locales";
 
 const statusColors: Record<string, string> = { active: "green", suspended: "orange", blacklisted: "red" };
+const supplierTypeColors: Record<string, string> = { design: "purple", module_dev: "cyan" };
 
 export default function Suppliers() {
   const { t } = useLocale();
@@ -38,7 +39,7 @@ export default function Suppliers() {
       dataIndex: "type",
       key: "type",
       width: 120,
-      render: (v: string) => <Tag>{v === "design" ? t("supplier.typeDesign") : v === "module_dev" ? t("supplier.typeModuleDev") : v}</Tag>,
+      render: (v: string) => <Tag color={supplierTypeColors[v] || "default"}>{v === "design" ? t("supplier.typeDesign") : v === "module_dev" ? t("supplier.typeModuleDev") : v}</Tag>,
     },
     { title: t("supplier.contact"), dataIndex: "contact_name", key: "contact", width: 100, render: (v: string) => v || "-" },
     {
@@ -68,6 +69,67 @@ export default function Suppliers() {
           {t("common.total", { count: total })}
         </Typography.Text>
       </div>
+
+      {/* Stat Summary Cards */}
+      {(() => {
+        const rows = suppliers;
+        const statusCounts = { active: 0, suspended: 0, blacklisted: 0 };
+        const typeCounts = { design: 0, module_dev: 0 };
+        let totalRating = 0;
+        let ratedCount = 0;
+        rows.forEach((r: any) => {
+          const s = r.status as string;
+          const t = r.type as string;
+          const rating = r.rating as number;
+          if (s in statusCounts) statusCounts[s as keyof typeof statusCounts]++;
+          if (t in typeCounts) typeCounts[t as keyof typeof typeCounts]++;
+          if (typeof rating === "number" && rating > 0) { totalRating += rating; ratedCount++; }
+        });
+        const avgRating = ratedCount > 0 ? (totalRating / ratedCount).toFixed(1) : "-";
+        return (
+          <div style={{ marginBottom: 16 }}>
+            <Row gutter={[12, 12]}>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Total" value={total} valueStyle={{ color: "#4f6ef6", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Active" value={statusCounts.active} valueStyle={{ color: "#22c55e", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Suspended" value={statusCounts.suspended} valueStyle={{ color: "#fa8c16", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Blacklisted" value={statusCounts.blacklisted} valueStyle={{ color: "#ef4444", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Avg Rating" value={avgRating} suffix="/5" valueStyle={{ color: "#722ed1", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+            </Row>
+            <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Design" value={typeCounts.design} valueStyle={{ color: "#722ed1", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+              <Col xs={12} sm={6} lg={3}>
+                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+                  <Statistic title="Module Dev" value={typeCounts.module_dev} valueStyle={{ color: "#13c2c2", fontSize: 22, fontWeight: 700 }} />
+                </Card>
+              </Col>
+            </Row>
+          </div>
+        );
+      })()}
 
       <Card
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>{t("common.create")}</Button>}
