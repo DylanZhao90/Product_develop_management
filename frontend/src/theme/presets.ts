@@ -3,6 +3,9 @@
  *
  * Each preset is self-contained: colors, Ant Design global tokens,
  * component-specific tokens, and algorithm (light/dark).
+ *
+ * v2 — UI depth optimization: higher contrast, deeper card depth,
+ *        more distinct neutral palettes per preset, polished visuals.
  */
 
 import type { ThemeConfig } from "antd";
@@ -49,8 +52,32 @@ function buildPreset(cfg: {
   error: Record<string, string>;
   info: Record<string, string>;
   sidebarBg: string;
+  /** Override default page background (defaults to neutral[50] tweak) */
+  bgPage?: string;
+  /** Override default card shadow for deeper depth */
+  cardShadow?: string;
+  cardShadowHover?: string;
+  borderColor?: string;
 }): ThemePreset {
   const { primary, neutral, success, warning, error, info, sidebarBg } = cfg;
+
+  // Compute contrast-friendly text colors
+  const textPrimary = neutral[800];
+  const textSecondary = neutral[500];
+  const textMuted = neutral[400];
+  const borderDefault = cfg.borderColor || neutral[200];
+  const borderLight = neutral[100];
+  const bgPage = cfg.bgPage || neutral[50];
+  const cardShadow = cfg.cardShadow || "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)";
+  const cardShadowHover = cfg.cardShadowHover || "0 4px 16px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04)";
+
+  const isDark = cfg.mode === "dark";
+
+  // Dark-mode overrides for base vars
+  const darkNeutralText = neutral[800];
+  const darkNeutralSecondary = neutral[600];
+  const darkNeutralMuted = neutral[500];
+  const darkBorder = neutral[200];
 
   return {
     id: cfg.id,
@@ -81,21 +108,22 @@ function buildPreset(cfg: {
       colorInfo: info[500],
       colorInfoBg: info[50],
 
-      colorTextBase: neutral[700],
-      colorText: neutral[700],
-      colorTextSecondary: neutral[500],
-      colorTextTertiary: neutral[400],
+      // Higher contrast text
+      colorTextBase: textPrimary,
+      colorText: textPrimary,
+      colorTextSecondary: textSecondary,
+      colorTextTertiary: textMuted,
       colorTextQuaternary: neutral[300],
 
       colorBgBase: neutral[0],
       colorBgContainer: neutral[0],
-      colorBgLayout: neutral[50],
+      colorBgLayout: bgPage,
       colorBgElevated: neutral[0],
       colorBgSpotlight: neutral[800],
 
-      colorBorder: neutral[200],
-      colorBorderSecondary: neutral[100],
-      colorSplit: neutral[100],
+      colorBorder: borderDefault,
+      colorBorderSecondary: borderLight,
+      colorSplit: borderLight,
       colorFill: neutral[100],
       colorFillSecondary: neutral[50],
       colorFillTertiary: neutral[0],
@@ -111,9 +139,9 @@ function buildPreset(cfg: {
       borderRadiusSM: 6,
       borderRadiusXS: 4,
 
-      boxShadow: `0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02)`,
-      boxShadowSecondary: `0 6px 16px 0 rgba(0,0,0,0.08), 0 3px 6px -4px rgba(0,0,0,0.06)`,
-      boxShadowTertiary: `0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)`,
+      boxShadow: cardShadow,
+      boxShadowSecondary: `0 6px 20px 0 rgba(0,0,0,0.10), 0 3px 6px -4px rgba(0,0,0,0.06)`,
+      boxShadowTertiary: cardShadow,
 
       motionDurationSlow: "0.3s",
       motionDurationMid: "0.2s",
@@ -138,7 +166,7 @@ function buildPreset(cfg: {
       Layout: {
         siderBg: sidebarBg,
         triggerBg: neutral[800],
-        triggerColor: neutral[300],
+        triggerColor: isDark ? neutral[600] : neutral[300],
       },
       Menu: {
         darkItemBg: sidebarBg,
@@ -153,17 +181,18 @@ function buildPreset(cfg: {
         itemMarginInline: 8,
       },
       Table: {
-        headerBg: neutral[50],
-        headerColor: neutral[500],
+        headerBg: neutral[100],
+        headerColor: textSecondary,
         headerSplitColor: "transparent",
-        rowHoverBg: primary[50],
-        borderColor: neutral[100],
+        rowHoverBg: `${primary[500]}0F`,
+        borderColor: borderLight,
         cellPaddingBlock: 12,
         cellPaddingInline: 16,
       },
       Card: {
         paddingLG: 24,
         borderRadiusLG: 12,
+        colorBgContainer: neutral[0],
       },
       Button: {
         borderRadius: 8,
@@ -185,9 +214,9 @@ function buildPreset(cfg: {
       Statistic: { titleFontSize: 14, contentFontSize: 28 },
       Breadcrumb: {
         fontSize: 14,
-        linkColor: neutral[500],
+        linkColor: textSecondary,
         linkHoverColor: primary[500],
-        separatorColor: neutral[300],
+        separatorColor: textMuted,
       },
       DatePicker: {
         borderRadius: 8,
@@ -204,7 +233,7 @@ function buildPreset(cfg: {
         optionSelectedColor: primary[700],
       },
       Tabs: {
-        itemColor: neutral[500],
+        itemColor: textSecondary,
         itemHoverColor: primary[500],
         itemSelectedColor: primary[500],
         itemActiveColor: primary[500],
@@ -236,40 +265,99 @@ function buildPreset(cfg: {
     },
 
     // ── Dark-mode component overrides ──
-    ...(cfg.mode === "dark" ? {
-      componentTokens: {
-        ...({
-          Layout: { siderBg: sidebarBg, triggerBg: neutral[800], triggerColor: neutral[300] },
-          Menu: {
-            darkItemBg: sidebarBg, darkItemColor: neutral[400],
-            darkItemHoverBg: `${primary[500]}26`, darkItemHoverColor: neutral[0],
-            darkItemSelectedBg: `${primary[500]}38`, darkItemSelectedColor: neutral[0],
-            darkSubMenuItemBg: sidebarBg, darkItemDisabledColor: neutral[600],
-            itemBorderRadius: 8, itemMarginInline: 8,
+    ...(isDark
+      ? {
+          componentTokens: {
+            Layout: {
+              siderBg: sidebarBg,
+              triggerBg: neutral[800],
+              triggerColor: neutral[600],
+            },
+            Menu: {
+              darkItemBg: sidebarBg,
+              darkItemColor: neutral[400],
+              darkItemHoverBg: `${primary[500]}26`,
+              darkItemHoverColor: neutral[0],
+              darkItemSelectedBg: `${primary[500]}38`,
+              darkItemSelectedColor: neutral[0],
+              darkSubMenuItemBg: sidebarBg,
+              darkItemDisabledColor: neutral[600],
+              itemBorderRadius: 8,
+              itemMarginInline: 8,
+            },
+            Table: {
+              headerBg: neutral[100],
+              headerColor: neutral[500],
+              headerSplitColor: "transparent",
+              rowHoverBg: `${primary[500]}14`,
+              borderColor: neutral[200],
+              cellPaddingBlock: 12,
+              cellPaddingInline: 16,
+            },
+            Card: {
+              paddingLG: 24,
+              borderRadiusLG: 12,
+              colorBgContainer: neutral[50],
+            },
+            Button: {
+              borderRadius: 8,
+              controlHeight: 36,
+              controlHeightLG: 44,
+              controlHeightSM: 28,
+              paddingInline: 16,
+              paddingInlineLG: 20,
+              paddingInlineSM: 12,
+            },
+            Input: {
+              borderRadius: 8,
+              controlHeight: 36,
+              controlHeightLG: 44,
+              controlHeightSM: 28,
+              colorBgContainer: neutral[50],
+              colorBorder: neutral[200],
+            },
+            Tag: { borderRadiusSM: 6, colorBgContainer: neutral[100] },
+            Modal: {
+              borderRadiusLG: 16,
+              titleFontSize: 18,
+              contentBg: neutral[50],
+              headerBg: neutral[50],
+            },
+            Statistic: { titleFontSize: 14, contentFontSize: 28 },
+            Tabs: {
+              itemColor: neutral[500],
+              itemHoverColor: primary[500],
+              itemSelectedColor: primary[500],
+              inkBarColor: primary[500],
+            },
+            Select: {
+              borderRadius: 8,
+              controlHeight: 36,
+              optionSelectedBg: `${primary[500]}26`,
+              optionSelectedColor: primary[500],
+              colorBgContainer: neutral[50],
+              colorBorder: neutral[200],
+            },
+            DatePicker: {
+              borderRadius: 8,
+              controlHeight: 36,
+              colorBgContainer: neutral[50],
+              colorBorder: neutral[200],
+            },
+            Breadcrumb: {
+              fontSize: 14,
+              linkColor: neutral[500],
+              linkHoverColor: primary[500],
+              separatorColor: neutral[400],
+            },
+            Tooltip: { borderRadius: 8, colorBgSpotlight: neutral[800] },
+            Popover: { borderRadius: 12, colorBgElevated: neutral[50] },
+            Notification: { borderRadiusLG: 12, colorBgElevated: neutral[50] },
+            Drawer: { paddingLG: 24 },
+            Dropdown: { colorBgElevated: neutral[50] },
           },
-          Table: {
-            headerBg: neutral[50], headerColor: neutral[400],
-            headerSplitColor: "transparent", rowHoverBg: `${primary[500]}14`,
-            borderColor: neutral[200], cellPaddingBlock: 12, cellPaddingInline: 16,
-          },
-          Card: { paddingLG: 24, borderRadiusLG: 12, colorBgContainer: neutral[0] },
-          Button: { borderRadius: 8, controlHeight: 36, controlHeightLG: 44, controlHeightSM: 28, paddingInline: 16, paddingInlineLG: 20, paddingInlineSM: 12 },
-          Input: { borderRadius: 8, controlHeight: 36, controlHeightLG: 44, controlHeightSM: 28, colorBgContainer: neutral[0], colorBorder: neutral[200] },
-          Tag: { borderRadiusSM: 6, colorBgContainer: neutral[100] },
-          Modal: { borderRadiusLG: 16, titleFontSize: 18, contentBg: neutral[50], headerBg: neutral[50] },
-          Statistic: { titleFontSize: 14, contentFontSize: 28 },
-          Tabs: { itemColor: neutral[400], itemHoverColor: primary[500], itemSelectedColor: primary[500], inkBarColor: primary[500] },
-          Select: { borderRadius: 8, controlHeight: 36, optionSelectedBg: `${primary[500]}26`, optionSelectedColor: primary[500], colorBgContainer: neutral[0], colorBorder: neutral[200] },
-          DatePicker: { borderRadius: 8, controlHeight: 36, colorBgContainer: neutral[0], colorBorder: neutral[200] },
-          Breadcrumb: { fontSize: 14, linkColor: neutral[400], linkHoverColor: primary[500], separatorColor: neutral[200] },
-          Tooltip: { borderRadius: 8, colorBgSpotlight: neutral[800] },
-          Popover: { borderRadius: 12, colorBgElevated: neutral[50] },
-          Notification: { borderRadiusLG: 12, colorBgElevated: neutral[50] },
-          Drawer: { paddingLG: 24 },
-          Dropdown: { colorBgElevated: neutral[50] },
-        }),
-      },
-    } : {}),
+        }
+      : {}),
 
     // ── CSS custom properties (injected on :root) ──
     cssVariables: {
@@ -286,14 +374,14 @@ function buildPreset(cfg: {
       "--color-warning": warning[500],
       "--color-error": error[500],
 
-      "--color-bg-page": neutral[50],
+      "--color-bg-page": bgPage,
       "--color-bg-card": neutral[0],
-      "--color-border": neutral[200],
-      "--color-border-light": neutral[100],
+      "--color-border": borderDefault,
+      "--color-border-light": borderLight,
 
-      "--color-text": neutral[700],
-      "--color-text-secondary": neutral[500],
-      "--color-text-muted": neutral[400],
+      "--color-text": textPrimary,
+      "--color-text-secondary": textSecondary,
+      "--color-text-muted": textMuted,
 
       "--radius-sm": "6px",
       "--radius-md": "8px",
@@ -337,7 +425,8 @@ function buildPreset(cfg: {
       "--card-padding": "24px",
       "--card-padding-mobile": "12px",
       "--card-border-radius": "12px",
-      "--card-shadow": "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)",
+      "--card-shadow": cardShadow,
+      "--card-shadow-hover": cardShadowHover,
 
       /* ── Table ── */
       "--table-cell-padding": "12px 16px",
@@ -392,16 +481,18 @@ function buildPreset(cfg: {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 5 Theme Presets
+// 5 Theme Presets — v2: visually distinct, high contrast, polished
 // ═══════════════════════════════════════════════════════════════
 
 export const themePresets: ThemePreset[] = [
   // ── 1. Tech SaaS (default) — data-vis optimized ─────────────
+  // Sharp indigo primary, deep blue-grey sidebar, elevated cards
+  // with visible borders and refined shadows.
   buildPreset({
     id: "tech-saas",
     name: "Tech SaaS",
     nameZh: "科技蓝紫",
-    description: "Modern, glass-morphism header, dark sidebar, data-viz optimized",
+    description: "Modern, high-contrast, dark sidebar, data-viz optimized — inspired by Linear & Vercel",
     mode: "default",
     primary: {
       50: "#eef2ff", 100: "#e0e7ff", 200: "#c7d2fe", 300: "#a5b4fc",
@@ -409,18 +500,26 @@ export const themePresets: ThemePreset[] = [
       800: "#2a3fb8", 900: "#1e2f8a",
     },
     neutral: {
-      0: "#ffffff", 50: "#f8fafc", 100: "#f1f5f9", 200: "#e2e8f0",
-      300: "#cbd5e1", 400: "#94a3b8", 500: "#64748b", 600: "#475569",
-      700: "#334155", 800: "#1e293b", 900: "#0f172a",
+      0: "#ffffff", 50: "#f4f7fc", 100: "#e9edf4", 200: "#dce1ea",
+      300: "#c5ccd9", 400: "#8f98a8", 500: "#5c6577", 600: "#3f4758",
+      700: "#2d3443", 800: "#1c212e", 900: "#11151f",
     },
-    success: { 50: "#f0fdf4", 500: "#10b981", 700: "#059669" },
-    warning: { 50: "#fffbeb", 500: "#f59e0b", 700: "#d97706" },
+    success: { 50: "#ecfdf3", 500: "#0aad7c", 700: "#06946a" },
+    warning: { 50: "#fffaeb", 500: "#f5a623", 700: "#d48c0e" },
     error: { 50: "#fef2f2", 500: "#ef4444", 700: "#dc2626" },
-    info: { 50: "#eef2ff", 500: "#6366f1", 700: "#4f46e5" },
+    info: { 50: "#eef2ff", 500: "#4f6ef6", 700: "#3b5de7" },
     sidebarBg: "#0f172a",
+    // Deeper page bg for more contrast against white cards
+    bgPage: "#e4e9f2",
+    // Stronger card presence
+    cardShadow: "0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04)",
+    cardShadowHover: "0 6px 20px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.04)",
+    borderColor: "#dce1ea",
   }),
 
   // ── 2. Linear Dark ─────────────────────────────────────────
+  // Full dark mode with green accents. Deeper blacks, crisp borders,
+  // elevated card surfaces with visible edges.
   buildPreset({
     id: "linear-dark",
     name: "Linear Dark",
@@ -428,28 +527,34 @@ export const themePresets: ThemePreset[] = [
     description: "Full dark mode, green accents, minimalist — inspired by Linear",
     mode: "dark",
     primary: {
-      50: "#eef7f0", 100: "#d3ece0", 200: "#a6d9c1", 300: "#79c7a2",
-      400: "#4db483", 500: "#1ea864", 600: "#198f54", 700: "#147644",
+      50: "#e8f5ed", 100: "#c8e6d9", 200: "#94d1b3", 300: "#5fb88d",
+      400: "#35a36e", 500: "#1ea864", 600: "#198f54", 700: "#147644",
       800: "#0f5d34", 900: "#0a4424",
     },
     neutral: {
-      0: "#1a1a1a", 50: "#212121", 100: "#2a2a2a", 200: "#333333",
-      300: "#4a4a4a", 400: "#6b6b6b", 500: "#8c8c8c", 600: "#a3a3a3",
-      700: "#cccccc", 800: "#e0e0e0", 900: "#f5f5f5",
+      0: "#141414", 50: "#1a1a1a", 100: "#242424", 200: "#303030",
+      300: "#444444", 400: "#636363", 500: "#868686", 600: "#a3a3a3",
+      700: "#c4c4c4", 800: "#e0e0e0", 900: "#f2f2f2",
     },
     success: { 50: "#0d2818", 500: "#39d353", 700: "#5ce670" },
     warning: { 50: "#2d1f0a", 500: "#f0a030", 700: "#f4b950" },
     error: { 50: "#2d0f0f", 500: "#f85149", 700: "#fa6e67" },
     info: { 50: "#0d1d2d", 500: "#58a6ff", 700: "#79b8ff" },
-    sidebarBg: "#141414",
+    sidebarBg: "#0f0f0f",
+    bgPage: "#111111",
+    cardShadow: "0 1px 3px rgba(0,0,0,0.3), 0 1px 1px rgba(0,0,0,0.2)",
+    cardShadowHover: "0 8px 24px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2)",
+    borderColor: "#303030",
   }),
 
   // ── 3. Forest Emerald ──────────────────────────────────────
+  // Nature-inspired greens with warm undertones. Soft earthy
+  // neutrals, green accent, eye-friendly and humanized.
   buildPreset({
     id: "forest-emerald",
     name: "Forest Emerald",
     nameZh: "自然翡翠",
-    description: "Nature-inspired greens, eye-friendly, warm and humanized",
+    description: "Nature-inspired greens, soft earthy neutrals, eye-friendly and warm",
     mode: "default",
     primary: {
       50: "#ecfdf5", 100: "#d1fae5", 200: "#a7f3d0", 300: "#6ee7b7",
@@ -457,23 +562,29 @@ export const themePresets: ThemePreset[] = [
       800: "#064e3b", 900: "#022c22",
     },
     neutral: {
-      0: "#ffffff", 50: "#f6f9f7", 100: "#eef2ef", 200: "#dce4df",
-      300: "#bfc9c3", 400: "#8f9c93", 500: "#5f6d64", 600: "#445249",
-      700: "#2d3831", 800: "#1a241d", 900: "#0f1a14",
+      0: "#ffffff", 50: "#f6faf7", 100: "#eaf2ed", 200: "#d7e3dc",
+      300: "#bcc9c0", 400: "#8d9b91", 500: "#5e6d63", 600: "#435248",
+      700: "#2d3a31", 800: "#1c261f", 900: "#0e1a13",
     },
     success: { 50: "#ecfdf5", 500: "#10b981", 700: "#047857" },
-    warning: { 50: "#fffbeb", 500: "#d97706", 700: "#b45309" },
+    warning: { 50: "#fff7ed", 500: "#d97706", 700: "#b45309" },
     error: { 50: "#fef2f2", 500: "#dc2626", 700: "#b91c1c" },
     info: { 50: "#eef2ff", 500: "#6366f1", 700: "#4f46e5" },
-    sidebarBg: "#0f1a14",
+    sidebarBg: "#0e1a13",
+    bgPage: "#eef5f0",
+    cardShadow: "0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03)",
+    cardShadowHover: "0 6px 18px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.03)",
+    borderColor: "#d7e3dc",
   }),
 
   // ── 4. Sunset Amber ────────────────────────────────────────
+  // Warm amber tones with sandy neutrals. Creative energy,
+  // approachable feel, slightly vintage warmth.
   buildPreset({
     id: "sunset-amber",
     name: "Sunset Amber",
     nameZh: "日落琥珀",
-    description: "Warm amber tones, creative energy, approachable feel",
+    description: "Warm amber tones, sandy neutrals, creative and approachable",
     mode: "default",
     primary: {
       50: "#fffbeb", 100: "#fef3c7", 200: "#fde68a", 300: "#fcd34d",
@@ -481,23 +592,29 @@ export const themePresets: ThemePreset[] = [
       800: "#78350f", 900: "#451a03",
     },
     neutral: {
-      0: "#ffffff", 50: "#fdfaf5", 100: "#f8f3ea", 200: "#efe4d4",
-      300: "#dfceb5", 400: "#b8a088", 500: "#8c6f56", 600: "#6b5340",
-      700: "#4a382b", 800: "#2d2118", 900: "#1c1410",
+      0: "#ffffff", 50: "#fdfaf5", 100: "#f6efe6", 200: "#e9dfd3",
+      300: "#d4c7b8", 400: "#a89784", 500: "#7e6b58", 600: "#5f4f40",
+      700: "#42372c", 800: "#2a221b", 900: "#1a1410",
     },
     success: { 50: "#ecfdf5", 500: "#10b981", 700: "#047857" },
     warning: { 50: "#fff7ed", 500: "#ea580c", 700: "#c2410c" },
     error: { 50: "#fef2f2", 500: "#dc2626", 700: "#b91c1c" },
     info: { 50: "#eef2ff", 500: "#6366f1", 700: "#4f46e5" },
-    sidebarBg: "#1c1410",
+    sidebarBg: "#1a1410",
+    bgPage: "#f8f2ea",
+    cardShadow: "0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03)",
+    cardShadowHover: "0 6px 18px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.03)",
+    borderColor: "#e9dfd3",
   }),
 
   // ── 5. Ocean Depth ─────────────────────────────────────────
+  // Professional deep blue with cool steel neutrals.
+  // Financial-grade clarity, dense data feel.
   buildPreset({
     id: "ocean-depth",
     name: "Ocean Depth",
     nameZh: "深海蓝",
-    description: "Professional deep blue, data-dense, financial-grade clarity",
+    description: "Professional deep blue, cool steel neutrals, data-dense clarity",
     mode: "default",
     primary: {
       50: "#f0f9ff", 100: "#e0f2fe", 200: "#bae6fd", 300: "#7dd3fc",
@@ -505,15 +622,19 @@ export const themePresets: ThemePreset[] = [
       800: "#0c4a6e", 900: "#082f49",
     },
     neutral: {
-      0: "#ffffff", 50: "#f4f7fa", 100: "#e8edf2", 200: "#d1dae3",
-      300: "#b0bdc8", 400: "#8595a3", 500: "#5d6d7d", 600: "#445361",
-      700: "#2d3a47", 800: "#19242e", 900: "#0a1628",
+      0: "#ffffff", 50: "#f2f6fa", 100: "#e4eaf1", 200: "#d0d8e3",
+      300: "#b1bbc9", 400: "#7f8b9e", 500: "#556172", 600: "#3d4857",
+      700: "#28323f", 800: "#17202b", 900: "#0c1420",
     },
     success: { 50: "#ecfdf5", 500: "#10b981", 700: "#047857" },
     warning: { 50: "#fffbeb", 500: "#d97706", 700: "#b45309" },
     error: { 50: "#fef2f2", 500: "#dc2626", 700: "#b91c1c" },
     info: { 50: "#e0f2fe", 500: "#0284c7", 700: "#0369a1" },
-    sidebarBg: "#0a1628",
+    sidebarBg: "#0c1420",
+    bgPage: "#eef3f8",
+    cardShadow: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.03)",
+    cardShadowHover: "0 6px 18px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.03)",
+    borderColor: "#d0d8e3",
   }),
 ];
 

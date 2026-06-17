@@ -82,13 +82,17 @@
 /* Flow rate items */
 .flow-rate-item {
   text-align: center;
-  padding: 8px 4px;
+  padding: 10px 8px;
   border-radius: 8px;
-  background: var(--color-bg-page);
-  transition: background 150ms;
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-light);
+  transition: background 150ms, border-color 150ms, box-shadow 150ms;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
 }
 .flow-rate-item:hover {
-  background: var(--color-border-light);
+  background: var(--color-bg-card);
+  border-color: var(--color-border);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
 .flow-rate-path {
   font-size: 12px;
@@ -178,7 +182,7 @@
   margin-top: 2px;
 }
 
-/* ── Mini Chart Container ─────────────────────────── */
+/* Mini Chart Container ─────────────────────────── */
 .mini-chart {
   width: 100%;
   height: 190px;
@@ -186,13 +190,15 @@
 .chart-card {
   height: 100%;
   padding: 16px;
-  background: var(--color-bg-page);
+  background: var(--color-bg-card);
   border-radius: 10px;
   border: 1px solid var(--color-border-light);
-  transition: border-color 150ms;
+  transition: border-color 150ms, box-shadow 150ms;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 .chart-card:hover {
   border-color: var(--color-border);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 .chart-title-sm {
   font-size: 13px;
@@ -232,20 +238,25 @@
 
 /* ── Dark mode overrides ───────────────────────────── */
 [data-theme="linear-dark"] .stage-panel-card {
-  border-color: var(--border-dark, #2a2a2a);
+  border-color: var(--border-dark, #303030);
 }
 [data-theme="linear-dark"] .stage-metric-card {
-  background: rgba(255,255,255,0.03);
+  background: rgba(255,255,255,0.04);
 }
 [data-theme="linear-dark"] .chart-card {
-  background: rgba(255,255,255,0.03);
-  border-color: var(--border-dark, #2a2a2a);
+  background: var(--bg-dark, #1a1a1a);
+  border-color: var(--border-dark, #303030);
+}
+[data-theme="linear-dark"] .chart-card:hover {
+  border-color: var(--border-dark-strong, #444);
 }
 [data-theme="linear-dark"] .flow-rate-item {
-  background: rgba(255,255,255,0.03);
+  background: var(--bg-dark, #1a1a1a);
+  border-color: var(--border-dark, #303030);
 }
 [data-theme="linear-dark"] .flow-rate-item:hover {
-  background: rgba(255,255,255,0.06);
+  background: var(--bg-dark-elevated, #242424);
+  border-color: var(--border-dark-strong, #444);
 }
 
 /* ═══════════════════════════════════════════════════════════════
