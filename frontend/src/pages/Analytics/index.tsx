@@ -132,8 +132,6 @@ function LifecycleSankey({ flows, totalProducts, ec }: { flows: LifecycleAnalyti
     },
     series: [{
       type: "sankey" as const,
-      layout: "none" as const,
-      layoutIterations: 0,
       emphasis: { focus: "adjacency" as const },
       nodeAlign: "left" as const,
       nodeWidth: 28,
@@ -157,10 +155,14 @@ function LifecycleSankey({ flows, totalProducts, ec }: { flows: LifecycleAnalyti
         };
       }),
       label: { show: true, fontSize: 13, fontWeight: 600, color: "var(--color-text)" },
-      lineStyle: { color: "gradient", curveness: 0.5, opacity: 0.6 },
+      lineStyle: { curveness: 0.5, opacity: 0.6 },
     }],
   }), [flows, totalProducts, t]);
-  return <ReactEChartsCore echarts={echarts} option={option} style={{ height: 420 }} />;
+  return (
+    <div className="sankey-chart-container">
+      <ReactEChartsCore echarts={echarts} option={option} style={{ height: "100%", width: "100%" }} />
+    </div>
+  );
 }
 
 // ── Per-Stage Deep Dive Panel ──
@@ -553,7 +555,7 @@ export default function Analytics() {
       </div>
 
       {/* ── Row 2: Enhanced Sankey with Flow Rates ── */}
-      <Card className="sankey-card" styles={{ body: { padding: "20px" } }}>
+      <Card className="sankey-card" styles={{ body: { display: "flex", flexDirection: "column", padding: "20px" } }}>
         <div className="stage-card-header" style={{ marginBottom: 16 }}>
           <span className="stage-badge" style={{ background: "linear-gradient(90deg, #3b82f6, #6b7280)", width: 12, height: 12 }} />
           <h3>♻️ {t("analytics.lifecycleFlow")}</h3>

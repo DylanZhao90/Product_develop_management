@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button, Card, Form, Input, Modal, Select, Space, Tag, Typography, message, Table } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { projectApi } from "../../services/api";
+import { projectApi, productApi } from "../../services/api";
 import { useLocale } from "../../locales";
 
 const statusColors: Record<string, string> = {
@@ -27,6 +27,13 @@ export default function Projects() {
     queryKey: ["projects", page, statusFilter],
     queryFn: () => projectApi.list({ page, page_size: 20, status: statusFilter }),
   });
+
+  const { data: productsData } = useQuery({
+    queryKey: ["products-all"],
+    queryFn: () => productApi.list({ page_size: 100 }),
+  });
+
+  const products = productsData?.data?.data || [];
 
   const createMutation = useMutation({
     mutationFn: (values: Record<string, unknown>) => projectApi.create(values),
@@ -120,7 +127,12 @@ export default function Projects() {
       <Modal
         title={`${t("common.create")} ${t("project.name")}`}
         open={createModalOpen}
-        onOk={() => form.validateFields().then((v) => createMutation.mutate(v))}
+        onOk={() =>
+          form.validateFields().then((v) => {
+            const selected = products.find((p) => p.id === v.product_id);
+            createMutation.mutate({ ...v, product_code: selected?.code || null });
+          })
+        }
         onCancel={() => setCreateModalOpen(false)}
         confirmLoading={createMutation.isPending}
       >
@@ -129,7 +141,15 @@ export default function Projects() {
             <Input />
           </Form.Item>
           <Form.Item name="product_id" label={t("project.productId")} rules={[{ required: true }]}>
-            <Input placeholder={t("project.enterProductUUID")} />
+            <Select
+              showSearch
+              placeholder={t("project.enterProductUUID")}
+              optionFilterProp="label"
+              options={products.map((p) => ({
+                label: `${p.code} - ${p.name}`,
+                value: p.id,
+              }))}
+            />
           </Form.Item>
           <Form.Item name="type" label={t("project.type")} initialValue="new_product">
             <Select

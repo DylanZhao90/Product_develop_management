@@ -351,3 +351,119 @@
   padding: 2px 0;
   cursor: pointer;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   Dashboard Responsive — Mobile Overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* ── Widget cards: stack vertically, reduce padding ── */
+  .pdm-widget-header {
+    padding: 10px 14px !important;
+  }
+  .pdm-widget-body {
+    padding: 12px 14px !important;
+  }
+  .pdm-widget-header h4 {
+    font-size: 13px !important;
+  }
+
+  /* ── Stat cards: smaller icon/value ── */
+  .pdm-stat-card .ant-statistic-content {
+    font-size: 24px !important;
+  }
+  .pdm-stat-card .ant-card-body {
+    padding: 14px 16px !important;
+  }
+
+  /* ── Panorama cards: adjust layout ── */
+  .pdm-panorama-card .ant-card-body {
+    padding: 12px !important;
+  }
+  .pdm-panorama-stats {
+    gap: 8px !important;
+  }
+  .pdm-panorama-stat-value {
+    font-size: 18px !important;
+  }
+  .pdm-panorama-card-header .pdm-panorama-icon {
+    font-size: 16px !important;
+  }
+  .pdm-panorama-card-header .ant-typography strong {
+    font-size: 12px !important;
+  }
+  /* Allow panorama timeline to scroll on small screens */
+  .pdm-panorama-timeline {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── Summary bar: wrap on mobile ── */
+  .pdm-panorama-summary {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    font-size: 11px !important;
+  }
+
+  /* ── Module drawer items compact ── */
+  .pdm-module-item {
+    padding: 8px 0 !important;
+  }
+
+  /* ── Activity feed compact ── */
+  .pdm-activity-item {
+    padding: 6px 0 !important;
+  }
+  .pdm-activity-text {
+    font-size: 12px !important;
+  }
+
+  /* ── Dashboard header action bar ── */
+  .pdm-dashboard-header .ant-space {
+    flex-wrap: wrap;
+    gap: 4px !important;
+  }
+  .pdm-dashboard-header .ant-btn {
+    font-size: 12px !important;
+    padding: 4px 8px !important;
+  }
+
+  /* ── Floating action bar below stat cards ── */
+  .ant-row + div[style*="justify-content: flex-end"] {
+    flex-wrap: wrap;
+    justify-content: flex-start !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* ── Panorama: single column minimal ── */
+  .pdm-panorama-card .ant-card-body {
+    padding: 10px !important;
+  }
+  .pdm-panorama-stat-value {
+    font-size: 16px !important;
+  }
+  .pdm-panorama-flow-rate {
+    font-size: 10px !important;
+    padding: 3px 8px !important;
+  }
+  .pdm-panorama-product-item {
+    font-size: 10px !important;
+  }
+
+  /* ── Widget body padding reduced ── */
+  .pdm-widget-body {
+    padding: 8px 10px !important;
+  }
+  .pdm-widget-header {
+    padding: 8px 10px !important;
+  }
+
+  /* ── Activity feed compact ── */
+  .pdm-activity-item {
+    gap: 8px !important;
+  }
+  .pdm-activity-time {
+    font-size: 10px !important;
+  }
+}

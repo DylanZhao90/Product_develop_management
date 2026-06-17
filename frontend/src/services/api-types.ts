@@ -67,6 +67,7 @@ export type IssueStatus = "open" | "investigating" | "resolved" | "closed";
 export interface Project {
   id: string;
   product_id: string;
+  product_code?: string;
   name: string;
   type: "new_product" | "version_upgrade";
   feasibility_doc_url: string | null;

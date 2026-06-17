@@ -337,5 +337,5 @@
   "project.taskUpdated": "任务已更新",
   "project.issueUpdated": "问题已更新",
   "project.notFound": "项目未找到",
-  "project.enterProductUUID": "输入产品 UUID"
+  "project.enterProductUUID": "选择产品"
 }

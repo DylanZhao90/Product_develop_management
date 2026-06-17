@@ -57,6 +57,20 @@
   background: var(--color-bg-card) !important;
 }
 
+/* Sankey chart fills available space inside the flex card body */
+.sankey-chart-container {
+  flex: 1;
+  min-height: 500px;
+  width: 100%;
+}
+
+/* On larger screens, let the sankey card expand vertically */
+@media (min-width: 1200px) {
+  .sankey-card {
+    min-height: 640px;
+  }
+}
+
 /* Flow rate items */
 .flow-rate-item {
   text-align: center;
@@ -224,4 +238,103 @@
 }
 [data-theme="linear-dark"] .flow-rate-item:hover {
   background: rgba(255,255,255,0.06);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Analytics Responsive — Mobile Overrides
+   ═══════════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  /* ── Stage overview cards: reduce font sizes ── */
+  .stage-stat-count {
+    font-size: 22px !important;
+  }
+  .stage-stat-label {
+    font-size: 11px !important;
+  }
+  .stage-stat-card .pdm-stat-icon {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+    margin-bottom: 6px !important;
+  }
+
+  /* ── Sankey card: allow scroll / reduce min-height ── */
+  .sankey-chart-container {
+    min-height: 320px !important;
+  }
+  .sankey-card .ant-card-body {
+    padding: 14px !important;
+  }
+
+  /* ── Flow rate items: wrap properly, reduce size ── */
+  .flow-rate-value {
+    font-size: 16px !important;
+  }
+  .flow-rate-path {
+    font-size: 11px !important;
+  }
+  .flow-rate-pct {
+    font-size: 10px !important;
+  }
+
+  /* ── Per-stage panels ── */
+  .stage-card-header h3 {
+    font-size: 14px !important;
+  }
+  .stage-card-header .stage-count {
+    font-size: 11px !important;
+    padding: 1px 8px !important;
+  }
+
+  /* ── Metric cards compact ── */
+  .stage-metric-card {
+    padding: 8px 10px !important;
+  }
+
+  /* ── Mini charts ── */
+  .mini-chart {
+    height: 150px !important;
+  }
+  .chart-card {
+    padding: 10px !important;
+  }
+  .chart-title-sm {
+    font-size: 12px !important;
+  }
+
+  /* ── Product detail table ── */
+  .stage-product-table .ant-table-thead > tr > th,
+  .stage-product-table .ant-table-tbody > tr > td {
+    padding: 4px 8px !important;
+    font-size: 11px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  /* ── Stage overview cards: even smaller ── */
+  .stage-stat-count {
+    font-size: 18px !important;
+  }
+  .stage-stat-sublabel {
+    display: none;
+  }
+
+  /* ── Sankey ── */
+  .sankey-chart-container {
+    min-height: 260px !important;
+  }
+
+  /* ── Flow rates: single column ── */
+  .flow-rate-value {
+    font-size: 14px !important;
+  }
+
+  /* ── Sections: reduce spacing ── */
+  .stage-section {
+    margin-bottom: 14px !important;
+  }
+  .stage-panel-card .ant-card-body {
+    padding: 10px !important;
+  }
 }

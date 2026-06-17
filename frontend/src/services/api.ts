@@ -122,6 +122,9 @@ const MOCK_PRODUCTS: Product[] = [
   { id: "prod-10", code: "PF-2.2-KR", model: "PF-2.2-KR", name: "Portable Charger 2.2kW KR", type: "portable", target_markets: ["KR"], certification_requirements: ["KC"], lifecycle_status: "trial_handover", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2025-04-20T00:00:00Z", updated_at: null },
 ];
 
+// In-memory mutable store for mock fallback — items created/updated in catch blocks persist here
+let _products = [...MOCK_PRODUCTS];
+
 export const productApi = {
   list: async (params?: {
     page?: number; page_size?: number; status?: string; type?: string; search?: string;
@@ -130,7 +133,7 @@ export const productApi = {
       const res = await api.get<PaginatedResponse<Product>>("/products", { params });
       return { data: res.data };
     } catch {
-      const filtered = MOCK_PRODUCTS.filter((p) => {
+      const filtered = _products.filter((p) => {
         if (params?.status && p.lifecycle_status !== params.status) return false;
         if (params?.type && p.type !== params.type) return false;
         if (params?.search) {
@@ -158,12 +161,11 @@ export const productApi = {
       return {
         data: {
           success: true,
-          data: MOCK_PRODUCTS.find((p) => p.id === id) ?? {
-            id, code: "AC-220-EU", model: "AC-220-EU", name: "AC Charger 220V EU",
-            type: "ac_charger", target_markets: ["EU"], certification_requirements: ["CE","ROHS"],
-            lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null,
-            description: null, created_at: "2025-01-15T00:00:00Z", updated_at: null,
-          } as Product,
+          data: _products.find((p) => p.id === id) ?? (() => {
+            const fallback: Product = { id, code: "AC-220-EU", model: "AC-220-EU", name: "AC Charger 220V EU", type: "ac_charger", target_markets: ["EU"], certification_requirements: ["CE","ROHS"], lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2025-01-15T00:00:00Z", updated_at: null };
+            _products.push(fallback);
+            return fallback;
+          })(),
         },
       };
     }
@@ -173,17 +175,16 @@ export const productApi = {
       const res = await api.post<ApiResponse<Product>>("/products", data);
       return { data: res.data };
     } catch {
+      const newItem = {
+        id: `mock-${Date.now()}`, code: data.model, model: data.model, name: data.name,
+        type: data.type ?? null, target_markets: data.target_markets ?? null,
+        certification_requirements: data.certification_requirements ?? null,
+        lifecycle_status: "in_development", product_manager_id: null, thumbnail_url: null,
+        description: data.description ?? null, created_at: new Date().toISOString(), updated_at: null,
+      } as Product;
+      _products.push(newItem);
       return {
-        data: {
-          success: true,
-          data: {
-            id: `mock-${Date.now()}`, code: data.model, model: data.model, name: data.name,
-            type: data.type ?? null, target_markets: data.target_markets ?? null,
-            certification_requirements: data.certification_requirements ?? null,
-            lifecycle_status: "in_development", product_manager_id: null, thumbnail_url: null,
-            description: data.description ?? null, created_at: new Date().toISOString(), updated_at: null,
-          } as Product,
-        },
+        data: { success: true, data: newItem },
       };
     }
   },
@@ -192,10 +193,14 @@ export const productApi = {
       const res = await api.patch<ApiResponse<Product>>(`/products/${id}`, data);
       return { data: res.data };
     } catch {
+      const idx = _products.findIndex((p) => p.id === id);
+      if (idx !== -1) {
+        _products[idx] = { ..._products[idx], ...data, updated_at: new Date().toISOString() } as Product;
+      }
       return {
         data: {
           success: true,
-          data: { id, ...data, lifecycle_status: "on_sale", created_at: "2025-01-15T00:00:00Z", updated_at: new Date().toISOString(), code: "AC-220-EU", model: "AC-220-EU", name: "AC Charger", type: "ac_charger", target_markets: null, certification_requirements: null, product_manager_id: null, thumbnail_url: null, description: null } as Product,
+          data: idx !== -1 ? _products[idx] : { id, ...data, lifecycle_status: "on_sale", created_at: "2025-01-15T00:00:00Z", updated_at: new Date().toISOString(), code: "AC-220-EU", model: "AC-220-EU", name: "AC Charger", type: "ac_charger", target_markets: null, certification_requirements: null, product_manager_id: null, thumbnail_url: null, description: null } as Product,
         },
       };
     }
@@ -232,12 +237,15 @@ export const productApi = {
       const res = await api.post<ApiResponse<{ product: Product; log: LifecycleChangeLog }>>(`/products/${id}/lifecycle/transition`, data);
       return { data: res.data };
     } catch {
-      const product = MOCK_PRODUCTS.find((p) => p.id === id) ?? MOCK_PRODUCTS[0];
+      const product = _products.find((p) => p.id === id) ?? _products[0];
+      const updatedProduct = { ...product, lifecycle_status: data.to_status, updated_at: new Date().toISOString() } as Product;
+      const idx = _products.findIndex((p) => p.id === id);
+      if (idx !== -1) _products[idx] = updatedProduct;
       return {
         data: {
           success: true,
           data: {
-            product: { ...product, lifecycle_status: data.to_status, updated_at: new Date().toISOString() } as Product,
+            product: updatedProduct,
             log: { id: `ll-${Date.now()}`, product_id: id, from_status: product.lifecycle_status, to_status: data.to_status, approval_id: null, changed_by: "mock-user", reason: data.reason ?? null, changed_at: new Date().toISOString() },
           },
         },
@@ -317,13 +325,17 @@ const MOCK_ISSUES: TechnicalIssue[] = [
   { id: "issue-5", project_id: "proj-2", title: "Charging cable connector wear", description: "Connector shows wear after 500 cycles", severity: "minor", assigned_to: null, status: "closed", resolved_at: "2025-06-01T00:00:00Z", created_at: "2025-05-20T00:00:00Z" },
 ];
 
+let _projects = [...MOCK_PROJECTS];
+let _tasks = [...MOCK_TASKS];
+let _issues = [...MOCK_ISSUES];
+
 export const projectApi = {
   list: async (params?: { page?: number; page_size?: number; product_id?: string; status?: string }): Promise<{ data: PaginatedResponse<Project> }> => {
     try {
       const res = await api.get<PaginatedResponse<Project>>("/projects", { params });
       return { data: res.data };
     } catch {
-      const filtered = MOCK_PROJECTS.filter((p) => {
+      const filtered = _projects.filter((p) => {
         if (params?.status && p.status !== params.status) return false;
         if (params?.product_id && p.product_id !== params.product_id) return false;
         return true;
@@ -347,7 +359,7 @@ export const projectApi = {
       return {
         data: {
           success: true,
-          data: MOCK_PROJECTS.find((p) => p.id === id) ?? {
+          data: _projects.find((p) => p.id === id) ?? {
             id, product_id: "prod-1", name: "Mock Project", type: "new_product",
             feasibility_doc_url: null, approval_id: null, feishu_chat_id: null,
             status: "in_progress", created_by: "mock-user", created_at: new Date().toISOString(), updated_at: null,
@@ -361,16 +373,17 @@ export const projectApi = {
       const res = await api.post<ApiResponse<Project>>("/projects", data);
       return { data: res.data };
     } catch {
+   const product = _products.find((p) => p.id === data.product_id);
+   const newItem = {
+     id: `mock-proj-${Date.now()}`, product_id: (data.product_id as string) || "prod-1",
+     product_code: product?.code || null,
+     name: (data.name as string) || "Mock Project", type: (data.type as "new_product" | "version_upgrade") ?? "new_product",
+        feasibility_doc_url: null, approval_id: null, feishu_chat_id: null,
+        status: "pending_approval", created_by: "mock-user", created_at: new Date().toISOString(), updated_at: null,
+      } as Project;
+      _projects.push(newItem);
       return {
-        data: {
-          success: true,
-          data: {
-            id: `mock-proj-${Date.now()}`, product_id: (data.product_id as string) || "prod-1",
-            name: (data.name as string) || "Mock Project", type: (data.type as "new_product" | "version_upgrade") ?? "new_product",
-            feasibility_doc_url: null, approval_id: null, feishu_chat_id: null,
-            status: "pending_approval", created_by: "mock-user", created_at: new Date().toISOString(), updated_at: null,
-          } as Project,
-        },
+        data: { success: true, data: newItem },
       };
     }
   },
@@ -379,7 +392,11 @@ export const projectApi = {
       const res = await api.patch<ApiResponse<Project>>(`/projects/${id}`, data);
       return { data: res.data };
     } catch {
-      const existing = MOCK_PROJECTS.find((p) => p.id === id) ?? MOCK_PROJECTS[0];
+      const idx = _projects.findIndex((p) => p.id === id);
+      if (idx !== -1) {
+        _projects[idx] = { ..._projects[idx], ...data, updated_at: new Date().toISOString() } as unknown as Project;
+      }
+      const existing = idx !== -1 ? _projects[idx] : _projects[0];
       return { data: { success: true, data: { ...existing, ...data, updated_at: new Date().toISOString() } as unknown as Project } };
     }
   },
@@ -404,7 +421,7 @@ export const projectApi = {
       const res = await api.get<ApiResponse<ProjectTask[]>>(`/projects/${id}/tasks`);
       return { data: res.data };
     } catch {
-      return { data: { success: true, data: MOCK_TASKS.filter((t) => t.project_id === id).length > 0 ? MOCK_TASKS.filter((t) => t.project_id === id) : MOCK_TASKS } };
+      return { data: { success: true, data: _tasks.filter((t) => t.project_id === id).length > 0 ? _tasks.filter((t) => t.project_id === id) : _tasks } };
     }
   },
   getTaskTree: async (id: string): Promise<{ data: ApiResponse<ProjectTask[]> }> => {
@@ -412,9 +429,9 @@ export const projectApi = {
       const res = await api.get<ApiResponse<ProjectTask[]>>(`/projects/${id}/tasks/tree`);
       return { data: res.data };
     } catch {
-      const tasks = MOCK_TASKS.filter((t) => t.project_id === id || !t.project_id).map((t) => ({
+      const tasks = _tasks.filter((t) => t.project_id === id || !t.project_id).map((t) => ({
         ...t,
-        children: MOCK_TASKS.filter((child) => child.parent_task_id === t.id),
+        children: _tasks.filter((child) => child.parent_task_id === t.id),
       }));
       return { data: { success: true, data: tasks } };
     }
@@ -424,16 +441,15 @@ export const projectApi = {
       const res = await api.post<ApiResponse<ProjectTask>>(`/projects/${id}/tasks`, data);
       return { data: res.data };
     } catch {
+      const newItem = {
+        id: `mock-task-${Date.now()}`, project_id: id, parent_task_id: (data.parent_task_id as string) || null,
+        name: (data.name as string) || "Mock Task", responsible_role: null, assignee_feishu_id: null,
+        supplier_id: null, planned_start: null, planned_end: null, actual_end: null,
+        deliverables: null, status: "pending", sort_order: 0,
+      } as ProjectTask;
+      _tasks.push(newItem);
       return {
-        data: {
-          success: true,
-          data: {
-            id: `mock-task-${Date.now()}`, project_id: id, parent_task_id: (data.parent_task_id as string) || null,
-            name: (data.name as string) || "Mock Task", responsible_role: null, assignee_feishu_id: null,
-            supplier_id: null, planned_start: null, planned_end: null, actual_end: null,
-            deliverables: null, status: "pending", sort_order: 0,
-          } as ProjectTask,
-        },
+        data: { success: true, data: newItem },
       };
     }
   },
@@ -442,7 +458,11 @@ export const projectApi = {
       const res = await api.patch<ApiResponse<ProjectTask>>(`/projects/${projectId}/tasks/${taskId}`, data);
       return { data: res.data };
     } catch {
-      const existing = MOCK_TASKS.find((t) => t.id === taskId) ?? MOCK_TASKS[0];
+      const idx = _tasks.findIndex((t) => t.id === taskId);
+      if (idx !== -1) {
+        _tasks[idx] = { ..._tasks[idx], ...data } as unknown as ProjectTask;
+      }
+      const existing = idx !== -1 ? _tasks[idx] : _tasks[0];
       return { data: { success: true, data: { ...existing, ...data } as unknown as ProjectTask } };
     }
   },
@@ -451,7 +471,7 @@ export const projectApi = {
       const res = await api.get<ApiResponse<TechnicalIssue[]>>(`/projects/${id}/issues`);
       return { data: res.data };
     } catch {
-      return { data: { success: true, data: MOCK_ISSUES } };
+      return { data: { success: true, data: _issues } };
     }
   },
   createIssue: async (id: string, data: Record<string, unknown>): Promise<{ data: ApiResponse<TechnicalIssue> }> => {
@@ -459,15 +479,14 @@ export const projectApi = {
       const res = await api.post<ApiResponse<TechnicalIssue>>(`/projects/${id}/issues`, data);
       return { data: res.data };
     } catch {
+      const newItem = {
+        id: `mock-issue-${Date.now()}`, project_id: id, title: (data.title as string) || "Mock Issue",
+        description: (data.description as string) || null, severity: (data.severity as "critical" | "major" | "minor") ?? "major",
+        assigned_to: null, status: "open", resolved_at: null, created_at: new Date().toISOString(),
+      } as TechnicalIssue;
+      _issues.push(newItem);
       return {
-        data: {
-          success: true,
-          data: {
-            id: `mock-issue-${Date.now()}`, project_id: id, title: (data.title as string) || "Mock Issue",
-            description: (data.description as string) || null, severity: (data.severity as "critical" | "major" | "minor") ?? "major",
-            assigned_to: null, status: "open", resolved_at: null, created_at: new Date().toISOString(),
-          } as TechnicalIssue,
-        },
+        data: { success: true, data: newItem },
       };
     }
   },
@@ -476,7 +495,11 @@ export const projectApi = {
       const res = await api.patch<ApiResponse<TechnicalIssue>>(`/projects/${projectId}/issues/${issueId}`, data);
       return { data: res.data };
     } catch {
-      const existing = MOCK_ISSUES.find((i) => i.id === issueId) ?? MOCK_ISSUES[0];
+      const idx = _issues.findIndex((i) => i.id === issueId);
+      if (idx !== -1) {
+        _issues[idx] = { ..._issues[idx], ...data } as unknown as TechnicalIssue;
+      }
+      const existing = idx !== -1 ? _issues[idx] : _issues[0];
       return { data: { success: true, data: { ...existing, ...data } as unknown as TechnicalIssue } };
     }
   },
@@ -495,6 +518,8 @@ const MOCK_DESIGN_FILES: Record<string, unknown>[] = [
   { id: "df-8", name: "PF-7.7-US_Disassembly_Guide.pdf", type: "documentation", file_size: 1800000, uploaded_by: "user-2", uploaded_at: "2025-02-15T00:00:00Z", product_id: "prod-7", project_id: "proj-7" },
 ];
 
+let _designFiles = [...MOCK_DESIGN_FILES];
+
 export const designApi = {
   list: async (params?: Record<string, unknown>): Promise<{ data: PaginatedResponse<Record<string, unknown>> }> => {
     try {
@@ -503,8 +528,8 @@ export const designApi = {
     } catch {
       return {
         data: {
-          success: true, data: MOCK_DESIGN_FILES,
-          total: MOCK_DESIGN_FILES.length,
+          success: true, data: _designFiles,
+          total: _designFiles.length,
           page: (params?.page as number) ?? 1,
           page_size: (params?.page_size as number) ?? 20,
           total_pages: 1,
@@ -517,7 +542,7 @@ export const designApi = {
       const res = await api.get(`/design-files/${id}`);
       return { data: res.data as unknown as ApiResponse<Record<string, unknown>> };
     } catch {
-      const file = MOCK_DESIGN_FILES.find((f) => f.id === id) ?? MOCK_DESIGN_FILES[0];
+      const file = _designFiles.find((f) => f.id === id) ?? _designFiles[0];
       return { data: { success: true, data: file } };
     }
   },
@@ -560,7 +585,9 @@ export const designApi = {
       });
       return { data: res.data as unknown as ApiResponse<Record<string, unknown>> };
     } catch {
-      return { data: { success: true, data: { id: `mock-upload-${Date.now()}`, name: "uploaded_file", status: "uploaded" } } };
+      const newItem = { id: `mock-upload-${Date.now()}`, name: "uploaded_file", status: "uploaded" };
+      _designFiles.push(newItem);
+      return { data: { success: true, data: newItem } };
     }
   },
 };
@@ -585,6 +612,9 @@ const MOCK_OUTSOURCE_TASKS: Record<string, unknown>[] = [
   { id: "ost-6", supplier_id: "supp-6", project_id: "proj-10", name: "IGBT module samples", status: "pending", quantity: 50, unit_price: 180.0, total_cost: 9000, started_at: null, completed_at: null, notes: "Lead time 12 weeks" },
 ];
 
+let _suppliers = [...MOCK_SUPPLIERS];
+let _outsourceTasks = [...MOCK_OUTSOURCE_TASKS];
+
 export const supplierApi = {
   list: async (params?: Record<string, unknown>): Promise<{ data: PaginatedResponse<Supplier> }> => {
     try {
@@ -593,8 +623,8 @@ export const supplierApi = {
     } catch {
       return {
         data: {
-          success: true, data: MOCK_SUPPLIERS,
-          total: MOCK_SUPPLIERS.length,
+          success: true, data: _suppliers,
+          total: _suppliers.length,
           page: (params?.page as number) ?? 1,
           page_size: (params?.page_size as number) ?? 20,
           total_pages: 1,
@@ -610,7 +640,7 @@ export const supplierApi = {
       return {
         data: {
           success: true,
-          data: MOCK_SUPPLIERS.find((s) => s.id === id) ?? {
+          data: _suppliers.find((s) => s.id === id) ?? {
             id, name: "Mock Supplier", type: "unknown", contact_name: null, contact_email: null,
             contact_feishu_id: null, qualification_files: null, rating: null, on_time_delivery_rate: null,
             status: "active", notes: null, created_at: new Date().toISOString(), updated_at: null,
@@ -624,16 +654,15 @@ export const supplierApi = {
       const res = await api.post<ApiResponse<Supplier>>("/suppliers", data);
       return { data: res.data };
     } catch {
+      const newItem = {
+        id: `mock-supp-${Date.now()}`, name: (data.name as string) || "Mock Supplier",
+        type: (data.type as string) || "unknown", contact_name: null, contact_email: null,
+        contact_feishu_id: null, qualification_files: null, rating: null, on_time_delivery_rate: null,
+        status: "active", notes: null, created_at: new Date().toISOString(), updated_at: null,
+      } as Supplier;
+      _suppliers.push(newItem);
       return {
-        data: {
-          success: true,
-          data: {
-            id: `mock-supp-${Date.now()}`, name: (data.name as string) || "Mock Supplier",
-            type: (data.type as string) || "unknown", contact_name: null, contact_email: null,
-            contact_feishu_id: null, qualification_files: null, rating: null, on_time_delivery_rate: null,
-            status: "active", notes: null, created_at: new Date().toISOString(), updated_at: null,
-          } as Supplier,
-        },
+        data: { success: true, data: newItem },
       };
     }
   },
@@ -642,7 +671,11 @@ export const supplierApi = {
       const res = await api.patch<ApiResponse<Supplier>>(`/suppliers/${id}`, data);
       return { data: res.data };
     } catch {
-      const existing = MOCK_SUPPLIERS.find((s) => s.id === id) ?? MOCK_SUPPLIERS[0];
+      const idx = _suppliers.findIndex((s) => s.id === id);
+      if (idx !== -1) {
+        _suppliers[idx] = { ..._suppliers[idx], ...data, updated_at: new Date().toISOString() } as unknown as Supplier;
+      }
+      const existing = idx !== -1 ? _suppliers[idx] : _suppliers[0];
       return { data: { success: true, data: { ...existing, ...data, updated_at: new Date().toISOString() } as unknown as Supplier } };
     }
   },
@@ -659,7 +692,7 @@ export const supplierApi = {
       const res = await api.get(`/suppliers/${supplierId}/outsource-tasks`);
       return { data: res.data as unknown as ApiResponse<Record<string, unknown>[]> };
     } catch {
-      return { data: { success: true, data: MOCK_OUTSOURCE_TASKS.filter((t) => t.supplier_id === supplierId) } };
+      return { data: { success: true, data: _outsourceTasks.filter((t) => t.supplier_id === supplierId) } };
     }
   },
   createOutsourceTask: async (supplierId: string, data: Record<string, unknown>): Promise<{ data: ApiResponse<Record<string, unknown>> }> => {
@@ -667,7 +700,9 @@ export const supplierApi = {
       const res = await api.post(`/suppliers/${supplierId}/outsource-tasks`, data);
       return { data: res.data as unknown as ApiResponse<Record<string, unknown>> };
     } catch {
-      return { data: { success: true, data: { id: `mock-ost-${Date.now()}`, supplier_id: supplierId, ...data, status: "pending" } } };
+      const newItem = { id: `mock-ost-${Date.now()}`, supplier_id: supplierId, ...data, status: "pending" };
+      _outsourceTasks.push(newItem);
+      return { data: { success: true, data: newItem } };
     }
   },
   updateOutsourceTask: async (supplierId: string, taskId: string, data: Record<string, unknown>): Promise<{ data: ApiResponse<Record<string, unknown>> }> => {
@@ -675,6 +710,10 @@ export const supplierApi = {
       const res = await api.patch(`/suppliers/${supplierId}/outsource-tasks/${taskId}`, data);
       return { data: res.data as unknown as ApiResponse<Record<string, unknown>> };
     } catch {
+      const idx = _outsourceTasks.findIndex((t) => t.id === taskId);
+      if (idx !== -1) {
+        _outsourceTasks[idx] = { ..._outsourceTasks[idx], ...data };
+      }
       return { data: { success: true, data: { id: taskId, supplier_id: supplierId, ...data } } };
     }
   },
@@ -706,6 +745,9 @@ const MOCK_UPGRADE_TASKS: FirmwareUpgradeTask[] = [
   { id: "ug-4", firmware_version_id: "fw-5", target_sn_filter: { region: "JP" }, gray_scale_percent: 100, status: "failed", success_count: 15, failure_count: 35, total_count: 50, failure_reasons: { "INCOMPATIBLE_HW": 30, "NETWORK_ERROR": 5 }, created_by: "user-3", created_at: "2025-05-20T00:00:00Z", updated_at: "2025-05-25T00:00:00Z" },
 ];
 
+let _firmwareVersions = [...MOCK_FIRMWARE_VERSIONS];
+let _upgradeTasks = [...MOCK_UPGRADE_TASKS];
+
 export const firmwareApi = {
   listVersions: async (params?: Record<string, unknown>): Promise<{ data: PaginatedResponse<FirmwareVersion> }> => {
     try {
@@ -714,8 +756,8 @@ export const firmwareApi = {
     } catch {
       return {
         data: {
-          success: true, data: MOCK_FIRMWARE_VERSIONS,
-          total: MOCK_FIRMWARE_VERSIONS.length,
+          success: true, data: _firmwareVersions,
+          total: _firmwareVersions.length,
           page: (params?.page as number) ?? 1,
           page_size: (params?.page_size as number) ?? 20,
           total_pages: 1,
@@ -731,7 +773,7 @@ export const firmwareApi = {
       return {
         data: {
           success: true,
-          data: MOCK_FIRMWARE_VERSIONS.find((v) => v.id === id) ?? {
+          data: _firmwareVersions.find((v) => v.id === id) ?? {
             id, product_model: "AC-220-EU", version: "1.0.0", file_url: "", file_size: null,
             file_hash: null, release_notes: null, release_type: "full", released_by: null,
             released_at: new Date().toISOString(), created_at: new Date().toISOString(),
@@ -745,16 +787,15 @@ export const firmwareApi = {
       const res = await api.post<ApiResponse<FirmwareVersion>>("/firmware/versions", data);
       return { data: res.data };
     } catch {
+      const newItem = {
+        id: `mock-fw-${Date.now()}`, product_model: (data.product_model as string) || "AC-220-EU",
+        version: (data.version as string) || "0.0.0", file_url: "", file_size: null, file_hash: null,
+        release_notes: (data.release_notes as string) || null, release_type: (data.release_type as "full" | "incremental") ?? "full",
+        released_by: "mock-user", released_at: new Date().toISOString(), created_at: new Date().toISOString(),
+      } as FirmwareVersion;
+      _firmwareVersions.push(newItem);
       return {
-        data: {
-          success: true,
-          data: {
-            id: `mock-fw-${Date.now()}`, product_model: (data.product_model as string) || "AC-220-EU",
-            version: (data.version as string) || "0.0.0", file_url: "", file_size: null, file_hash: null,
-            release_notes: (data.release_notes as string) || null, release_type: (data.release_type as "full" | "incremental") ?? "full",
-            released_by: "mock-user", released_at: new Date().toISOString(), created_at: new Date().toISOString(),
-          } as FirmwareVersion,
-        },
+        data: { success: true, data: newItem },
       };
     }
   },
@@ -773,7 +814,9 @@ export const firmwareApi = {
       });
       return { data: res.data as unknown as ApiResponse<FirmwareVersion> };
     } catch {
-      return { data: { success: true, data: { id: `mock-upload-${Date.now()}`, product_model: "AC-220-EU", version: "0.0.0", file_url: "", file_size: null, file_hash: null, release_notes: null, release_type: "full", released_by: null, released_at: new Date().toISOString(), created_at: new Date().toISOString() } as FirmwareVersion } };
+      const newItem = { id: `mock-upload-${Date.now()}`, product_model: "AC-220-EU", version: "0.0.0", file_url: "", file_size: null, file_hash: null, release_notes: null, release_type: "full", released_by: null, released_at: new Date().toISOString(), created_at: new Date().toISOString() } as FirmwareVersion;
+      _firmwareVersions.push(newItem);
+      return { data: { success: true, data: newItem } };
     }
   },
   listUpgradeTasks: async (params?: Record<string, unknown>): Promise<{ data: PaginatedResponse<FirmwareUpgradeTask> }> => {
@@ -783,8 +826,8 @@ export const firmwareApi = {
     } catch {
       return {
         data: {
-          success: true, data: MOCK_UPGRADE_TASKS,
-          total: MOCK_UPGRADE_TASKS.length,
+          success: true, data: _upgradeTasks,
+          total: _upgradeTasks.length,
           page: (params?.page as number) ?? 1,
           page_size: (params?.page_size as number) ?? 20,
           total_pages: 1,
@@ -800,7 +843,7 @@ export const firmwareApi = {
       return {
         data: {
           success: true,
-          data: MOCK_UPGRADE_TASKS.find((t) => t.id === id) ?? {
+          data: _upgradeTasks.find((t) => t.id === id) ?? {
             id, firmware_version_id: "fw-1", target_sn_filter: null, gray_scale_percent: 100,
             status: "scheduled", success_count: 0, failure_count: 0, total_count: 0,
             failure_reasons: null, created_by: null, created_at: new Date().toISOString(), updated_at: null,
@@ -814,16 +857,15 @@ export const firmwareApi = {
       const res = await api.post<ApiResponse<FirmwareUpgradeTask>>("/firmware/upgrade-tasks", data);
       return { data: res.data };
     } catch {
+      const newItem = {
+        id: `mock-ug-${Date.now()}`, firmware_version_id: (data.firmware_version_id as string) || "fw-1",
+        target_sn_filter: null, gray_scale_percent: (data.gray_scale_percent as number) ?? 100,
+        status: "scheduled", success_count: 0, failure_count: 0, total_count: 0,
+        failure_reasons: null, created_by: "mock-user", created_at: new Date().toISOString(), updated_at: null,
+      } as FirmwareUpgradeTask;
+      _upgradeTasks.push(newItem);
       return {
-        data: {
-          success: true,
-          data: {
-            id: `mock-ug-${Date.now()}`, firmware_version_id: (data.firmware_version_id as string) || "fw-1",
-            target_sn_filter: null, gray_scale_percent: (data.gray_scale_percent as number) ?? 100,
-            status: "scheduled", success_count: 0, failure_count: 0, total_count: 0,
-            failure_reasons: null, created_by: "mock-user", created_at: new Date().toISOString(), updated_at: null,
-          } as FirmwareUpgradeTask,
-        },
+        data: { success: true, data: newItem },
       };
     }
   },
@@ -832,7 +874,11 @@ export const firmwareApi = {
       const res = await api.patch<ApiResponse<FirmwareUpgradeTask>>(`/firmware/upgrade-tasks/${id}`, data);
       return { data: res.data };
     } catch {
-      const existing = MOCK_UPGRADE_TASKS.find((t) => t.id === id) ?? MOCK_UPGRADE_TASKS[0];
+      const idx = _upgradeTasks.findIndex((t) => t.id === id);
+      if (idx !== -1) {
+        _upgradeTasks[idx] = { ..._upgradeTasks[idx], ...data, updated_at: new Date().toISOString() } as unknown as FirmwareUpgradeTask;
+      }
+      const existing = idx !== -1 ? _upgradeTasks[idx] : _upgradeTasks[0];
       return { data: { success: true, data: { ...existing, ...data, updated_at: new Date().toISOString() } as unknown as FirmwareUpgradeTask } };
     }
   },
@@ -915,6 +961,8 @@ const MOCK_CERTIFICATIONS: Certification[] = [
   { id: "cert-8", product_id: "prod-8", cert_type: "CE", cert_number: "CE-2023-001-DC1500", issued_by: "TÜV SÜD", issue_date: "2023-10-01", expiry_date: "2024-10-01", cert_file_url: null, status: "expired", remind_before_days: 90, created_at: "2023-10-01T00:00:00Z", updated_at: "2024-10-02T00:00:00Z" },
 ];
 
+let _certifications = [...MOCK_CERTIFICATIONS];
+
 export const certApi = {
   list: async (params?: Record<string, unknown>): Promise<{ data: PaginatedResponse<Certification> }> => {
     try {
@@ -923,8 +971,8 @@ export const certApi = {
     } catch {
       return {
         data: {
-          success: true, data: MOCK_CERTIFICATIONS,
-          total: MOCK_CERTIFICATIONS.length,
+          success: true, data: _certifications,
+          total: _certifications.length,
           page: (params?.page as number) ?? 1,
           page_size: (params?.page_size as number) ?? 20,
           total_pages: 1,
@@ -940,7 +988,7 @@ export const certApi = {
       return {
         data: {
           success: true,
-          data: MOCK_CERTIFICATIONS.find((c) => c.id === id) ?? {
+          data: _certifications.find((c) => c.id === id) ?? {
             id, product_id: "prod-1", cert_type: "Mock Cert", cert_number: null, issued_by: null,
             issue_date: null, expiry_date: null, cert_file_url: null, status: "valid",
             remind_before_days: 90, created_at: new Date().toISOString(), updated_at: null,
@@ -954,16 +1002,15 @@ export const certApi = {
       const res = await api.post<ApiResponse<Certification>>("/certifications", data);
       return { data: res.data };
     } catch {
+      const newItem = {
+        id: `mock-cert-${Date.now()}`, product_id: (data.product_id as string) || "prod-1",
+        cert_type: (data.cert_type as string) || "CE", cert_number: null, issued_by: null,
+        issue_date: null, expiry_date: null, cert_file_url: null, status: "valid",
+        remind_before_days: 90, created_at: new Date().toISOString(), updated_at: null,
+      } as Certification;
+      _certifications.push(newItem);
       return {
-        data: {
-          success: true,
-          data: {
-            id: `mock-cert-${Date.now()}`, product_id: (data.product_id as string) || "prod-1",
-            cert_type: (data.cert_type as string) || "CE", cert_number: null, issued_by: null,
-            issue_date: null, expiry_date: null, cert_file_url: null, status: "valid",
-            remind_before_days: 90, created_at: new Date().toISOString(), updated_at: null,
-          } as Certification,
-        },
+        data: { success: true, data: newItem },
       };
     }
   },
@@ -972,7 +1019,11 @@ export const certApi = {
       const res = await api.patch<ApiResponse<Certification>>(`/certifications/${id}`, data);
       return { data: res.data };
     } catch {
-      const existing = MOCK_CERTIFICATIONS.find((c) => c.id === id) ?? MOCK_CERTIFICATIONS[0];
+      const idx = _certifications.findIndex((c) => c.id === id);
+      if (idx !== -1) {
+        _certifications[idx] = { ..._certifications[idx], ...data, updated_at: new Date().toISOString() } as unknown as Certification;
+      }
+      const existing = idx !== -1 ? _certifications[idx] : _certifications[0];
       return { data: { success: true, data: { ...existing, ...data, updated_at: new Date().toISOString() } as unknown as Certification } };
     }
   },
@@ -992,7 +1043,7 @@ export const certApi = {
       return {
         data: {
           success: true,
-          data: MOCK_CERTIFICATIONS.filter((c) => c.status === "expiring_soon" || c.status === "expired").slice(0, 3),
+          data: _certifications.filter((c) => c.status === "expiring_soon" || c.status === "expired").slice(0, 3),
         },
       };
     }

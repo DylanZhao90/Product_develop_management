@@ -337,5 +337,5 @@
   "project.taskUpdated": "Task updated",
   "project.issueUpdated": "Issue updated",
   "project.notFound": "Project not found",
-  "project.enterProductUUID": "Enter product UUID"
+  "project.enterProductUUID": "Select product"
 }
