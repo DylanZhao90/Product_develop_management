@@ -10,12 +10,13 @@ export default function AuthCallback() {
 
   useEffect(() => {
     const code = searchParams.get("code");
+    const state = searchParams.get("state") || "";
     if (!code) {
       message.error("Missing authorization code");
       navigate("/login");
       return;
     }
-    handleCallback(code)
+    handleCallback(code, state)
       .then(() => {
         message.success("Login successful");
         navigate("/");

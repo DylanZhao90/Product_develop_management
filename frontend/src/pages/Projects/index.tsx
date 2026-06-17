@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button, Card, Form, Input, Modal, Select, Space, Tag, Typography, message } from "antd";
+import { Button, Card, Form, Input, Modal, Select, Space, Tag, Typography, message, Table } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { projectApi } from "../../services/api";
 import { useLocale } from "../../locales";
-import { Table } from "antd";
 
 const statusColors: Record<string, string> = {
   pending_approval: "gold",
@@ -32,7 +31,7 @@ export default function Projects() {
   const createMutation = useMutation({
     mutationFn: (values: Record<string, unknown>) => projectApi.create(values),
     onSuccess: () => {
-      message.success("Project created");
+      message.success(t("project.createdSuccess"));
       setCreateModalOpen(false);
       form.resetFields();
       queryClient.invalidateQueries({ queryKey: ["projects"] });
@@ -40,13 +39,13 @@ export default function Projects() {
   });
 
   const columns = [
-    { title: "Project Name", dataIndex: "name", key: "name", ellipsis: true },
+    { title: t("project.name"), dataIndex: "name", key: "name", ellipsis: true },
     {
-      title: "Type",
+      title: t("project.type"),
       dataIndex: "type",
       key: "type",
       width: 120,
-      render: (v: string) => (v === "new_product" ? "New Product" : "Version Upgrade"),
+      render: (v: string) => (v === "new_product" ? t("project.newProduct") : t("project.versionUpgrade")),
     },
     {
       title: t("common.status"),
@@ -56,7 +55,7 @@ export default function Projects() {
       render: (v: string) => <Tag color={statusColors[v]}>{t(`project.status.${v}`)}</Tag>,
     },
     {
-      title: "Created",
+      title: t("project.created"),
       dataIndex: "created_at",
       key: "created_at",
       width: 170,
@@ -66,8 +65,17 @@ export default function Projects() {
 
   return (
     <div>
+      {/* Page Header */}
+      <div className="page-header">
+        <Typography.Title className="page-header-title" level={4} style={{ margin: 0 }}>
+          {t("menu.projects")}
+        </Typography.Title>
+        <Typography.Text className="page-header-desc">
+          {t("common.total", { count: data?.data?.total || 0 })}
+        </Typography.Text>
+      </div>
+
       <Card
-        title={<Typography.Title level={4}>{t("menu.projects")}</Typography.Title>}
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalOpen(true)}>
             {t("common.create")}
@@ -76,17 +84,17 @@ export default function Projects() {
       >
         <Space style={{ marginBottom: 16 }}>
           <Select
-            placeholder="Status"
+            placeholder={t("common.status")}
             value={statusFilter}
             onChange={(v) => { setStatusFilter(v); setPage(1); }}
             allowClear
             style={{ width: 160 }}
             options={[
-              { label: "Pending Approval", value: "pending_approval" },
-              { label: "Approved", value: "approved" },
-              { label: "In Progress", value: "in_progress" },
-              { label: "Completed", value: "completed" },
-              { label: "Closed", value: "closed" },
+              { label: t("project.status.pending_approval"), value: "pending_approval" },
+              { label: t("project.status.approved"), value: "approved" },
+              { label: t("project.status.in_progress"), value: "in_progress" },
+              { label: t("project.status.completed"), value: "completed" },
+              { label: t("project.status.closed"), value: "closed" },
             ]}
           />
         </Space>
@@ -100,7 +108,7 @@ export default function Projects() {
             pageSize: 20,
             total: data?.data?.total || 0,
             onChange: setPage,
-            showTotal: (total: number) => `Total ${total}`,
+            showTotal: (total: number) => t("common.total", { count: total }),
           }}
           onRow={(record: { id: string }) => ({
             onClick: () => navigate(`/projects/${record.id}`),
@@ -110,24 +118,24 @@ export default function Projects() {
       </Card>
 
       <Modal
-        title={`${t("common.create")} Project`}
+        title={`${t("common.create")} ${t("project.name")}`}
         open={createModalOpen}
         onOk={() => form.validateFields().then((v) => createMutation.mutate(v))}
         onCancel={() => setCreateModalOpen(false)}
         confirmLoading={createMutation.isPending}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="name" label="Project Name" rules={[{ required: true }]}>
+          <Form.Item name="name" label={t("project.name")} rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="product_id" label="Product ID" rules={[{ required: true }]}>
-            <Input placeholder="Enter product UUID" />
+          <Form.Item name="product_id" label={t("project.productId")} rules={[{ required: true }]}>
+            <Input placeholder={t("project.enterProductUUID")} />
           </Form.Item>
-          <Form.Item name="type" label="Project Type" initialValue="new_product">
+          <Form.Item name="type" label={t("project.type")} initialValue="new_product">
             <Select
               options={[
-                { label: "New Product", value: "new_product" },
-                { label: "Version Upgrade", value: "version_upgrade" },
+                { label: t("project.newProduct"), value: "new_product" },
+                { label: t("project.versionUpgrade"), value: "version_upgrade" },
               ]}
             />
           </Form.Item>

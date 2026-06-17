@@ -239,6 +239,46 @@ export interface IssueDistribution {
   count: number;
 }
 
+// ---- Lifecycle Analytics ----
+
+export interface LifecycleStageEntry {
+  month: string;
+  count: number;
+}
+
+export interface LifecycleStageProduct {
+  code: string;
+  name: string;
+  model: string;
+  entered_at: string;
+  duration_days: number;
+  markets?: string[];
+}
+
+export interface LifecycleStageAnalytics {
+  stage: LifecycleStatus;
+  count: number;
+  entries: LifecycleStageEntry[];
+  duration_distribution: { range: string; count: number }[];
+  products: LifecycleStageProduct[];
+}
+
+export interface LifecycleFlowData {
+  from: LifecycleStatus;
+  to: LifecycleStatus;
+  count: number;
+}
+
+export interface LifecycleAnalyticsData {
+  in_development: LifecycleStageAnalytics;
+  trial_handover: LifecycleStageAnalytics;
+  on_sale: LifecycleStageAnalytics;
+  discontinued: LifecycleStageAnalytics;
+  eol: LifecycleStageAnalytics;
+  flows: LifecycleFlowData[];
+  total_products: number;
+}
+
 // ---- Lifecycle ----
 
 export interface LifecycleChangeLog {

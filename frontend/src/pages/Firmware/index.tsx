@@ -32,7 +32,7 @@ export default function Firmware() {
   const uploadMutation = useMutation({
     mutationFn: (formData: FormData) => firmwareApi.uploadFirmware(formData),
     onSuccess: () => {
-      message.success("Firmware uploaded");
+      message.success(t("firmware.uploadSuccess"));
       setVersionModalOpen(false);
       versionForm.resetFields();
       setFwFile(null);
@@ -43,7 +43,7 @@ export default function Firmware() {
   const createOtaMutation = useMutation({
     mutationFn: (v: Record<string, unknown>) => firmwareApi.createUpgradeTask(v),
     onSuccess: () => {
-      message.success("OTA task created");
+      message.success(t("firmware.otaCreated"));
       setOtaModalOpen(false);
       otaForm.resetFields();
       queryClient.invalidateQueries({ queryKey: ["firmware-upgrade-tasks"] });
@@ -64,32 +64,32 @@ export default function Firmware() {
 
   const handleDownload = (versionId: string) => {
     firmwareApi.getVersion(versionId).then((resp) => {
-      const url = resp.data?.data?.download_url;
+      const url = (resp.data?.data as any)?.download_url;
       if (url) window.open(url, "_blank");
     });
   };
 
   const versionColumns = [
-    { title: "Model", dataIndex: "product_model", key: "product_model", width: 120 },
-    { title: "Version", dataIndex: "version", key: "version", width: 100 },
+    { title: t("firmware.model"), dataIndex: "product_model", key: "product_model", width: 120 },
+    { title: t("firmware.version"), dataIndex: "version", key: "version", width: 100 },
     {
-      title: "Type",
+      title: t("firmware.releaseType"),
       dataIndex: "release_type",
       key: "release_type",
       width: 90,
       render: (v: string) => <Tag color={v === "full" ? "blue" : "green"}>{v}</Tag>,
     },
     {
-      title: "Hash",
+      title: t("firmware.hash"),
       dataIndex: "file_hash",
       key: "file_hash",
       width: 120,
       ellipsis: true,
-      render: (v: string) => v ? v.substring(0, 12) + "..." : "-",
+      render: (v: string) => (v ? v.substring(0, 12) + "..." : "-"),
     },
-    { title: "Release Notes", dataIndex: "release_notes", key: "release_notes", ellipsis: true },
+    { title: t("firmware.releaseNotes"), dataIndex: "release_notes", key: "release_notes", ellipsis: true },
     {
-      title: "Released",
+      title: t("firmware.released"),
       dataIndex: "released_at",
       key: "released_at",
       width: 150,
@@ -106,9 +106,9 @@ export default function Firmware() {
   ];
 
   const taskColumns = [
-    { title: "Firmware ID", dataIndex: "firmware_version_id", key: "firmware_version_id", width: 120, ellipsis: true },
+    { title: t("firmware.version") + " ID", dataIndex: "firmware_version_id", key: "firmware_version_id", width: 120, ellipsis: true },
     {
-      title: "Status",
+      title: t("common.status"),
       dataIndex: "status",
       key: "status",
       width: 110,
@@ -118,7 +118,7 @@ export default function Firmware() {
       },
     },
     {
-      title: "Progress",
+      title: t("firmware.progress"),
       key: "progress",
       width: 150,
       render: (_: unknown, r: Record<string, unknown>) => {
@@ -126,9 +126,9 @@ export default function Firmware() {
         return <Progress percent={pct} size="small" status={r.status === "failed" ? "exception" : undefined} />;
       },
     },
-    { title: "Gray", dataIndex: "gray_scale_percent", key: "gray", width: 60, render: (v: number) => `${v}%` },
+    { title: t("firmware.grayScale"), dataIndex: "gray_scale_percent", key: "gray", width: 60, render: (v: number) => `${v}%` },
     {
-      title: "Created",
+      title: t("firmware.created"),
       dataIndex: "created_at",
       key: "created_at",
       width: 150,
@@ -143,59 +143,66 @@ export default function Firmware() {
 
   return (
     <div>
-      <Typography.Title level={4}>{t("menu.firmware")}</Typography.Title>
+      <div className="page-header">
+        <Typography.Title className="page-header-title" level={4} style={{ margin: 0 }}>
+          {t("menu.firmware")}
+        </Typography.Title>
+        <Typography.Text className="page-header-desc">
+          {t("common.total", { count: vTotal })}
+        </Typography.Text>
+      </div>
       <Card>
         <Tabs activeKey={activeTab} onChange={setActiveTab} tabBarExtraContent={
           activeTab === "versions"
-            ? <Button type="primary" icon={<UploadOutlined />} onClick={() => setVersionModalOpen(true)}>Upload Firmware</Button>
-            : <Button type="primary" icon={<CloudUploadOutlined />} onClick={() => setOtaModalOpen(true)}>New OTA Task</Button>
+            ? <Button type="primary" icon={<UploadOutlined />} onClick={() => setVersionModalOpen(true)}>{t("common.upload")} {t("menu.firmware")}</Button>
+            : <Button type="primary" icon={<CloudUploadOutlined />} onClick={() => setOtaModalOpen(true)}>{t("common.create")} {t("firmware.otaTasks")}</Button>
         }>
-          <Tabs.TabPane tab="Versions" key="versions">
+          <Tabs.TabPane tab={t("firmware.versions")} key="versions">
             <Space style={{ marginBottom: 16 }}>
-              <Input placeholder="Filter by model" value={modelFilter}
+              <Input placeholder={t("firmware.model")} value={modelFilter}
                 onChange={(e) => { setModelFilter(e.target.value || undefined); setPage(1); }}
                 style={{ width: 200 }} allowClear />
             </Space>
-            <Table columns={versionColumns} dataSource={versions} rowKey="id" loading={vLoading}
-              pagination={{ current: page, pageSize: 20, total: vTotal, onChange: setPage, showTotal: (t: number) => `Total ${t}` }} />
+            <Table columns={versionColumns} dataSource={versions as any} rowKey="id" loading={vLoading}
+              pagination={{ current: page, pageSize: 20, total: vTotal, onChange: setPage, showTotal: (total: number) => t("common.total", { count: total }) }} />
           </Tabs.TabPane>
-          <Tabs.TabPane tab="OTA Tasks" key="tasks">
-            <Table columns={taskColumns} dataSource={tasks} rowKey="id" loading={tLoading}
-              pagination={{ current: page, pageSize: 20, total: tTotal, onChange: setPage, showTotal: (t: number) => `Total ${t}` }} />
+          <Tabs.TabPane tab={t("firmware.otaTasks")} key="tasks">
+            <Table columns={taskColumns} dataSource={tasks as any} rowKey="id" loading={tLoading}
+              pagination={{ current: page, pageSize: 20, total: tTotal, onChange: setPage, showTotal: (total: number) => t("common.total", { count: total }) }} />
           </Tabs.TabPane>
         </Tabs>
       </Card>
 
-      <Modal title="Upload Firmware" open={versionModalOpen}
+      <Modal title={`${t("common.upload")} ${t("menu.firmware")}`} open={versionModalOpen}
         onOk={handleUploadFirmware}
         onCancel={() => { setVersionModalOpen(false); versionForm.resetFields(); setFwFile(null); }}
         confirmLoading={uploadMutation.isPending}
-        okText="Upload"
+        okText={t("common.upload")}
       >
         <Form form={versionForm} layout="vertical">
-          <Form.Item name="product_model" label="Product Model" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="version" label="Version" rules={[{ required: true }]}><Input placeholder="e.g. 1.2.3" /></Form.Item>
+          <Form.Item name="product_model" label={t("firmware.model")} rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item name="version" label={t("firmware.version")} rules={[{ required: true }]}><Input placeholder="e.g. 1.2.3" /></Form.Item>
           <Form.Item label="Firmware Binary" required>
             <Upload beforeUpload={(f) => { setFwFile(f); return false; }} maxCount={1}
               onRemove={() => setFwFile(null)}
               fileList={fwFile ? [{ uid: "0", name: fwFile.name }] : []}>
-              <Button icon={<UploadOutlined />}>Select .bin File</Button>
+              <Button icon={<UploadOutlined />}>{t("common.upload")}</Button>
             </Upload>
           </Form.Item>
-          <Form.Item name="release_type" label="Release Type" initialValue="full">
+          <Form.Item name="release_type" label={t("firmware.releaseType")} initialValue="full">
             <Select options={[{ label: "Full", value: "full" }, { label: "Incremental", value: "incremental" }]} />
           </Form.Item>
-          <Form.Item name="release_notes" label="Release Notes"><Input.TextArea rows={3} /></Form.Item>
+          <Form.Item name="release_notes" label={t("firmware.releaseNotes")}><Input.TextArea rows={3} /></Form.Item>
         </Form>
       </Modal>
 
-      <Modal title="New OTA Upgrade Task" open={otaModalOpen}
+      <Modal title={`${t("common.create")} ${t("firmware.otaTasks")}`} open={otaModalOpen}
         onOk={() => otaForm.validateFields().then((v) => createOtaMutation.mutate(v))}
         onCancel={() => { setOtaModalOpen(false); otaForm.resetFields(); }}
         confirmLoading={createOtaMutation.isPending}>
         <Form form={otaForm} layout="vertical">
-          <Form.Item name="firmware_version_id" label="Firmware Version ID" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="gray_scale_percent" label="Gray Scale %" initialValue={100}>
+          <Form.Item name="firmware_version_id" label={t("firmware.version") + " ID"} rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item name="gray_scale_percent" label={t("firmware.grayScale")} initialValue={100}>
             <Select options={[1, 5, 10, 25, 50, 100].map((n) => ({ label: `${n}%`, value: n }))} />
           </Form.Item>
         </Form>

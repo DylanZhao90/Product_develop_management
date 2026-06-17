@@ -105,3 +105,11 @@ class CertificationService:
         count += result.rowcount  # type: ignore[attr-defined]
 
         return count
+
+    async def delete_certification(self, cert_id: str, deleted_by: str | None = None) -> None:
+        cert = await self.repo.get_by_id(cert_id)
+        if not cert:
+            raise NotFoundError("Certification not found")
+        await self.db.delete(cert)
+        await AuditLogger.log(self.db, user_id=deleted_by, action="certification.delete", resource_type="certification", resource_id=cert_id)
+        await self.db.commit()

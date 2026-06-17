@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
+import { HashRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { App as AntdApp } from "antd";
 
@@ -24,9 +24,9 @@ function Root() {
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <AntdApp>
-            <BrowserRouter>
+            <HashRouter>
               <App />
-            </BrowserRouter>
+            </HashRouter>
           </AntdApp>
         </ThemeProvider>
       </QueryClientProvider>

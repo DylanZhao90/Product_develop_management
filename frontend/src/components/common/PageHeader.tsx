@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useLocale } from "../../locales";
 
 interface BreadcrumbItem {
-  title: string;
+  title: React.ReactNode;
   path?: string;
 }
 

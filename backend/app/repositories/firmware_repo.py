@@ -33,6 +33,12 @@ class FirmwareVersionRepository(BaseRepository[FirmwareVersion]):
 class FirmwareUpgradeTaskRepository(BaseRepository[FirmwareUpgradeTask]):
     model_class = FirmwareUpgradeTask
 
+    async def get_by_firmware_version(self, firmware_version_id: str) -> list[FirmwareUpgradeTask]:
+        result = await self.db.execute(
+            select(FirmwareUpgradeTask).where(FirmwareUpgradeTask.firmware_version_id == firmware_version_id)
+        )
+        return list(result.scalars().all())
+
     async def get_all(
         self,
         *,

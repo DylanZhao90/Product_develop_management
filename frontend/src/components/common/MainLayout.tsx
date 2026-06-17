@@ -18,7 +18,6 @@ import {
   TeamOutlined,
   NodeIndexOutlined,
   CloudUploadOutlined,
-  BarChartOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
   LogoutOutlined,
@@ -26,10 +25,10 @@ import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   TranslationOutlined,
-  ThunderboltOutlined,
   BgColorsOutlined,
   CheckOutlined,
 } from "@ant-design/icons";
+import Logo from "./Logo";
 import { useAuthStore } from "../../stores/authStore";
 import { useAppStore } from "../../stores/appStore";
 import { useLocale } from "../../locales";
@@ -45,7 +44,6 @@ const menuItems = [
   { key: "/suppliers", icon: <TeamOutlined />, label: "" },
   { key: "/lifecycle", icon: <NodeIndexOutlined />, label: "" },
   { key: "/firmware", icon: <CloudUploadOutlined />, label: "" },
-  { key: "/analytics", icon: <BarChartOutlined />, label: "" },
   { key: "/admin", icon: <SettingOutlined />, label: "" },
   { key: "/certifications", icon: <SafetyCertificateOutlined />, label: "" },
 ];
@@ -58,7 +56,6 @@ const menuLabelKeys: Record<string, string> = {
   "/suppliers": "menu.suppliers",
   "/lifecycle": "menu.lifecycle",
   "/firmware": "menu.firmware",
-  "/analytics": "menu.analytics",
   "/admin": "menu.admin",
   "/certifications": "menu.certifications",
 };
@@ -79,7 +76,7 @@ export default function MainLayout() {
       label: (
         <div style={{ padding: "4px 0" }}>
           <div style={{ fontWeight: 600, fontSize: 14 }}>{user?.name}</div>
-          <div style={{ fontSize: 12, color: "#94a3b8" }}>{user?.email || user?.role}</div>
+          <div style={{ fontSize: 12, color: "var(--color-text-muted)" }}>{user?.email || user?.role}</div>
         </div>
       ),
       disabled: true,
@@ -105,7 +102,7 @@ export default function MainLayout() {
               }}
             />
             <span>{preset.nameZh}</span>
-            <span style={{ fontSize: 11, color: "#94a3b8" }}>{preset.name}</span>
+            <span style={{ fontSize: 11, color: "var(--color-text-muted)" }}>{preset.name}</span>
             {themeId === preset.id && (
               <CheckOutlined style={{ color: "var(--color-primary)", fontSize: 12, marginLeft: "auto" }} />
             )}
@@ -160,40 +157,12 @@ export default function MainLayout() {
           borderRight: "1px solid rgba(255,255,255,0.04)",
         }}
       >
-        {/* Brand */}
+        {/* Brand — professional SVG logo */}
         <div className="sidebar-brand">
           {collapsed ? (
-            <ThunderboltOutlined
-              style={{ fontSize: 22, color: "var(--color-primary)" }}
-            />
+            <Logo iconSize={28} showText={false} variant="sidebar" />
           ) : (
-            <Space align="center" size={10}>
-              <div
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 8,
-                  background: "linear-gradient(135deg, var(--color-primary), #6366f1)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: "0 4px 12px color-mix(in srgb, var(--color-primary) 40%, transparent)",
-                }}
-              >
-                <ThunderboltOutlined style={{ fontSize: 16, color: "#fff" }} />
-              </div>
-              <Typography.Text
-                strong
-                style={{
-                  color: "#fff",
-                  fontSize: 16,
-                  letterSpacing: "-0.3px",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {t("app.brand")}
-              </Typography.Text>
-            </Space>
+            <Logo iconSize={32} showText={true} variant="sidebar" />
           )}
         </div>
 
@@ -243,13 +212,13 @@ export default function MainLayout() {
                 )
               }
               onClick={() => setCollapsed(!collapsed)}
-              style={{ color: "#64748b" }}
+              style={{ color: "var(--color-text-secondary)" }}
             />
             <Typography.Text
               style={{
                 fontSize: 15,
                 fontWeight: 500,
-                color: "#334155",
+                color: "var(--color-text)",
                 letterSpacing: "-0.2px",
               }}
             >
@@ -280,20 +249,20 @@ export default function MainLayout() {
                 status="success"
                 dot
                 offset={[-2, 30]}
-                style={{ boxShadow: "0 0 0 2px #fff" }}
+                style={{ boxShadow: "0 0 0 2px var(--color-bg-card)" }}
               >
                 <Avatar
                   src={user?.avatar_url}
                   icon={<UserOutlined />}
                   size={32}
-                  style={{ backgroundColor: "#4f6ef6" }}
+                  style={{ backgroundColor: "var(--color-primary)" }}
                 />
               </Badge>
               <span
                 style={{
                   fontSize: 14,
                   fontWeight: 500,
-                  color: "#334155",
+                  color: "var(--color-text)",
                 }}
               >
                 {user?.name || "User"}

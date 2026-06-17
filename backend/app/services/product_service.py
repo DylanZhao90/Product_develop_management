@@ -99,5 +99,14 @@ class ProductService:
         await self.db.commit()
         return product, log
 
+    async def delete_product(self, product_id: str, deleted_by: str | None = None) -> None:
+        product = await self.product_repo.get_by_id(product_id)
+        if not product:
+            raise NotFoundError("Product not found")
+        # CASCADE on lifecycle logs FK handles children
+        await self.db.delete(product)
+        await AuditLogger.log(self.db, user_id=deleted_by, action="product.delete", resource_type="product", resource_id=product_id)
+        await self.db.commit()
+
     async def get_lifecycle_logs(self, product_id: str) -> Sequence[LifecycleChangeLog]:
         return await self.lifecycle_log_repo.get_by_product(product_id)

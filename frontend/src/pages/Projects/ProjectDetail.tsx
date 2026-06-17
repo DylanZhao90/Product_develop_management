@@ -9,7 +9,6 @@ import {
   Modal,
   Select,
   Space,
-  Spin,
   Table,
   Tag,
   Typography,
@@ -21,11 +20,15 @@ import {
   PlusOutlined,
   SendOutlined,
   EditOutlined,
+  WarningOutlined,
+  UnorderedListOutlined,
 } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { projectApi } from "../../services/api";
+import type { ProjectTask } from "../../services/api-types";
 import { useLocale } from "../../locales";
 import dayjs from "dayjs";
+import { LoadingSkeleton } from "../../components/common/LoadingSkeleton";
 
 const statusColors: Record<string, string> = {
   pending_approval: "gold",
@@ -55,9 +58,9 @@ const issueStatusColors: Record<string, string> = {
   closed: "default",
 };
 
-function buildTaskTree(tasks: Record<string, unknown>[]) {
-  const map: Record<string, Record<string, unknown>> = {};
-  const roots: Record<string, unknown>[] = [];
+function buildTaskTree(tasks: ProjectTask[]) {
+  const map: Record<string, ProjectTask> = {};
+  const roots: ProjectTask[] = [];
   for (const t of tasks) {
     map[t.id as string] = { ...t, children: [] };
   }
@@ -106,7 +109,7 @@ export default function ProjectDetail() {
   const createTaskMutation = useMutation({
     mutationFn: (values: Record<string, unknown>) => projectApi.createTask(id!, values),
     onSuccess: () => {
-      message.success("Task created");
+      message.success(`${t("project.addTask")} ${t("common.success")}`);
       setTaskModalOpen(false);
       taskForm.resetFields();
       queryClient.invalidateQueries({ queryKey: ["project-tasks", id] });
@@ -117,7 +120,7 @@ export default function ProjectDetail() {
     mutationFn: (values: Record<string, unknown>) =>
       projectApi.createIssue(id!, values),
     onSuccess: () => {
-      message.success("Issue created");
+      message.success(`${t("project.reportIssue")} ${t("common.success")}`);
       setIssueModalOpen(false);
       issueForm.resetFields();
       queryClient.invalidateQueries({ queryKey: ["project-issues", id] });
@@ -127,7 +130,7 @@ export default function ProjectDetail() {
   const updateStatusMutation = useMutation({
     mutationFn: (values: Record<string, unknown>) => projectApi.update(id!, values),
     onSuccess: () => {
-      message.success("Status updated");
+      message.success(t("project.updatedSuccess"));
       setEditStatusOpen(false);
       queryClient.invalidateQueries({ queryKey: ["project", id] });
     },
@@ -137,7 +140,7 @@ export default function ProjectDetail() {
     mutationFn: ({ taskId, values }: { taskId: string; values: Record<string, unknown> }) =>
       projectApi.updateTask(id!, taskId, values),
     onSuccess: () => {
-      message.success("Task updated");
+      message.success(t("project.taskUpdated"));
       queryClient.invalidateQueries({ queryKey: ["project-tasks", id] });
     },
   });
@@ -146,7 +149,7 @@ export default function ProjectDetail() {
     mutationFn: ({ issueId, values }: { issueId: string; values: Record<string, unknown> }) =>
       projectApi.updateIssue(id!, issueId, values),
     onSuccess: () => {
-      message.success("Issue updated");
+      message.success(t("project.issueUpdated"));
       queryClient.invalidateQueries({ queryKey: ["project-issues", id] });
     },
   });
@@ -154,13 +157,13 @@ export default function ProjectDetail() {
   const submitApprovalMutation = useMutation({
     mutationFn: () => projectApi.submitApproval(id!),
     onSuccess: () => {
-      message.success("Approval submitted");
+      message.success(t("project.approvalSubmitted"));
       queryClient.invalidateQueries({ queryKey: ["project", id] });
     },
   });
 
   if (isLoading) {
-    return <div style={{ textAlign: "center", padding: 80 }}><Spin size="large" /></div>;
+    return <LoadingSkeleton detail />;
   }
 
   const project = projectResp?.data?.data;
@@ -169,29 +172,29 @@ export default function ProjectDetail() {
   const taskTree = buildTaskTree(tasks);
 
   if (!project) {
-    return <Typography.Text type="danger">Project not found</Typography.Text>;
+    return <Typography.Text type="danger">{t("project.notFound")}</Typography.Text>;
   }
 
   const taskColumns = [
     {
-      title: "Task Name",
+      title: t("project.taskName"),
       dataIndex: "name",
       key: "name",
       ellipsis: true,
     },
     {
-      title: "Role",
+      title: t("project.responsibleRole"),
       dataIndex: "responsible_role",
       key: "role",
       width: 100,
       render: (v: string) => v || "-",
     },
     {
-      title: "Status",
+      title: t("common.status"),
       dataIndex: "status",
       key: "status",
       width: 110,
-      render: (v: string, record: Record<string, unknown>) => (
+      render: (v: string, record: ProjectTask) => (
         <Select
           value={v}
           size="small"
@@ -210,7 +213,7 @@ export default function ProjectDetail() {
       ),
     },
     {
-      title: "Due",
+      title: t("project.endDate"),
       dataIndex: "planned_end",
       key: "due",
       width: 110,
@@ -219,23 +222,23 @@ export default function ProjectDetail() {
   ];
 
   const issueColumns = [
-    { title: "Title", dataIndex: "title", key: "title", ellipsis: true },
+    { title: t("project.issueTitle"), dataIndex: "title", key: "title", ellipsis: true },
     {
-      title: "Severity",
+      title: t("project.issueSeverity"),
       dataIndex: "severity",
       key: "severity",
       width: 90,
-      render: (v: string) => <Tag color={severityColors[v]}>{v}</Tag>,
+      render: (v: string) => <Tag color={severityColors[v]}>{t(`issue.severity.${v}`)}</Tag>,
     },
     {
-      title: "Status",
+      title: t("common.status"),
       dataIndex: "status",
       key: "status",
       width: 120,
-      render: (v: string) => <Tag color={issueStatusColors[v]}>{v}</Tag>,
+      render: (v: string) => <Tag color={issueStatusColors[v]}>{t(`issue.status.${v}`)}</Tag>,
     },
     {
-      title: "Created",
+      title: t("common.created"),
       dataIndex: "created_at",
       key: "created_at",
       width: 160,
@@ -245,10 +248,20 @@ export default function ProjectDetail() {
 
   return (
     <div>
+      {/* Page Header with back button and project name */}
+      <div className="page-header">
+        <Space align="center">
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/projects")}>
+            {t("common.back")}
+          </Button>
+          <Typography.Title className="page-header-title" level={4} style={{ margin: 0 }}>
+            {project.name}
+          </Typography.Title>
+        </Space>
+      </div>
+
+      {/* Action buttons */}
       <Space style={{ marginBottom: 16 }} wrap>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/projects")}>
-          {t("common.back")}
-        </Button>
         {["pending_approval", "approved"].includes(project.status) && (
           <Button
             type="primary"
@@ -256,15 +269,15 @@ export default function ProjectDetail() {
             onClick={() => submitApprovalMutation.mutate()}
             loading={submitApprovalMutation.isPending}
           >
-            Submit for Approval
+            {t("project.submitApproval")}
           </Button>
         )}
         <Button icon={<EditOutlined />} onClick={() => { statusForm.setFieldsValue(project); setEditStatusOpen(true); }}>
-          Update Status
+          {t("project.updateStatus")}
         </Button>
       </Space>
 
-      <Card title={project.name} style={{ marginBottom: 16 }}>
+      <Card style={{ marginBottom: 16 }}>
         <Descriptions
           items={[
             {
@@ -274,15 +287,15 @@ export default function ProjectDetail() {
             },
             {
               key: "type",
-              label: "Type",
-              children: project.type === "new_product" ? "New Product" : "Version Upgrade",
+              label: t("project.type"),
+              children: project.type === "new_product" ? t("project.newProduct") : t("project.versionUpgrade"),
             },
-            { key: "product_id", label: "Product ID", children: project.product_id },
-            { key: "approval_id", label: "Approval ID", children: project.approval_id || "-" },
-            { key: "feishu_chat_id", label: "Feishu Chat", children: project.feishu_chat_id || "-" },
+            { key: "product_id", label: t("project.productId"), children: project.product_id },
+            { key: "approval_id", label: t("project.approvalId"), children: project.approval_id || "-" },
+            { key: "feishu_chat_id", label: t("project.feishuChat"), children: project.feishu_chat_id || "-" },
             {
               key: "created_at",
-              label: "Created",
+              label: t("common.created"),
               children: project.created_at ? new Date(project.created_at).toLocaleString() : "-",
             },
           ]}
@@ -293,16 +306,21 @@ export default function ProjectDetail() {
       </Card>
 
       <Card
-        title="WBS Task Tree"
+        title={t("project.wbsTaskTree")}
         extra={
           <Button type="primary" size="small" icon={<PlusOutlined />} onClick={() => setTaskModalOpen(true)}>
-            Add Task
+            {t("project.addTask")}
           </Button>
         }
         style={{ marginBottom: 16 }}
       >
         {tasks.length === 0 ? (
-          <Typography.Text type="secondary">{t("common.noData")}</Typography.Text>
+          <div className="empty-state">
+            <UnorderedListOutlined style={{ fontSize: 40, color: "var(--color-text-muted)", marginBottom: 12 }} />
+            <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+              {t("common.noData")}
+            </Typography.Text>
+          </div>
         ) : (
           <Table
             columns={taskColumns}
@@ -318,16 +336,21 @@ export default function ProjectDetail() {
       </Card>
 
       <Card
-        title="Technical Issues"
+        title={t("project.technicalIssues")}
         extra={
           <Button type="primary" size="small" icon={<PlusOutlined />} onClick={() => setIssueModalOpen(true)}>
-            Report Issue
+            {t("project.reportIssue")}
           </Button>
         }
         style={{ marginBottom: 16 }}
       >
         {issues.length === 0 ? (
-          <Typography.Text type="secondary">{t("common.noData")}</Typography.Text>
+          <div className="empty-state">
+            <WarningOutlined style={{ fontSize: 40, color: "var(--color-text-muted)", marginBottom: 12 }} />
+            <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+              {t("common.noData")}
+            </Typography.Text>
+          </div>
         ) : (
           <Table columns={issueColumns} dataSource={issues} rowKey="id" pagination={false} size="small" />
         )}
@@ -335,27 +358,27 @@ export default function ProjectDetail() {
 
       {/* Add Task Modal */}
       <Modal
-        title="Add Task"
+        title={t("project.addTask")}
         open={taskModalOpen}
         onOk={() => taskForm.validateFields().then((v) => createTaskMutation.mutate(v))}
         onCancel={() => { setTaskModalOpen(false); taskForm.resetFields(); }}
         confirmLoading={createTaskMutation.isPending}
       >
         <Form form={taskForm} layout="vertical">
-          <Form.Item name="name" label="Task Name" rules={[{ required: true }]}>
+          <Form.Item name="name" label={t("project.taskName")} rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="parent_task_id" label="Parent Task">
+          <Form.Item name="parent_task_id" label={t("project.parentTask")}>
             <Select
               allowClear
-              placeholder="None (root task)"
-              options={tasks.map((t: Record<string, unknown>) => ({
+              placeholder={t("project.parentTaskPlaceholder")}
+              options={tasks.map((t) => ({
                 label: t.name as string,
                 value: t.id as string,
               }))}
             />
           </Form.Item>
-          <Form.Item name="responsible_role" label="Responsible Role">
+          <Form.Item name="responsible_role" label={t("project.responsibleRole")}>
             <Select
               allowClear
               options={[
@@ -369,10 +392,10 @@ export default function ProjectDetail() {
             />
           </Form.Item>
           <Space>
-            <Form.Item name="planned_start" label="Start">
+            <Form.Item name="planned_start" label={t("project.startDate")}>
               <DatePicker />
             </Form.Item>
-            <Form.Item name="planned_end" label="End">
+            <Form.Item name="planned_end" label={t("project.endDate")}>
               <DatePicker />
             </Form.Item>
           </Space>
@@ -381,26 +404,26 @@ export default function ProjectDetail() {
 
       {/* Add Issue Modal */}
       <Modal
-        title="Report Technical Issue"
+        title={t("project.reportIssue")}
         open={issueModalOpen}
         onOk={() => issueForm.validateFields().then((v) => createIssueMutation.mutate(v))}
         onCancel={() => { setIssueModalOpen(false); issueForm.resetFields(); }}
         confirmLoading={createIssueMutation.isPending}
       >
         <Form form={issueForm} layout="vertical">
-          <Form.Item name="title" label="Title" rules={[{ required: true }]}>
+          <Form.Item name="title" label={t("project.issueTitle")} rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="severity" label="Severity" initialValue="minor">
+          <Form.Item name="severity" label={t("project.issueSeverity")} initialValue="minor">
             <Select
               options={[
-                { label: "Critical", value: "critical" },
-                { label: "Major", value: "major" },
-                { label: "Minor", value: "minor" },
+                { label: t("issue.severity.critical"), value: "critical" },
+                { label: t("issue.severity.major"), value: "major" },
+                { label: t("issue.severity.minor"), value: "minor" },
               ]}
             />
           </Form.Item>
-          <Form.Item name="description" label="Description">
+          <Form.Item name="description" label={t("project.issueDescription")}>
             <Input.TextArea rows={3} />
           </Form.Item>
         </Form>
@@ -408,21 +431,21 @@ export default function ProjectDetail() {
 
       {/* Edit Status Modal */}
       <Modal
-        title="Update Project Status"
+        title={t("project.updateStatus")}
         open={editStatusOpen}
         onOk={() => statusForm.validateFields().then((v) => updateStatusMutation.mutate(v))}
         onCancel={() => setEditStatusOpen(false)}
         confirmLoading={updateStatusMutation.isPending}
       >
         <Form form={statusForm} layout="vertical">
-          <Form.Item name="status" label="Status" rules={[{ required: true }]}>
+          <Form.Item name="status" label={t("common.status")} rules={[{ required: true }]}>
             <Select
               options={[
-                { label: "Pending Approval", value: "pending_approval" },
-                { label: "Approved", value: "approved" },
-                { label: "In Progress", value: "in_progress" },
-                { label: "Completed", value: "completed" },
-                { label: "Closed", value: "closed" },
+                { label: t("project.status.pending_approval"), value: "pending_approval" },
+                { label: t("project.status.approved"), value: "approved" },
+                { label: t("project.status.in_progress"), value: "in_progress" },
+                { label: t("project.status.completed"), value: "completed" },
+                { label: t("project.status.closed"), value: "closed" },
               ]}
             />
           </Form.Item>

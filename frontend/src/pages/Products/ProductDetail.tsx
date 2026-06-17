@@ -9,7 +9,6 @@ import {
   Modal,
   Select,
   Space,
-  Spin,
   Tag,
   Timeline,
   Typography,
@@ -18,11 +17,15 @@ import {
 import {
   ArrowLeftOutlined,
   EditOutlined,
+  FileTextOutlined,
   SwapOutlined,
+  SwapOutlined as TimelineIcon,
 } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { productApi } from "../../services/api";
 import { useLocale } from "../../locales";
+import type { LifecycleStatus } from "../../services/api-types";
+import { LoadingSkeleton } from "../../components/common/LoadingSkeleton";
 
 const statusColors: Record<string, string> = {
   in_development: "blue",
@@ -66,7 +69,7 @@ export default function ProductDetail() {
   const updateMutation = useMutation({
     mutationFn: (values: Record<string, unknown>) => productApi.update(id!, values),
     onSuccess: () => {
-      message.success("Product updated");
+      message.success(t("product.updatedSuccess"));
       setEditModalOpen(false);
       queryClient.invalidateQueries({ queryKey: ["product", id] });
     },
@@ -74,9 +77,9 @@ export default function ProductDetail() {
 
   const transitionMutation = useMutation({
     mutationFn: (values: { to_status: string; reason?: string }) =>
-      productApi.transitionLifecycle(id!, values),
+      productApi.transitionLifecycle(id!, { ...values, to_status: values.to_status as LifecycleStatus } as any),
     onSuccess: () => {
-      message.success("Lifecycle transitioned");
+      message.success(t("product.transitionSuccess"));
       setTransitionModalOpen(false);
       transitionForm.resetFields();
       queryClient.invalidateQueries({ queryKey: ["product", id] });
@@ -85,18 +88,14 @@ export default function ProductDetail() {
   });
 
   if (isLoading) {
-    return (
-      <div style={{ textAlign: "center", padding: 80 }}>
-        <Spin size="large" />
-      </div>
-    );
+    return <LoadingSkeleton detail />;
   }
 
   const product = productResp?.data?.data;
   const logs = logsResp?.data?.data || [];
 
   if (!product) {
-    return <Typography.Text type="danger">Product not found</Typography.Text>;
+    return <Typography.Text type="danger">{t("common.notFound")}</Typography.Text>;
   }
 
   const nextStatuses = VALID_TRANSITIONS[product.lifecycle_status] || [];
@@ -111,12 +110,12 @@ export default function ProductDetail() {
   };
 
   const items = [
-    { key: "code", label: "Product Code", children: product.code },
-    { key: "model", label: "Model", children: product.model },
-    { key: "name", label: "Name", children: product.name },
+    { key: "code", label: t("product.code"), children: product.code },
+    { key: "model", label: t("product.model"), children: product.model },
+    { key: "name", label: t("product.name"), children: product.name },
     {
       key: "type",
-      label: "Type",
+      label: t("product.type"),
       children: (
         <Tag>
           {product.type === "ac_charger" ? "AC" : product.type === "dc_charger" ? "DC" : product.type === "portable" ? "Portable" : product.type || "-"}
@@ -130,21 +129,21 @@ export default function ProductDetail() {
     },
     {
       key: "markets",
-      label: "Target Markets",
+      label: t("product.targetMarkets"),
       children: Array.isArray(product.target_markets) && product.target_markets.length > 0
         ? product.target_markets.map((m: string) => <Tag key={m}>{m}</Tag>)
         : "-",
     },
     {
       key: "certifications",
-      label: "Certifications Required",
+      label: t("product.certificationRequirements"),
       children: Array.isArray(product.certification_requirements) && product.certification_requirements.length > 0
         ? product.certification_requirements.map((c: string) => <Tag key={c}>{c}</Tag>)
         : "-",
     },
     {
       key: "description",
-      label: "Description",
+      label: t("product.description"),
       children: product.description || "-",
       span: 2,
     },
@@ -152,30 +151,45 @@ export default function ProductDetail() {
 
   return (
     <div>
+      {/* Page Header with back button and product name */}
+      <div className="page-header">
+        <Space align="center">
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/products")}>
+            {t("common.back")}
+          </Button>
+          <Typography.Title className="page-header-title" level={4} style={{ margin: 0 }}>
+            {product.name}
+          </Typography.Title>
+        </Space>
+      </div>
+
+      {/* Action buttons */}
       <Space style={{ marginBottom: 16 }}>
-        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate("/products")}>
-          {t("common.back")}
-        </Button>
         <Button icon={<EditOutlined />} onClick={handleEdit}>
           {t("common.edit")}
         </Button>
         {nextStatuses.length > 0 && (
           <Button type="primary" icon={<SwapOutlined />} onClick={handleTransition}>
-            Transition Status
+            {t("product.transition")}
           </Button>
         )}
       </Space>
 
-      <Card title={product.name} style={{ marginBottom: 16 }}>
+      <Card style={{ marginBottom: 16 }}>
         <Descriptions items={items} column={2} bordered size="small" />
       </Card>
 
-      <Card title="Lifecycle Timeline" style={{ marginBottom: 16 }}>
+      <Card title={t("product.lifecycleTitle")} style={{ marginBottom: 16 }}>
         {logs.length === 0 ? (
-          <Typography.Text type="secondary">{t("common.noData")}</Typography.Text>
+          <div className="empty-state">
+            <TimelineIcon style={{ fontSize: 40, color: "var(--color-text-muted)", marginBottom: 12 }} />
+            <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+              {t("common.noData")}
+            </Typography.Text>
+          </div>
         ) : (
           <Timeline
-            items={logs.map((log: Record<string, unknown>) => ({
+            items={logs.map((log: any) => ({
               color: log.to_status === "eol" ? "red" : "blue",
               children: (
                 <div>
@@ -198,26 +212,31 @@ export default function ProductDetail() {
         )}
       </Card>
 
-      <Card title="Design Files">
-        <Typography.Text type="secondary">Design file management coming in Phase 2</Typography.Text>
+      <Card title={t("product.designFilesTitle")}>
+        <div className="empty-state">
+          <FileTextOutlined style={{ fontSize: 40, color: "var(--color-text-muted)", marginBottom: 12 }} />
+          <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+            {t("product.designFilesComing")}
+          </Typography.Text>
+        </div>
       </Card>
 
       {/* Edit Modal */}
       <Modal
-        title={`${t("common.edit")} Product`}
+        title={t("product.editTitle")}
         open={editModalOpen}
         onOk={() => editForm.validateFields().then((v) => updateMutation.mutate(v))}
         onCancel={() => setEditModalOpen(false)}
         confirmLoading={updateMutation.isPending}
       >
         <Form form={editForm} layout="vertical">
-          <Form.Item name="model" label="Model" rules={[{ required: true }]}>
+          <Form.Item name="model" label={t("product.model")} rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+          <Form.Item name="name" label={t("product.name")} rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="type" label="Type">
+          <Form.Item name="type" label={t("product.type")}>
             <Select
               options={[
                 { label: "AC Charger", value: "ac_charger" },
@@ -226,7 +245,7 @@ export default function ProductDetail() {
               ]}
             />
           </Form.Item>
-          <Form.Item name="description" label="Description">
+          <Form.Item name="description" label={t("product.description")}>
             <Input.TextArea rows={3} />
           </Form.Item>
         </Form>
@@ -234,7 +253,7 @@ export default function ProductDetail() {
 
       {/* Transition Modal */}
       <Modal
-        title="Transition Lifecycle Status"
+        title={t("product.transitionTitle")}
         open={transitionModalOpen}
         onOk={() =>
           transitionForm.validateFields().then((v) => transitionMutation.mutate(v))
@@ -246,12 +265,12 @@ export default function ProductDetail() {
         confirmLoading={transitionMutation.isPending}
       >
         <Form form={transitionForm} layout="vertical">
-          <Form.Item label="Current Status">
+          <Form.Item label={t("common.currentStatus")}>
             <Tag color={statusColors[product.lifecycle_status]}>
               {t(`product.status.${product.lifecycle_status}`)}
             </Tag>
           </Form.Item>
-          <Form.Item name="to_status" label="New Status" rules={[{ required: true }]}>
+          <Form.Item name="to_status" label={t("common.newStatus")} rules={[{ required: true }]}>
             <Select
               options={nextStatuses.map((s) => ({
                 label: t(`product.status.${s}`),
@@ -259,8 +278,8 @@ export default function ProductDetail() {
               }))}
             />
           </Form.Item>
-          <Form.Item name="reason" label="Reason">
-            <Input.TextArea rows={2} placeholder="Optional reason for this transition" />
+          <Form.Item name="reason" label={t("common.reason")}>
+            <Input.TextArea rows={2} placeholder={t("product.transitionReasonPlaceholder")} />
           </Form.Item>
         </Form>
       </Modal>

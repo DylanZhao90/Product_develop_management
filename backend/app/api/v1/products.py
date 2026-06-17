@@ -67,18 +67,22 @@ async def update_product(
     current_user: CurrentUserDep,
 ):
     service = ProductService(db)
-    try:
-        product = await service.update_product(product_id, body.model_dump(exclude_none=True), str(current_user.id))
-        return {"success": True, "data": ProductResponse.model_validate(product)}
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    product = await service.update_product(product_id, body.model_dump(exclude_none=True), str(current_user.id))
+    return {"success": True, "data": ProductResponse.model_validate(product)}
+
+
+@router.delete("/{product_id}")
+async def delete_product(product_id: str, db: DBSessionDep, current_user: CurrentUserDep):
+    service = ProductService(db)
+    await service.delete_product(product_id, str(current_user.id))
+    return {"success": True, "message": "产品已删除"}
 
 
 @router.get("/{product_id}/lifecycle/logs")
 async def get_lifecycle_logs(product_id: str, db: DBSessionDep, current_user: CurrentUserDep):
     service = ProductService(db)
     logs = await service.get_lifecycle_logs(product_id)
-    return {"success": True, "data": logs}
+    return {"success": True, "data": [LifecycleChangeLogResponse.model_validate(l) for l in logs]}
 
 
 @router.post("/{product_id}/lifecycle/transition")
@@ -89,10 +93,7 @@ async def transition_lifecycle(
     current_user: CurrentUserDep,
 ):
     service = ProductService(db)
-    try:
-        product, log = await service.transition_lifecycle(
-            product_id, body.to_status, str(current_user.id), body.reason
-        )
-        return {"success": True, "data": {"product": ProductResponse.model_validate(product), "log": LifecycleChangeLogResponse.model_validate(log)}}
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    product, log = await service.transition_lifecycle(
+        product_id, body.to_status, str(current_user.id), body.reason
+    )
+    return {"success": True, "data": {"product": ProductResponse.model_validate(product), "log": LifecycleChangeLogResponse.model_validate(log)}}

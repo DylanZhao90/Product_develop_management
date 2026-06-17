@@ -1,13 +1,13 @@
 import { useNavigate } from "react-router-dom";
 import { Button, Card, Divider, Space, Typography } from "antd";
 import {
-  ThunderboltOutlined,
   SafetyOutlined,
   GlobalOutlined,
   EyeOutlined,
 } from "@ant-design/icons";
 import { useAuthStore } from "../../stores/authStore";
 import { useLocale } from "../../locales";
+import Logo from "../../components/common/Logo";
 
 export default function Login() {
   const { login, enableDemo } = useAuthStore();
@@ -35,9 +35,9 @@ export default function Login() {
 
       <Card className="login-card" styles={{ body: { padding: "48px 40px" } }}>
         <Space direction="vertical" size={28} style={{ width: "100%" }}>
-          {/* Icon */}
-          <div className="login-icon-wrapper">
-            <ThunderboltOutlined style={{ fontSize: 32, color: "#fff" }} />
+          {/* Brand Logo */}
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 4 }}>
+            <Logo iconSize={48} showText={false} variant="login" />
           </div>
 
           {/* Title */}
@@ -51,7 +51,7 @@ export default function Login() {
                 fontSize: 26,
               }}
             >
-              {t("app.brand")}
+              安纳瑞 PDM
             </Typography.Title>
             <Typography.Text
               style={{
@@ -85,7 +85,7 @@ export default function Login() {
 
           {/* Demo mode */}
           <Divider plain style={{ margin: 0, fontSize: 12, color: "#94a3b8" }}>
-            Backend not running?
+            {t("auth.backendNotRunning")}
           </Divider>
           <Button
             type="link"
@@ -93,7 +93,7 @@ export default function Login() {
             onClick={handleDemo}
             style={{ color: "#64748b", fontSize: 13 }}
           >
-            Demo Preview — skip login, explore UI
+            {t("auth.demoPreview")}
           </Button>
 
           {/* Features row */}
@@ -111,7 +111,7 @@ export default function Login() {
                 icon: (
                   <SafetyOutlined style={{ fontSize: 14, color: "#4f6ef6" }} />
                 ),
-                label: t("auth.loginHint") || "Feishu SSO",
+                label: t("auth.login"),
               },
               {
                 icon: (

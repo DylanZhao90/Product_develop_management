@@ -67,11 +67,15 @@ async def get_project(project_id: str, db: DBSessionDep, current_user: CurrentUs
 @router.patch("/{project_id}")
 async def update_project(project_id: str, body: ProjectUpdate, db: DBSessionDep, current_user: CurrentUserDep):
     service = ProjectService(db)
-    try:
-        project = await service.update_project(project_id, body.model_dump(exclude_none=True), str(current_user.id))
-        return {"success": True, "data": ProjectResponse.model_validate(project)}
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    project = await service.update_project(project_id, body.model_dump(exclude_none=True), str(current_user.id))
+    return {"success": True, "data": ProjectResponse.model_validate(project)}
+
+
+@router.delete("/{project_id}")
+async def delete_project(project_id: str, db: DBSessionDep, current_user: CurrentUserDep):
+    service = ProjectService(db)
+    await service.delete_project(project_id, str(current_user.id))
+    return {"success": True, "message": "项目已删除"}
 
 
 @router.post("/{project_id}/submit-approval")
@@ -114,11 +118,8 @@ async def update_task(
     project_id: str, task_id: str, body: ProjectTaskUpdate, db: DBSessionDep, current_user: CurrentUserDep
 ):
     service = ProjectService(db)
-    try:
-        task = await service.update_task(task_id, body.model_dump(exclude_none=True), str(current_user.id))
-        return {"success": True, "data": ProjectTaskResponse.model_validate(task)}
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    task = await service.update_task(task_id, body.model_dump(exclude_none=True), str(current_user.id))
+    return {"success": True, "data": ProjectTaskResponse.model_validate(task)}
 
 
 # ---- Technical Issues ----
@@ -142,8 +143,5 @@ async def update_issue(
     project_id: str, issue_id: str, body: TechnicalIssueUpdate, db: DBSessionDep, current_user: CurrentUserDep
 ):
     service = ProjectService(db)
-    try:
-        issue = await service.update_issue(issue_id, body.model_dump(exclude_none=True), str(current_user.id))
-        return {"success": True, "data": TechnicalIssueResponse.model_validate(issue)}
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    issue = await service.update_issue(issue_id, body.model_dump(exclude_none=True), str(current_user.id))
+    return {"success": True, "data": TechnicalIssueResponse.model_validate(issue)}

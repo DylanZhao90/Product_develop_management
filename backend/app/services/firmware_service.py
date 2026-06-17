@@ -101,6 +101,21 @@ class FirmwareService:
             fw._download_url = await get_file_url(fw.file_url)
         return fw
 
+    async def delete_version(self, version_id: str, deleted_by: str | None = None) -> None:
+        fw = await self.version_repo.get_by_id(version_id)
+        if not fw:
+            raise NotFoundError("Firmware version not found")
+        # RESTRICT on upgrade task FK — check for existing upgrade tasks
+        tasks = await self.task_repo.get_by_firmware_version(version_id)
+        if tasks:
+            from app.core.exceptions import ConflictError
+            raise ConflictError(f"Cannot delete firmware version with {len(tasks)} active upgrade task(s)")
+        # Optionally delete from MinIO as well
+        # from app.core.minio_client import delete_file; await delete_file(fw.file_url)
+        await self.db.delete(fw)
+        await AuditLogger.log(self.db, user_id=deleted_by, action="firmware_version.delete", resource_type="firmware_version", resource_id=version_id)
+        await self.db.commit()
+
     # ---- Upgrade Tasks ----
 
     async def create_upgrade_task(self, data: dict, created_by: str) -> FirmwareUpgradeTask:
@@ -157,3 +172,11 @@ class FirmwareService:
         await AuditLogger.log(self.db, user_id=cancelled_by, action="firmware_upgrade_task.cancel", resource_type="firmware_upgrade_task", resource_id=str(task.id), old_value={"status": old_status}, new_value={"status": "failed"})
         await self.db.commit()
         return task
+
+    async def delete_upgrade_task(self, task_id: str, deleted_by: str | None = None) -> None:
+        task = await self.task_repo.get_by_id(task_id)
+        if not task:
+            raise NotFoundError("Upgrade task not found")
+        await self.db.delete(task)
+        await AuditLogger.log(self.db, user_id=deleted_by, action="firmware_upgrade_task.delete", resource_type="firmware_upgrade_task", resource_id=task_id)
+        await self.db.commit()

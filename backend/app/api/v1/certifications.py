@@ -56,11 +56,15 @@ async def update_certification(
     cert_id: str, body: CertificationUpdate, db: DBSessionDep, current_user: CurrentUserDep,
 ):
     service = CertificationService(db)
-    try:
-        cert = await service.update_certification(cert_id, body.model_dump(exclude_none=True), str(current_user.id))
-        return {"success": True, "data": CertificationResponse.model_validate(cert)}
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    cert = await service.update_certification(cert_id, body.model_dump(exclude_none=True), str(current_user.id))
+    return {"success": True, "data": CertificationResponse.model_validate(cert)}
+
+
+@router.delete("/{cert_id}")
+async def delete_certification(cert_id: str, db: DBSessionDep, current_user: CurrentUserDep):
+    service = CertificationService(db)
+    await service.delete_certification(cert_id, str(current_user.id))
+    return {"success": True, "message": "认证已删除"}
 
 
 @router.get("/expiring/list")

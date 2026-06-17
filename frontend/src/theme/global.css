@@ -49,8 +49,8 @@ body {
   background: var(--color-bg-page);
   color: var(--color-text);
 }
-/* Dark-mode body override */
-[data-theme="linear-dark"] body {
+/* Dark-mode root override */
+:root[data-theme="linear-dark"] {
   background: #212121;
   color: #cccccc;
 }
@@ -70,6 +70,21 @@ body {
   justify-content: center;
   padding: 0 16px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.sidebar-brand::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.08),
+    transparent
+  );
 }
 .sidebar-brand::after {
   content: "";
@@ -193,6 +208,7 @@ body {
   transform: translateY(0);
 }
 
+/* Login icon — SVG logo is used instead, keep wrapper for decorative bg */
 .login-icon-wrapper {
   width: 72px;
   height: 72px;
@@ -251,11 +267,11 @@ body {
 
 /* ── Smooth Page Transitions ───────────────────────────────── */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 .page-enter {
-  animation: fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ── Glow Dot (active indicator) ───────────────────────────── */
@@ -294,4 +310,154 @@ body {
 }
 .theme-option-active .theme-swatch {
   border-color: var(--color-primary);
+}
+
+/* ── Dark Theme: Ant Design Component Overrides ─────────────── */
+:root[data-theme="linear-dark"] {
+  --bg-dark: #1a1a1a;
+  --bg-dark-elevated: #212121;
+  --border-dark: #2a2a2a;
+  --border-dark-strong: #333;
+  --text-dark-primary: #cccccc;
+  --text-dark-secondary: #a3a3a3;
+  --text-dark-muted: #6b6b6b;
+  --color-primary-dark: #1ea864;
+}
+
+/* Table */
+[data-theme="linear-dark"] .ant-table {
+  background: var(--bg-dark);
+}
+[data-theme="linear-dark"] .ant-table-thead > tr > th {
+  background: var(--bg-dark-elevated) !important;
+  color: var(--text-dark-secondary);
+  border-bottom: 1px solid var(--border-dark-strong);
+}
+[data-theme="linear-dark"] .ant-table-tbody > tr > td {
+  border-bottom: 1px solid var(--border-dark);
+}
+[data-theme="linear-dark"] .ant-table-tbody > tr:hover > td {
+  background: rgba(30, 168, 100, 0.08) !important;
+}
+[data-theme="linear-dark"] .ant-table-cell {
+  background: var(--bg-dark);
+}
+
+/* Card */
+[data-theme="linear-dark"] .ant-card {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-dark);
+}
+[data-theme="linear-dark"] .ant-card-head {
+  border-bottom: 1px solid var(--border-dark);
+  color: var(--text-dark-primary);
+}
+
+/* Modal */
+[data-theme="linear-dark"] .ant-modal-content {
+  background: var(--bg-dark-elevated);
+}
+[data-theme="linear-dark"] .ant-modal-header {
+  background: var(--bg-dark-elevated);
+  border-bottom: 1px solid var(--border-dark-strong);
+}
+[data-theme="linear-dark"] .ant-modal-title {
+  color: var(--text-dark-primary);
+}
+
+/* Input / Select / DatePicker */
+[data-theme="linear-dark"] .ant-input,
+[data-theme="linear-dark"] .ant-select-selector,
+[data-theme="linear-dark"] .ant-picker {
+  background: var(--bg-dark) !important;
+  border-color: var(--border-dark-strong) !important;
+  color: var(--text-dark-primary);
+}
+[data-theme="linear-dark"] .ant-input-affix-wrapper {
+  background: var(--bg-dark) !important;
+  border-color: var(--border-dark-strong) !important;
+}
+
+/* Dropdown */
+[data-theme="linear-dark"] .ant-dropdown-menu {
+  background: var(--bg-dark-elevated);
+}
+[data-theme="linear-dark"] .ant-dropdown-menu-item {
+  color: var(--text-dark-secondary);
+}
+[data-theme="linear-dark"] .ant-dropdown-menu-item:hover {
+  background: rgba(30, 168, 100, 0.12);
+}
+
+/* Tag / Drawer / Pagination */
+[data-theme="linear-dark"] .ant-tag {
+  background: var(--border-dark);
+  border-color: var(--border-dark-strong);
+}
+[data-theme="linear-dark"] .ant-drawer-content {
+  background: var(--bg-dark-elevated);
+}
+[data-theme="linear-dark"] .ant-pagination-item {
+  background: var(--bg-dark);
+  border-color: var(--border-dark-strong);
+}
+[data-theme="linear-dark"] .ant-pagination-item-active {
+  border-color: var(--color-primary-dark);
+}
+
+/* Tabs */
+[data-theme="linear-dark"] .ant-tabs-nav {
+  border-bottom-color: var(--border-dark);
+}
+[data-theme="linear-dark"] .ant-tabs-tab {
+  color: var(--text-dark-muted);
+}
+
+/* Message / Notification */
+[data-theme="linear-dark"] .ant-message-notice-content {
+  background: var(--bg-dark-elevated);
+  color: var(--text-dark-primary);
+}
+[data-theme="linear-dark"] .ant-notification-notice {
+  background: var(--bg-dark-elevated);
+  border: 1px solid var(--border-dark-strong);
+}
+
+/* ── Enhanced Animations ────────────────────────────────────── */
+/* Staggered list entry animation */
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.stagger-enter > * {
+  animation: slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.stagger-enter > *:nth-child(1) { animation-delay: 0.02s; }
+.stagger-enter > *:nth-child(2) { animation-delay: 0.04s; }
+.stagger-enter > *:nth-child(3) { animation-delay: 0.06s; }
+.stagger-enter > *:nth-child(4) { animation-delay: 0.08s; }
+.stagger-enter > *:nth-child(5) { animation-delay: 0.10s; }
+.stagger-enter > *:nth-child(6) { animation-delay: 0.12s; }
+.stagger-enter > *:nth-child(7) { animation-delay: 0.14s; }
+.stagger-enter > *:nth-child(8) { animation-delay: 0.16s; }
+.stagger-enter > *:nth-child(9) { animation-delay: 0.18s; }
+.stagger-enter > *:nth-child(10) { animation-delay: 0.20s; }
+
+/* Badge pulse animation */
+@keyframes badgePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(30, 168, 100, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(30, 168, 100, 0); }
+}
+.badge-pulse {
+  animation: badgePulse 2s ease-in-out infinite;
+}
+
+/* Hover lift micro-interaction */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 }

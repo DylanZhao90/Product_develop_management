@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate, useLocation } from "react-router-dom";
+import { Routes, Route, Navigate, useNavigate, useLocation, useParams } from "react-router-dom";
 import { Spin } from "antd";
 
 import { useAuthStore } from "./stores/authStore";
@@ -42,6 +42,17 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+/** Redirect any *.html URL to root (handle GitHub Pages SPA) */
+function HtmlRedirect({ children }: { children: React.ReactNode }) {
+  const location = useLocation();
+  useEffect(() => {
+    if (location.pathname.endsWith(".html")) {
+      window.location.replace(window.location.origin + window.location.pathname.replace(/\/[^/]+\.html$/, "/"));
+    }
+  }, [location.pathname]);
+  return <>{children}</>;
+}
+
 export default function App() {
   const { checkAuth } = useAuthStore();
 
@@ -56,9 +67,11 @@ export default function App() {
       <Route
         path="/*"
         element={
-          <ProtectedRoute>
-            <MainLayout />
-          </ProtectedRoute>
+          <HtmlRedirect>
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          </HtmlRedirect>
         }
       >
         <Route index element={<EnhancedDashboard />} />

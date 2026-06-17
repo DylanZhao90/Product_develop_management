@@ -1,76 +1,72 @@
 #!/bin/bash
-# PDM 演示 - 持久化启动脚本
-# 用法: bash start-pdm-demo.sh [start|stop|status]
-
-export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:$HOME/.npm-global/bin:$HOME/node_modules/.bin:$HOME/.nvm/versions/node/*/bin:$NVM_BIN"
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" 2>/dev/null || true
-
+# PDM Demo start script
+export PATH="/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:$HOME/.npm-global/bin"
 PROJECT_DIR="/run/media/dylan/软件/B_AI_CODE_PROJECTS/Product_develop_management"
-HTTP_PORT=8080
-TUNNEL_SUBDOMAIN="pdm-anari"
+HTTP_PORT=4173
 PID_FILE="/tmp/pdm-demo.pid"
 
 start() {
-  echo "🔄 启动 PDM 演示服务..."
-
-  # 启动 HTTP 服务器
-  cd "$PROJECT_DIR"
-  nohup python3 -m http.server $HTTP_PORT --bind 0.0.0.0 > /tmp/pdm-http.log 2>&1 &
+  echo "Starting PDM demo..."
+  cd "$PROJECT_DIR/frontend" || exit 1
+  
+  # Start vite preview
+  nohup npx vite preview --host 0.0.0.0 --port $HTTP_PORT > /tmp/pdm-http.log 2>&1 &
   HTTP_PID=$!
-  echo "  ✅ HTTP 服务已启动 (PID: $HTTP_PID) - 端口 $HTTP_PORT"
-
-  # 启动 localtunnel (等待 HTTP 就绪)
-  sleep 2
-  nohup npx localtunnel --port $HTTP_PORT --subdomain $TUNNEL_SUBDOMAIN > /tmp/pdm-tunnel.log 2>&1 &
+  echo "HTTP server PID: $HTTP_PID"
+  
+  # Copy SPA build as dashboard-demo.html (from Vite build output)
+  cp "$PROJECT_DIR/frontend/dist/index.html" "$PROJECT_DIR/frontend/dist/dashboard-demo.html" 2>/dev/null
+  
+  # Wait for server
+  sleep 3
+  
+  # Start localtunnel (clear proxy env)
+  nohup env -u http_proxy -u https_proxy -u HTTP_PROXY -u HTTPS_PROXY \
+    npx localtunnel --port $HTTP_PORT \
+    > /tmp/pdm-tunnel.log 2>&1 &
   TUNNEL_PID=$!
-  echo "  ✅ 隧道已启动 (PID: $TUNNEL_PID)"
-
-  # 保存 PID
+  echo "Tunnel PID: $TUNNEL_PID"
+  
   echo "{\"http\":$HTTP_PID,\"tunnel\":$TUNNEL_PID}" > $PID_FILE
-
-  # 等待隧道就绪并输出 URL
-  sleep 5
-  echo ""
-  echo "═══════════════════════════════════════════"
-  echo "  公网地址: https://$TUNNEL_SUBDOMAIN.loca.lt"
-  echo "  本地地址: http://localhost:$HTTP_PORT"
-  echo "═══════════════════════════════════════════"
-  echo ""
-  echo "日志文件:"
-  echo "  HTTP:   tail -f /tmp/pdm-http.log"
-  echo "  隧道:   tail -f /tmp/pdm-tunnel.log"
+  
+  # Wait and get URL
+  sleep 8
+  TUNNEL_URL=$(grep -oP 'https://[a-zA-Z0-9-]+\.loca\.lt' /tmp/pdm-tunnel.log 2>/dev/null | head -1)
+  if [ -n "$TUNNEL_URL" ]; then
+    echo "Public URL: $TUNNEL_URL/dashboard-demo.html"
+  else
+    echo "Tunnel URL not yet ready..."
+    echo "Check: tail -f /tmp/pdm-tunnel.log"
+  fi
+  echo "Local: http://localhost:$HTTP_PORT/dashboard-demo.html"
 }
 
 stop() {
-  echo "🛑 停止 PDM 演示服务..."
-  if [ -f $PID_FILE ]; then
-    HTTP_PID=$(python3 -c "import json; print(json.load(open('$PID_FILE'))['http'])")
-    TUNNEL_PID=$(python3 -c "import json; print(json.load(open('$PID_FILE'))['tunnel'])")
-    kill $HTTP_PID 2>/dev/null
-    kill $TUNNEL_PID 2>/dev/null
-    rm -f $PID_FILE
-    echo "  ✅ 已停止"
-  else
-    pkill -f "python3 -m http.server $HTTP_PORT" 2>/dev/null
-    pkill -f "localtunnel" 2>/dev/null
-    echo "  ✅ 已清理所有相关进程"
+  if [ -f "$PID_FILE" ]; then
+    HTTP_PID=$(grep -oP '"http":\K[0-9]+' "$PID_FILE" 2>/dev/null)
+    TUNNEL_PID=$(grep -oP '"tunnel":\K[0-9]+' "$PID_FILE" 2>/dev/null)
+    [ -n "$HTTP_PID" ] && kill "$HTTP_PID" 2>/dev/null
+    [ -n "$TUNNEL_PID" ] && kill "$TUNNEL_PID" 2>/dev/null
+    rm -f "$PID_FILE"
   fi
+  pkill -f "lt --port $HTTP_PORT" 2>/dev/null
+  pkill -f "vite preview.*$HTTP_PORT" 2>/dev/null
+  echo "Stopped"
 }
 
 status() {
-  HTTP_RUNNING=$(pgrep -f "python3 -m http.server $HTTP_PORT" 2>/dev/null | wc -l)
-  TUNNEL_RUNNING=$(pgrep -f "localtunnel" 2>/dev/null | wc -l)
-  echo "📊 PDM 演示状态:"
-  echo "  HTTP 服务: $([ $HTTP_RUNNING -gt 0 ] && echo '✅ 运行中' || echo '❌ 已停止')"
-  echo "  局域网地址: http://$(hostname -I 2>/dev/null | awk '{print $1}'):$HTTP_PORT"
-  echo "  隧道: $([ $TUNNEL_RUNNING -gt 0 ] && echo '✅ 运行中 -> https://'$TUNNEL_SUBDOMAIN'.loca.lt' || echo '❌ 已停止')"
+  HTTP_RUN=$(pgrep -f "vite preview.*4173" >/dev/null && echo "running" || echo "stopped")
+  TUNNEL_RUN=$(pgrep -f "lt --port 4173" >/dev/null && echo "running" || echo "stopped")
+  TUNNEL_URL=$(grep -oP 'https://[a-zA-Z0-9-]+\.loca\.lt' /tmp/pdm-tunnel.log 2>/dev/null | head -1)
+  echo "HTTP: $HTTP_RUN"
+  echo "Tunnel: $TUNNEL_RUN"
+  [ -n "$TUNNEL_URL" ] && echo "URL: $TUNNEL_URL/dashboard-demo.html"
 }
 
 case "${1:-start}" in
   start) start ;;
-  stop)  stop ;;
-  status) status ;;
+  stop) stop ;;
   restart) stop; sleep 2; start ;;
-  *) echo "用法: bash start-pdm-demo.sh [start|stop|status|restart]" ;;
+  status) status ;;
+  *) echo "Usage: $0 {start|stop|restart|status}" ;;
 esac

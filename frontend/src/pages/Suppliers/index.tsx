@@ -25,31 +25,31 @@ export default function Suppliers() {
 
   const createMutation = useMutation({
     mutationFn: (values: Record<string, unknown>) => supplierApi.create(values),
-    onSuccess: () => { message.success("Supplier created"); setModalOpen(false); form.resetFields(); queryClient.invalidateQueries({ queryKey: ["suppliers"] }); },
+    onSuccess: () => { message.success(t("supplier.createdSuccess")); setModalOpen(false); form.resetFields(); queryClient.invalidateQueries({ queryKey: ["suppliers"] }); },
   });
 
   const suppliers = data?.data?.data || [];
   const total = data?.data?.total || 0;
 
   const columns = [
-    { title: "Name", dataIndex: "name", key: "name", ellipsis: true },
+    { title: t("supplier.name"), dataIndex: "name", key: "name", ellipsis: true },
     {
-      title: "Type",
+      title: t("supplier.type"),
       dataIndex: "type",
       key: "type",
       width: 120,
-      render: (v: string) => <Tag>{v === "design" ? "Design" : v === "module_dev" ? "Module Dev" : v}</Tag>,
+      render: (v: string) => <Tag>{v === "design" ? t("supplier.typeDesign") : v === "module_dev" ? t("supplier.typeModuleDev") : v}</Tag>,
     },
-    { title: "Contact", dataIndex: "contact_name", key: "contact", width: 100, render: (v: string) => v || "-" },
+    { title: t("supplier.contact"), dataIndex: "contact_name", key: "contact", width: 100, render: (v: string) => v || "-" },
     {
-      title: "Rating",
+      title: t("supplier.rating"),
       dataIndex: "rating",
       key: "rating",
       width: 80,
       render: (v: number) => (v ? `${v}/5` : "-"),
     },
     {
-      title: "Status",
+      title: t("common.status"),
       dataIndex: "status",
       key: "status",
       width: 100,
@@ -59,8 +59,17 @@ export default function Suppliers() {
 
   return (
     <div>
+      {/* Page Header */}
+      <div className="page-header">
+        <Typography.Title className="page-header-title" level={4} style={{ margin: 0 }}>
+          {t("menu.suppliers")}
+        </Typography.Title>
+        <Typography.Text className="page-header-desc">
+          {t("common.total", { count: total })}
+        </Typography.Text>
+      </div>
+
       <Card
-        title={<Typography.Title level={4}>{t("menu.suppliers")}</Typography.Title>}
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>{t("common.create")}</Button>}
       >
         <Space style={{ marginBottom: 16 }} wrap>
@@ -73,15 +82,15 @@ export default function Suppliers() {
             allowClear
           />
           <Select
-            placeholder="Status"
+            placeholder={t("common.status")}
             value={statusFilter}
             onChange={(v) => { setStatusFilter(v); setPage(1); }}
             allowClear
             style={{ width: 140 }}
             options={[
-              { label: "Active", value: "active" },
-              { label: "Suspended", value: "suspended" },
-              { label: "Blacklisted", value: "blacklisted" },
+              { label: t("supplier.statusActive"), value: "active" },
+              { label: t("supplier.statusSuspended"), value: "suspended" },
+              { label: t("supplier.statusBlacklisted"), value: "blacklisted" },
             ]}
           />
         </Space>
@@ -90,26 +99,26 @@ export default function Suppliers() {
           dataSource={suppliers}
           rowKey="id"
           loading={isLoading}
-          pagination={{ current: page, pageSize: 20, total, onChange: setPage, showTotal: (t: number) => `Total ${t}` }}
+          pagination={{ current: page, pageSize: 20, total, onChange: setPage, showTotal: (total: number) => t("common.total", { count: total }) }}
           onRow={(r: { id: string }) => ({ onClick: () => navigate(`/suppliers/${r.id}`), style: { cursor: "pointer" } })}
         />
       </Card>
 
       <Modal
-        title="Add Supplier"
+        title={t("common.create")}
         open={modalOpen}
         onOk={() => form.validateFields().then((v) => createMutation.mutate(v))}
         onCancel={() => { setModalOpen(false); form.resetFields(); }}
         confirmLoading={createMutation.isPending}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="name" label="Name" rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="type" label="Type" rules={[{ required: true }]}>
-            <Select options={[{ label: "Design", value: "design" }, { label: "Module Dev", value: "module_dev" }]} />
+          <Form.Item name="name" label={t("supplier.name")} rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item name="type" label={t("supplier.type")} rules={[{ required: true }]}>
+            <Select options={[{ label: t("supplier.typeDesign"), value: "design" }, { label: t("supplier.typeModuleDev"), value: "module_dev" }]} />
           </Form.Item>
-          <Form.Item name="contact_name" label="Contact Name"><Input /></Form.Item>
-          <Form.Item name="contact_email" label="Contact Email"><Input /></Form.Item>
-          <Form.Item name="notes" label="Notes"><Input.TextArea rows={2} /></Form.Item>
+          <Form.Item name="contact_name" label={t("supplier.contactName")}><Input /></Form.Item>
+          <Form.Item name="contact_email" label={t("supplier.contactEmail")}><Input /></Form.Item>
+          <Form.Item name="notes" label={t("supplier.notes")}><Input.TextArea rows={2} /></Form.Item>
         </Form>
       </Modal>
     </div>

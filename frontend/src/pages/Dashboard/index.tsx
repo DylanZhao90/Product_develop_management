@@ -5,6 +5,7 @@ import {
   ClockCircleOutlined,
   CheckCircleOutlined,
   ArrowRightOutlined,
+  InboxOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -41,7 +42,7 @@ export default function Dashboard() {
 
   const recentProjectColumns = [
     {
-      title: t("common.project") || "Project",
+      title: t("common.project"),
       dataIndex: "name",
       key: "name",
       ellipsis: true,
@@ -50,7 +51,7 @@ export default function Dashboard() {
       ),
     },
     {
-      title: t("common.status") || "Status",
+      title: t("common.status"),
       dataIndex: "status",
       key: "status",
       width: 130,
@@ -64,7 +65,7 @@ export default function Dashboard() {
 
   const recentTaskColumns = [
     {
-      title: t("common.task") || "Task",
+      title: t("common.task"),
       dataIndex: "name",
       key: "name",
       ellipsis: true,
@@ -73,7 +74,7 @@ export default function Dashboard() {
       ),
     },
     {
-      title: t("common.status") || "Status",
+      title: t("common.status"),
       dataIndex: "status",
       key: "status",
       width: 120,
@@ -88,7 +89,7 @@ export default function Dashboard() {
   const statCards = [
     {
       key: "products",
-      title: t("dashboard.activeProducts") || "Active Products",
+      title: t("dashboard.activeProducts"),
       value: stats?.active_products ?? 0,
       prefix: <AppstoreOutlined />,
       accent: "stat-primary",
@@ -97,7 +98,7 @@ export default function Dashboard() {
     },
     {
       key: "projects",
-      title: t("dashboard.activeProjects") || "Active Projects",
+      title: t("dashboard.activeProjects"),
       value: stats?.active_projects ?? 0,
       prefix: <ProjectOutlined />,
       accent: "stat-success",
@@ -106,7 +107,7 @@ export default function Dashboard() {
     },
     {
       key: "pending",
-      title: t("dashboard.pendingTasks") || "Pending Tasks",
+      title: t("dashboard.pendingTasks"),
       value: stats?.pending_tasks ?? 0,
       prefix: <ClockCircleOutlined />,
       accent: "stat-warning",
@@ -115,7 +116,7 @@ export default function Dashboard() {
     },
     {
       key: "completed",
-      title: t("dashboard.completedTasks") || "Completed",
+      title: t("dashboard.completedTasks"),
       value: stats?.completed_tasks ?? 0,
       prefix: <CheckCircleOutlined />,
       accent: "stat-purple",
@@ -128,14 +129,11 @@ export default function Dashboard() {
     <div>
       {/* Page Header */}
       <div className="page-header">
-        <Typography.Title
-          level={4}
-          style={{ margin: 0, fontSize: 24, fontWeight: 700, letterSpacing: "-0.5px" }}
-        >
+        <Typography.Title className="page-header-title" level={4} style={{ margin: 0 }}>
           {t("menu.dashboard")}
         </Typography.Title>
-        <Typography.Text type="secondary" style={{ fontSize: 14 }}>
-          {t("dashboard.overview") || "Overview of your product development lifecycle"}
+        <Typography.Text className="page-header-desc">
+          {t("dashboard.overview")}
         </Typography.Text>
       </div>
 
@@ -191,7 +189,7 @@ export default function Dashboard() {
           <Card
             title={
               <Typography.Text strong style={{ fontSize: 16 }}>
-                {t("dashboard.recentProjects") || "Recent Projects"}
+                {t("dashboard.recentProjects")}
               </Typography.Text>
             }
             extra={
@@ -199,15 +197,15 @@ export default function Dashboard() {
                 onClick={() => navigate("/projects")}
                 style={{ fontSize: 13, fontWeight: 500 }}
               >
-                {t("common.viewAll") || "View All"} <ArrowRightOutlined />
+                {t("common.viewAll")} <ArrowRightOutlined />
               </Typography.Link>
             }
             styles={{ body: { padding: "0 24px 24px" } }}
           >
-            {stats?.recent_projects?.length > 0 ? (
+            {(stats?.recent_projects?.length ?? 0) > 0 ? (
               <Table
                 columns={recentProjectColumns}
-                dataSource={stats.recent_projects}
+                dataSource={stats?.recent_projects}
                 rowKey="id"
                 pagination={false}
                 size="middle"
@@ -219,7 +217,8 @@ export default function Dashboard() {
               />
             ) : (
               <div className="empty-state">
-                <Typography.Text type="secondary">
+                <InboxOutlined style={{fontSize: 40, color: "var(--color-text-muted)", marginBottom: 12}} />
+                <Typography.Text type="secondary" style={{fontSize: 14}}>
                   {t("common.noData")}
                 </Typography.Text>
               </div>
@@ -231,15 +230,15 @@ export default function Dashboard() {
           <Card
             title={
               <Typography.Text strong style={{ fontSize: 16 }}>
-                {t("dashboard.recentTasks") || "Recent Tasks"}
+                {t("dashboard.recentTasks")}
               </Typography.Text>
             }
             styles={{ body: { padding: "0 24px 24px" } }}
           >
-            {stats?.recent_tasks?.length > 0 ? (
+            {(stats?.recent_tasks?.length ?? 0) > 0 ? (
               <Table
                 columns={recentTaskColumns}
-                dataSource={stats.recent_tasks}
+                dataSource={stats?.recent_tasks}
                 rowKey="id"
                 pagination={false}
                 size="middle"
@@ -247,7 +246,8 @@ export default function Dashboard() {
               />
             ) : (
               <div className="empty-state">
-                <Typography.Text type="secondary">
+                <InboxOutlined style={{fontSize: 40, color: "var(--color-text-muted)", marginBottom: 12}} />
+                <Typography.Text type="secondary" style={{fontSize: 14}}>
                   {t("common.noData")}
                 </Typography.Text>
               </div>

@@ -7,7 +7,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
-from app.core.security import verify_token
+from app.core.security import is_token_revoked, verify_token
 from app.models.user import User
 
 security_scheme = HTTPBearer(auto_error=False)
@@ -44,10 +44,17 @@ async def get_current_user(
     if not user_id:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
 
+    # Check if the token's jti has been revoked (applies to refresh tokens and
+    # any token carrying a jti claim)
+    jti = payload.get("jti")
+    if jti and await is_token_revoked(jti):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token has been revoked")
+
     from app.repositories.user_repo import UserRepository
 
+    # get_by_id now filters by is_active=True; inactive users are excluded
     user = await UserRepository(db).get_by_id(user_id)
-    if not user or not user.is_active:
+    if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found or inactive")
 
     return user

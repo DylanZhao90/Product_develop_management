@@ -119,3 +119,16 @@ class SupplierService:
         )
         await self.db.commit()
         return await self.task_repo.update(task)
+
+    async def delete_supplier(self, supplier_id: str, deleted_by: str | None = None) -> None:
+        supplier = await self.supplier_repo.get_by_id(supplier_id)
+        if not supplier:
+            raise NotFoundError("Supplier not found")
+        # RESTRICT on OutsourceTask FK means we must check for existing tasks
+        tasks = await self.task_repo.get_by_supplier(supplier_id)
+        if tasks:
+            from app.core.exceptions import ConflictError
+            raise ConflictError(f"Cannot delete supplier with {len(tasks)} active outsource task(s)")
+        await self.db.delete(supplier)
+        await AuditLogger.log(self.db, user_id=deleted_by, action="supplier.delete", resource_type="supplier", resource_id=supplier_id)
+        await self.db.commit()

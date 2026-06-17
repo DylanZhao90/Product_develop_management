@@ -79,3 +79,11 @@ class DesignService:
         await AuditLogger.log(self.db, user_id=updated_by, action="design_file.update", resource_type="design_file", resource_id=str(design_file.id), old_value=old_values, new_value={"file_name": design_file.file_name, "is_current": design_file.is_current})
         await self.db.commit()
         return design_file
+
+    async def delete_design_file(self, file_id: str, deleted_by: str | None = None) -> None:
+        design_file = await self.repo.get_by_id(file_id)
+        if not design_file:
+            raise NotFoundError("Design file not found")
+        await self.db.delete(design_file)
+        await AuditLogger.log(self.db, user_id=deleted_by, action="design_file.delete", resource_type="design_file", resource_id=file_id)
+        await self.db.commit()

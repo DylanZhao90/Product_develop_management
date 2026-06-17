@@ -66,11 +66,15 @@ async def update_supplier(
     supplier_id: str, body: SupplierUpdate, db: DBSessionDep, current_user: CurrentUserDep,
 ):
     service = SupplierService(db)
-    try:
-        s = await service.update_supplier(supplier_id, body.model_dump(exclude_none=True), str(current_user.id))
-        return {"success": True, "data": SupplierResponse.model_validate(s)}
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    s = await service.update_supplier(supplier_id, body.model_dump(exclude_none=True), str(current_user.id))
+    return {"success": True, "data": SupplierResponse.model_validate(s)}
+
+
+@router.delete("/{supplier_id}")
+async def delete_supplier(supplier_id: str, db: DBSessionDep, current_user: CurrentUserDep):
+    service = SupplierService(db)
+    await service.delete_supplier(supplier_id, str(current_user.id))
+    return {"success": True, "message": "供应商已删除"}
 
 
 # ---- Outsource Tasks ----
@@ -102,11 +106,8 @@ async def update_outsource_task(
     db: DBSessionDep, current_user: CurrentUserDep,
 ):
     service = SupplierService(db)
-    try:
-        task = await service.update_outsource_task(task_id, body.model_dump(exclude_none=True), str(current_user.id))
-        return {"success": True, "data": OutsourceTaskResponse.model_validate(task)}
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    task = await service.update_outsource_task(task_id, body.model_dump(exclude_none=True), str(current_user.id))
+    return {"success": True, "data": OutsourceTaskResponse.model_validate(task)}
 
 
 @router.post("/{supplier_id}/outsource-tasks/{task_id}/review")
@@ -115,8 +116,5 @@ async def review_outsource_task(
     db: DBSessionDep, current_user: CurrentUserDep,
 ):
     service = SupplierService(db)
-    try:
-        task = await service.review_outsource_task(task_id, body.model_dump(), str(current_user.id))
-        return {"success": True, "data": OutsourceTaskResponse.model_validate(task)}
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    task = await service.review_outsource_task(task_id, body.model_dump(), str(current_user.id))
+    return {"success": True, "data": OutsourceTaskResponse.model_validate(task)}

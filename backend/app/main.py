@@ -1,12 +1,14 @@
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from app.core.config import get_settings
 from app.core.database import async_session
+from app.core.exceptions import AppException
 from app.middleware.error_handler import error_handler
 from app.middleware.metrics import metrics_endpoint, metrics_middleware
 from app.middleware.rate_limit import rate_limit_middleware
@@ -54,6 +56,15 @@ app.add_middleware(
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
 )
+
+# Global exception handler for AppException and subclasses
+@app.exception_handler(AppException)
+async def app_exception_handler(request: Request, exc: AppException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"success": False, "message": exc.detail},
+    )
+
 
 # Register API routes
 from app.api.v1.auth import router as auth_router

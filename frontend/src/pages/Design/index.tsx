@@ -23,7 +23,7 @@ export default function Design() {
   const uploadMutation = useMutation({
     mutationFn: (formData: FormData) => designApi.upload(formData),
     onSuccess: () => {
-      message.success("File uploaded");
+      message.success(t("design.uploadSuccess"));
       setUploadModalOpen(false);
       form.resetFields();
       setFileList([]);
@@ -52,38 +52,38 @@ export default function Design() {
   const total = data?.data?.total || 0;
 
   const columns = [
-    { title: "File Name", dataIndex: "file_name", key: "file_name", ellipsis: true },
+    { title: t("design.fileName"), dataIndex: "file_name", key: "file_name", ellipsis: true },
     {
-      title: "Type",
+      title: t("design.fileType"),
       dataIndex: "file_type",
       key: "file_type",
       width: 80,
       render: (v: string) => <Tag>{v?.toUpperCase()}</Tag>,
     },
-    { title: "Ver", dataIndex: "version", key: "version", width: 60 },
+    { title: t("design.version"), dataIndex: "version", key: "version", width: 60 },
     {
-      title: "Current",
+      title: t("design.current"),
       dataIndex: "is_current",
       key: "is_current",
       width: 80,
-      render: (v: boolean) => (v ? <Tag color="green">Latest</Tag> : <Tag>Old</Tag>),
+      render: (v: boolean) => (v ? <Tag color="green">{t("design.latest")}</Tag> : <Tag>{t("design.old")}</Tag>),
     },
     {
-      title: "Size",
+      title: t("design.size"),
       dataIndex: "file_size",
       key: "file_size",
       width: 80,
       render: (v: number) => (v ? `${(v / 1024).toFixed(0)} KB` : "-"),
     },
     {
-      title: "Uploaded",
+      title: t("design.uploaded"),
       dataIndex: "created_at",
       key: "created_at",
       width: 150,
       render: (v: string) => (v ? new Date(v).toLocaleString() : "-"),
     },
     {
-      title: "Action",
+      title: t("common.actions"),
       key: "action",
       width: 80,
       render: (_: unknown, r: Record<string, unknown>) => (
@@ -94,13 +94,22 @@ export default function Design() {
 
   return (
     <div>
-      <Typography.Title level={4}>{t("menu.design")}</Typography.Title>
+      {/* Page Header */}
+      <div className="page-header">
+        <Typography.Title className="page-header-title" level={4} style={{ margin: 0 }}>
+          {t("menu.design")}
+        </Typography.Title>
+        <Typography.Text className="page-header-desc">
+          {t("common.total", { count: total })}
+        </Typography.Text>
+      </div>
+
       <Card
-        extra={<Button type="primary" icon={<UploadOutlined />} onClick={() => setUploadModalOpen(true)}>Upload</Button>}
+        extra={<Button type="primary" icon={<UploadOutlined />} onClick={() => setUploadModalOpen(true)}>{t("common.upload")}</Button>}
       >
         <Space style={{ marginBottom: 16 }} wrap>
           <Input
-            placeholder="Product ID"
+            placeholder={t("design.productId")}
             value={productId}
             onChange={(e) => { setProductId(e.target.value || undefined); setPage(1); }}
             prefix={<SearchOutlined />}
@@ -108,7 +117,7 @@ export default function Design() {
             allowClear
           />
           <Select
-            placeholder="File Type"
+            placeholder={t("design.fileType")}
             value={fileType}
             onChange={(v) => { setFileType(v); setPage(1); }}
             allowClear
@@ -127,28 +136,28 @@ export default function Design() {
           dataSource={files}
           rowKey="id"
           loading={isLoading}
-          pagination={{ current: page, pageSize: 20, total, onChange: setPage, showTotal: (t: number) => `Total ${t}` }}
+          pagination={{ current: page, pageSize: 20, total, onChange: setPage, showTotal: (total: number) => t("common.total", { count: total }) }}
         />
       </Card>
 
       <Modal
-        title="Upload Design File"
+        title={t("design.uploadDesignFile")}
         open={uploadModalOpen}
         onOk={handleUpload}
         onCancel={() => { setUploadModalOpen(false); form.resetFields(); setFileList([]); }}
         confirmLoading={uploadMutation.isPending}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="product_id" label="Product ID" rules={[{ required: true }]}>
-            <Input placeholder="UUID of the product" />
+          <Form.Item name="product_id" label={t("design.productId")} rules={[{ required: true }]}>
+            <Input placeholder={t("design.productIdHint")} />
           </Form.Item>
-          <Form.Item label="File" required>
+          <Form.Item label={t("design.file")} required>
             <Upload beforeUpload={(f) => { setFileList([f]); return false; }} maxCount={1}
               onRemove={() => setFileList([])} fileList={fileList.map((f, i) => ({ uid: String(i), name: f.name }))}>
-              <Button icon={<UploadOutlined />}>Select File</Button>
+              <Button icon={<UploadOutlined />}>{t("design.selectFile")}</Button>
             </Upload>
           </Form.Item>
-          <Form.Item name="change_notes" label="Change Notes">
+          <Form.Item name="change_notes" label={t("design.changeNotes")}>
             <Input.TextArea rows={2} />
           </Form.Item>
         </Form>

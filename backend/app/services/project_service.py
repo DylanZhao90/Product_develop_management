@@ -165,3 +165,12 @@ class ProjectService:
         await AuditLogger.log(self.db, user_id=updated_by, action="issue.update", resource_type="technical_issue", resource_id=str(issue.id), old_value=old_values, new_value={"title": issue.title, "status": issue.status, "severity": issue.severity})
         await self.db.commit()
         return issue
+
+    async def delete_project(self, project_id: str, deleted_by: str | None = None) -> None:
+        project = await self.project_repo.get_by_id(project_id)
+        if not project:
+            raise NotFoundError("Project not found")
+        # CASCADE handles tasks and issues
+        await self.db.delete(project)
+        await AuditLogger.log(self.db, user_id=deleted_by, action="project.delete", resource_type="project", resource_id=project_id)
+        await self.db.commit()

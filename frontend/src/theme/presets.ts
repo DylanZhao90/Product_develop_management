@@ -235,6 +235,42 @@ function buildPreset(cfg: {
       },
     },
 
+    // ── Dark-mode component overrides ──
+    ...(cfg.mode === "dark" ? {
+      componentTokens: {
+        ...({
+          Layout: { siderBg: sidebarBg, triggerBg: neutral[800], triggerColor: neutral[300] },
+          Menu: {
+            darkItemBg: sidebarBg, darkItemColor: neutral[400],
+            darkItemHoverBg: `${primary[500]}26`, darkItemHoverColor: neutral[0],
+            darkItemSelectedBg: `${primary[500]}38`, darkItemSelectedColor: neutral[0],
+            darkSubMenuItemBg: sidebarBg, darkItemDisabledColor: neutral[600],
+            itemBorderRadius: 8, itemMarginInline: 8,
+          },
+          Table: {
+            headerBg: neutral[50], headerColor: neutral[400],
+            headerSplitColor: "transparent", rowHoverBg: `${primary[500]}14`,
+            borderColor: neutral[200], cellPaddingBlock: 12, cellPaddingInline: 16,
+          },
+          Card: { paddingLG: 24, borderRadiusLG: 12, colorBgContainer: neutral[0] },
+          Button: { borderRadius: 8, controlHeight: 36, controlHeightLG: 44, controlHeightSM: 28, paddingInline: 16, paddingInlineLG: 20, paddingInlineSM: 12 },
+          Input: { borderRadius: 8, controlHeight: 36, controlHeightLG: 44, controlHeightSM: 28, colorBgContainer: neutral[0], colorBorder: neutral[200] },
+          Tag: { borderRadiusSM: 6, colorBgContainer: neutral[100] },
+          Modal: { borderRadiusLG: 16, titleFontSize: 18, contentBg: neutral[50], headerBg: neutral[50] },
+          Statistic: { titleFontSize: 14, contentFontSize: 28 },
+          Tabs: { itemColor: neutral[400], itemHoverColor: primary[500], itemSelectedColor: primary[500], inkBarColor: primary[500] },
+          Select: { borderRadius: 8, controlHeight: 36, optionSelectedBg: `${primary[500]}26`, optionSelectedColor: primary[500], colorBgContainer: neutral[0], colorBorder: neutral[200] },
+          DatePicker: { borderRadius: 8, controlHeight: 36, colorBgContainer: neutral[0], colorBorder: neutral[200] },
+          Breadcrumb: { fontSize: 14, linkColor: neutral[400], linkHoverColor: primary[500], separatorColor: neutral[200] },
+          Tooltip: { borderRadius: 8, colorBgSpotlight: neutral[800] },
+          Popover: { borderRadius: 12, colorBgElevated: neutral[50] },
+          Notification: { borderRadiusLG: 12, colorBgElevated: neutral[50] },
+          Drawer: { paddingLG: 24 },
+          Dropdown: { colorBgElevated: neutral[50] },
+        }),
+      },
+    } : {}),
+
     // ── CSS custom properties (injected on :root) ──
     cssVariables: {
       "--color-primary": primary[500],
@@ -272,24 +308,24 @@ function buildPreset(cfg: {
 // ═══════════════════════════════════════════════════════════════
 
 export const themePresets: ThemePreset[] = [
-  // ── 1. Tech SaaS (default) ─────────────────────────────────
+  // ── 1. Tech SaaS (default) — data-vis optimized ─────────────
   buildPreset({
     id: "tech-saas",
     name: "Tech SaaS",
     nameZh: "科技蓝紫",
-    description: "Modern, glass-morphism header, dark sidebar, tech-forward",
+    description: "Modern, glass-morphism header, dark sidebar, data-viz optimized",
     mode: "default",
     primary: {
-      50: "#f0f5ff", 100: "#d6e4ff", 200: "#adc6ff", 300: "#85a5ff",
-      400: "#6b85f8", 500: "#4f6ef6", 600: "#4058db", 700: "#3b4fcf",
-      800: "#2d3fa8", 900: "#1e2f8a",
+      50: "#eef2ff", 100: "#e0e7ff", 200: "#c7d2fe", 300: "#a5b4fc",
+      400: "#818cf8", 500: "#4f6ef6", 600: "#3b5de7", 700: "#334ed6",
+      800: "#2a3fb8", 900: "#1e2f8a",
     },
     neutral: {
       0: "#ffffff", 50: "#f8fafc", 100: "#f1f5f9", 200: "#e2e8f0",
       300: "#cbd5e1", 400: "#94a3b8", 500: "#64748b", 600: "#475569",
       700: "#334155", 800: "#1e293b", 900: "#0f172a",
     },
-    success: { 50: "#f0fdf4", 500: "#22c55e", 700: "#16a34a" },
+    success: { 50: "#f0fdf4", 500: "#10b981", 700: "#059669" },
     warning: { 50: "#fffbeb", 500: "#f59e0b", 700: "#d97706" },
     error: { 50: "#fef2f2", 500: "#ef4444", 700: "#dc2626" },
     info: { 50: "#eef2ff", 500: "#6366f1", 700: "#4f46e5" },

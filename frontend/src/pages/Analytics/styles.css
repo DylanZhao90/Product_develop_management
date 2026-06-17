@@ -1,0 +1,227 @@
+/* ═══════════════════════════════════════════════════════════════
+   Analytics Page — Per-Stage Lifecycle Deep Dive
+   Enhanced: Stage-specific panels, glassmorphism cards, flow rates
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Stage Overview Cards ─────────────────────────── */
+.stage-overview-row {
+  margin-bottom: 24px;
+}
+.stage-stat-card {
+  text-align: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px !important;
+  transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+.stage-stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.1) !important;
+}
+.stage-stat-card--active {
+  transform: translateY(-3px);
+}
+.stage-stat-card .pdm-stat-icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 8px;
+  font-size: 18px;
+}
+.stage-stat-count {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  line-height: 1.2;
+}
+.stage-stat-label {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  font-weight: 500;
+  margin-top: 2px;
+}
+.stage-stat-sublabel {
+  font-size: 10px;
+  color: var(--color-text-muted);
+  font-weight: 400;
+  margin-top: 1px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Sankey Card ──────────────────────────────────── */
+.sankey-card {
+  margin-bottom: 24px;
+  border-radius: 14px !important;
+  background: var(--color-bg-card) !important;
+}
+
+/* Flow rate items */
+.flow-rate-item {
+  text-align: center;
+  padding: 8px 4px;
+  border-radius: 8px;
+  background: var(--color-bg-page);
+  transition: background 150ms;
+}
+.flow-rate-item:hover {
+  background: var(--color-border-light);
+}
+.flow-rate-path {
+  font-size: 12px;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 4px;
+}
+.flow-arrow {
+  margin: 0 4px;
+  color: var(--color-text-muted);
+}
+.flow-rate-value {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--color-text);
+  display: block;
+  line-height: 1.2;
+}
+.flow-rate-pct {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  display: block;
+}
+
+/* ── Per-Stage Section ────────────────────────────── */
+.stage-section {
+  margin-bottom: 24px;
+}
+.stage-section:last-child {
+  margin-bottom: 0;
+}
+.stage-dive-section {
+  margin-top: 24px;
+}
+.stage-panel-card {
+  border-radius: 14px !important;
+  overflow: hidden;
+  border: 1px solid var(--color-border-light);
+  background: var(--color-bg-card) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  transition: box-shadow 250ms;
+}
+.stage-panel-card:hover {
+  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+}
+.stage-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.stage-card-header .stage-badge {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.stage-card-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+.stage-card-header .stage-count {
+  margin-left: auto;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 12px;
+}
+.stage-empty {
+  text-align: center;
+  padding: 32px 0;
+}
+
+/* ── Metric Cards ─────────────────────────────────── */
+.stage-metric-card {
+  padding: 12px 14px;
+  background: var(--color-bg-page);
+  border-radius: 10px;
+  border-left: 3px solid transparent;
+  transition: background 150ms;
+}
+.stage-metric-card:hover {
+  background: var(--color-border-light);
+}
+.stage-metric-sub {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+/* ── Mini Chart Container ─────────────────────────── */
+.mini-chart {
+  width: 100%;
+  height: 190px;
+}
+.chart-card {
+  height: 100%;
+  padding: 16px;
+  background: var(--color-bg-page);
+  border-radius: 10px;
+  border: 1px solid var(--color-border-light);
+  transition: border-color 150ms;
+}
+.chart-card:hover {
+  border-color: var(--color-border);
+}
+.chart-title-sm {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.chart-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+/* ── Product Detail Table Inside Cards ────────────── */
+.stage-product-table {
+  margin-top: 8px;
+}
+.stage-product-table .ant-table-thead > tr > th {
+  font-size: 12px;
+  padding: 8px 12px;
+}
+.stage-product-table .ant-table-tbody > tr > td {
+  font-size: 12px;
+  padding: 6px 12px;
+}
+
+/* ── Dark mode overrides ───────────────────────────── */
+[data-theme="linear-dark"] .stage-panel-card {
+  border-color: var(--border-dark, #2a2a2a);
+}
+[data-theme="linear-dark"] .stage-metric-card {
+  background: rgba(255,255,255,0.03);
+}
+[data-theme="linear-dark"] .chart-card {
+  background: rgba(255,255,255,0.03);
+  border-color: var(--border-dark, #2a2a2a);
+}
+[data-theme="linear-dark"] .flow-rate-item {
+  background: rgba(255,255,255,0.03);
+}
+[data-theme="linear-dark"] .flow-rate-item:hover {
+  background: rgba(255,255,255,0.06);
+}

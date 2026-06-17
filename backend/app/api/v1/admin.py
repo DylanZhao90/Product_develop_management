@@ -43,11 +43,15 @@ async def update_user(
     user_id: str, body: UserUpdate, db: DBSessionDep, current_user: AdminUserDep,
 ):
     service = AdminService(db)
-    try:
-        user = await service.update_user(user_id, body.model_dump(exclude_none=True))
-        return {"success": True, "data": UserResponse.model_validate(user)}
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    user = await service.update_user(user_id, body.model_dump(exclude_none=True))
+    return {"success": True, "data": UserResponse.model_validate(user)}
+
+
+@router.delete("/users/{user_id}")
+async def delete_user(user_id: str, db: DBSessionDep, current_user: AdminUserDep):
+    service = AdminService(db)
+    await service.delete_user(user_id, str(current_user.id))
+    return {"success": True, "message": "用户已删除"}
 
 
 @router.get("/audit-logs")

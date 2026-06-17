@@ -17,6 +17,7 @@ import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { productApi } from "../../services/api";
 import { useLocale } from "../../locales";
+import type { ProductCreate } from "../../services/api-types";
 
 const statusColors: Record<string, string> = {
   in_development: "blue",
@@ -50,9 +51,9 @@ export default function Products() {
   });
 
   const createMutation = useMutation({
-    mutationFn: (values: Record<string, unknown>) => productApi.create(values),
+    mutationFn: (values: Record<string, unknown>) => productApi.create(values as any),
     onSuccess: () => {
-      message.success("Product created");
+      message.success(t("product.createdSuccess"));
       setCreateModalOpen(false);
       form.resetFields();
       queryClient.invalidateQueries({ queryKey: ["products"] });
@@ -65,25 +66,25 @@ export default function Products() {
 
   const columns = [
     {
-      title: "Product Code",
+      title: t("product.code"),
       dataIndex: "code",
       key: "code",
       width: 160,
     },
     {
-      title: "Model",
+      title: t("product.model"),
       dataIndex: "model",
       key: "model",
       width: 160,
     },
     {
-      title: "Name",
+      title: t("product.name"),
       dataIndex: "name",
       key: "name",
       ellipsis: true,
     },
     {
-      title: "Type",
+      title: t("product.type"),
       dataIndex: "type",
       key: "type",
       width: 100,
@@ -104,8 +105,17 @@ export default function Products() {
 
   return (
     <div>
+      {/* Page Header */}
+      <div className="page-header">
+        <Typography.Title className="page-header-title" level={4} style={{ margin: 0 }}>
+          {t("menu.products")}
+        </Typography.Title>
+        <Typography.Text className="page-header-desc">
+          {t("common.total", { count: data?.data?.total || 0 })}
+        </Typography.Text>
+      </div>
+
       <Card
-        title={<Typography.Title level={4}>{t("menu.products")}</Typography.Title>}
         extra={
           <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalOpen(true)}>
             {t("common.create")}
@@ -122,7 +132,7 @@ export default function Products() {
             allowClear
           />
           <Select
-            placeholder="Status"
+            placeholder={t("common.status")}
             value={statusFilter}
             onChange={(v) => { setStatusFilter(v); setPage(1); }}
             allowClear
@@ -136,7 +146,7 @@ export default function Products() {
             ]}
           />
           <Select
-            placeholder="Type"
+            placeholder={t("product.type")}
             value={typeFilter}
             onChange={(v) => { setTypeFilter(v); setPage(1); }}
             allowClear
@@ -153,14 +163,12 @@ export default function Products() {
           dataSource={data?.data?.data || []}
           loading={isLoading}
           rowKey="id"
-          search={false}
-          options={false}
           pagination={{
             current: page,
             pageSize: 20,
             total: data?.data?.total || 0,
             onChange: setPage,
-            showTotal: (total: number) => `Total ${total}`,
+            showTotal: (total: number) => t("common.total", { count: total }),
           }}
           onRow={(record: { id: string }) => ({
             onClick: () => navigate(`/products/${record.id}`),
@@ -170,20 +178,20 @@ export default function Products() {
       </Card>
 
       <Modal
-        title={`${t("common.create")} Product`}
+        title={`${t("common.create")} ${t("menu.products")}`}
         open={createModalOpen}
         onOk={handleCreate}
         onCancel={() => setCreateModalOpen(false)}
         confirmLoading={createMutation.isPending}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="model" label="Model" rules={[{ required: true }]}>
+          <Form.Item name="model" label={t("product.model")} rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="name" label="Name" rules={[{ required: true }]}>
+          <Form.Item name="name" label={t("product.name")} rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="type" label="Type">
+          <Form.Item name="type" label={t("product.type")}>
             <Select
               options={[
                 { label: "AC Charger", value: "ac_charger" },
@@ -192,7 +200,7 @@ export default function Products() {
               ]}
             />
           </Form.Item>
-          <Form.Item name="description" label="Description">
+          <Form.Item name="description" label={t("common.desc") || "Description"}>
             <Input.TextArea rows={3} />
           </Form.Item>
         </Form>

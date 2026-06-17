@@ -91,3 +91,10 @@ async def get_file_versions(file_id: str, db: DBSessionDep, current_user: Curren
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
     versions = await service.get_versions(file_id)
     return {"success": True, "data": [DesignFileResponse.model_validate(v) for v in versions]}
+
+
+@router.delete("/{file_id}")
+async def delete_design_file(file_id: str, db: DBSessionDep, current_user: CurrentUserDep):
+    service = DesignService(db)
+    await service.delete_design_file(file_id, str(current_user.id))
+    return {"success": True, "message": "设计文件已删除"}

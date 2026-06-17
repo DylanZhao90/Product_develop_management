@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,6 +9,22 @@ from app.repositories.base import BaseRepository
 
 class UserRepository(BaseRepository[User]):
     model_class = User
+
+    async def get_by_id(self, id: Any) -> User | None:
+        """Fetch an active user by primary key — inactive users are excluded."""
+        result = await self.db.execute(
+            select(self.model_class).where(
+                self.model_class.id == id, self.model_class.is_active == True  # type: ignore[attr-defined]
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def get_by_id_include_inactive(self, id: Any) -> User | None:
+        """Fetch any user by primary key, regardless of is_active status."""
+        result = await self.db.execute(
+            select(self.model_class).where(self.model_class.id == id)  # type: ignore[attr-defined]
+        )
+        return result.scalar_one_or_none()
 
     async def get_by_feishu_open_id(self, open_id: str) -> User | None:
         result = await self.db.execute(select(User).where(User.feishu_open_id == open_id))

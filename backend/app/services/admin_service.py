@@ -39,7 +39,7 @@ class AdminService:
         return user
 
     async def update_user(self, user_id: str, data: dict, updated_by: str | None = None) -> User:
-        user = await self.user_repo.get_by_id(user_id)
+        user = await self.user_repo.get_by_id_include_inactive(user_id)
         if not user:
             raise NotFoundError("User not found")
         old_values = {"name": user.name, "role": user.role, "is_active": user.is_active}
@@ -48,6 +48,14 @@ class AdminService:
         await AuditLogger.log(self.db, user_id=updated_by, action="user.update", resource_type="user", resource_id=str(user.id), old_value=old_values, new_value={"name": user.name, "role": user.role, "is_active": user.is_active})
         await self.db.commit()
         return user
+
+    async def delete_user(self, user_id: str, deleted_by: str | None = None) -> None:
+        user = await self.user_repo.get_by_id_include_inactive(user_id)
+        if not user:
+            raise NotFoundError("User not found")
+        await self.db.delete(user)
+        await AuditLogger.log(self.db, user_id=deleted_by, action="user.delete", resource_type="user", resource_id=user_id)
+        await self.db.commit()
 
     # ---- Audit Logs ----
 

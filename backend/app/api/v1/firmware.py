@@ -76,6 +76,13 @@ async def get_version(version_id: str, db: DBSessionDep, current_user: CurrentUs
     return {"success": True, "data": data}
 
 
+@router.delete("/versions/{version_id}")
+async def delete_version(version_id: str, db: DBSessionDep, current_user: CurrentUserDep):
+    service = FirmwareService(db)
+    await service.delete_version(version_id, str(current_user.id))
+    return {"success": True, "message": "固件版本已删除"}
+
+
 # ---- OTA Upgrade Tasks ----
 
 
@@ -125,18 +132,19 @@ async def update_upgrade_task(
     task_id: str, body: FirmwareUpgradeTaskUpdate, db: DBSessionDep, current_user: CurrentUserDep,
 ):
     service = FirmwareService(db)
-    try:
-        task = await service.update_upgrade_task(task_id, body.model_dump(exclude_none=True), str(current_user.id))
-        return {"success": True, "data": FirmwareUpgradeTaskResponse.model_validate(task)}
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    task = await service.update_upgrade_task(task_id, body.model_dump(exclude_none=True), str(current_user.id))
+    return {"success": True, "data": FirmwareUpgradeTaskResponse.model_validate(task)}
+
+
+@router.delete("/upgrade-tasks/{task_id}")
+async def delete_upgrade_task(task_id: str, db: DBSessionDep, current_user: CurrentUserDep):
+    service = FirmwareService(db)
+    await service.delete_upgrade_task(task_id, str(current_user.id))
+    return {"success": True, "message": "升级任务已删除"}
 
 
 @router.post("/upgrade-tasks/{task_id}/cancel")
 async def cancel_upgrade_task(task_id: str, db: DBSessionDep, current_user: CurrentUserDep):
     service = FirmwareService(db)
-    try:
-        task = await service.cancel_upgrade_task(task_id, str(current_user.id))
-        return {"success": True, "data": FirmwareUpgradeTaskResponse.model_validate(task)}
-    except ValueError as e:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+    task = await service.cancel_upgrade_task(task_id, str(current_user.id))
+    return {"success": True, "data": FirmwareUpgradeTaskResponse.model_validate(task)}

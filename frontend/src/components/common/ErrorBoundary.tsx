@@ -62,7 +62,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
                 <Typography.Text type="secondary">
                   An unexpected error occurred while rendering this page.
                 </Typography.Text>
-                {process.env.NODE_ENV === "development" && this.state.error && (
+                {(import.meta.env.DEV) && this.state.error && (
                   <Typography.Paragraph
                     type="danger"
                     style={{

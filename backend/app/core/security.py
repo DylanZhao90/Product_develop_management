@@ -13,7 +13,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 ALGORITHM = settings.jwt_algorithm
 
-REVOKED_TOKENS_SET = "revoked_tokens"
+REVOKED_TOKENS_PREFIX = "revoked_tokens"
 
 
 def create_access_token(subject: str, expires_delta: timedelta | None = None) -> str:
@@ -37,16 +37,23 @@ def create_refresh_token(subject: str) -> str:
 
 
 async def is_token_revoked(jti: str) -> bool:
-    """Check if a token's jti has been revoked in Redis."""
+    """Check if a token's jti has been revoked in Redis.
+
+    Each revoked token is stored as an independent key with its own TTL,
+    so no single key grows unbounded.
+    """
     redis = await get_redis()
-    return bool(await redis.sismember(REVOKED_TOKENS_SET, jti))
+    return bool(await redis.exists(f"{REVOKED_TOKENS_PREFIX}:{jti}"))
 
 
 async def revoke_token(jti: str, expire_seconds: int) -> None:
-    """Add a token's jti to the revoked set with an expiration."""
+    """Add a token's jti to the revoked set with an independent TTL.
+
+    Each jti gets its own key ``revoked_tokens:{jti}`` with ``expire_seconds``
+    TTL, so entries expire independently and the key space stays bounded.
+    """
     redis = await get_redis()
-    await redis.sadd(REVOKED_TOKENS_SET, jti)
-    await redis.expire(REVOKED_TOKENS_SET, expire_seconds)
+    await redis.setex(f"{REVOKED_TOKENS_PREFIX}:{jti}", expire_seconds, "1")
 
 
 def verify_token(
