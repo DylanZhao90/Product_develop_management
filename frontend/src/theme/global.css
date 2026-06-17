@@ -48,6 +48,32 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background: var(--color-bg-page);
   color: var(--color-text);
+  overflow-x: hidden;
+}
+
+/* Global overflow prevention for content areas */
+#root {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Ensure all layout content has safe boundaries */
+.ant-layout {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+.ant-layout-content {
+  overflow-x: auto;
+}
+
+/* Long text will not break layout */
+.ant-typography,
+.ant-table-cell,
+.ant-card,
+.ant-modal-body {
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 /* Dark-mode root override */
 :root[data-theme="linear-dark"] {
