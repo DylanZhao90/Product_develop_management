@@ -299,6 +299,94 @@ function buildPreset(cfg: {
       "--radius-md": "8px",
       "--radius-lg": "12px",
       "--radius-xl": "16px",
+
+      /* ── Layout ── */
+      "--sidebar-width": "232px",
+      "--sidebar-collapsed-width": "64px",
+      "--sidebar-brand-height": "64px",
+      "--header-height": "56px",
+      "--header-height-mobile": "48px",
+      "--content-margin": "24px",
+      "--content-margin-mobile": "12px",
+
+      /* ── Typography ── */
+      "--font-size-h1": "28px",
+      "--font-size-h2": "24px",
+      "--font-size-h3": "20px",
+      "--font-size-h4": "16px",
+      "--font-size-body": "14px",
+      "--font-size-small": "12px",
+      "--font-size-xs": "11px",
+      "--font-size-tag": "11px",
+      "--font-size-stat": "28px",
+      "--font-size-stat-mobile": "22px",
+      "--font-weight-normal": "400",
+      "--font-weight-medium": "500",
+      "--font-weight-semibold": "600",
+      "--font-weight-bold": "700",
+
+      /* ── Spacing ── */
+      "--spacing-xs": "4px",
+      "--spacing-sm": "8px",
+      "--spacing-md": "12px",
+      "--spacing-lg": "16px",
+      "--spacing-xl": "24px",
+      "--spacing-xxl": "32px",
+
+      /* ── Card ── */
+      "--card-padding": "24px",
+      "--card-padding-mobile": "12px",
+      "--card-border-radius": "12px",
+      "--card-shadow": "0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)",
+
+      /* ── Table ── */
+      "--table-cell-padding": "12px 16px",
+      "--table-cell-padding-sm": "8px 12px",
+      "--table-header-font-size": "12px",
+      "--table-row-font-size": "13px",
+
+      /* ── Form Controls ── */
+      "--control-height": "36px",
+      "--control-height-lg": "44px",
+      "--control-height-sm": "28px",
+      "--input-padding": "8px 12px",
+      "--input-radius": "8px",
+
+      /* ── Tags ── */
+      "--tag-radius": "6px",
+      "--tag-font-size": "11px",
+      "--tag-padding": "1px 8px",
+
+      /* ── Modal ── */
+      "--modal-radius": "16px",
+      "--modal-width": "520px",
+      "--modal-width-sm": "400px",
+      "--modal-width-lg": "720px",
+
+      /* ── Drawer ── */
+      "--drawer-padding": "24px",
+
+      /* ── Statistics Card ── */
+      "--stat-font-size": "28px",
+      "--stat-font-size-mobile": "22px",
+      "--stat-label-size": "14px",
+
+      /* ── Chart ── */
+      "--chart-mini-height": "190px",
+      "--chart-mini-height-mobile": "150px",
+      "--chart-sankey-height": "500px",
+      "--chart-sankey-height-lg": "600px",
+
+      /* ── Page Header ── */
+      "--page-header-margin": "24px",
+      "--page-header-margin-mobile": "14px",
+      "--page-header-title-size": "22px",
+      "--page-header-desc-size": "14px",
+
+      /* ── Transitions ── */
+      "--transition-fast": "0.15s",
+      "--transition-base": "0.25s",
+      "--transition-slow": "0.4s",
     },
   };
 }
