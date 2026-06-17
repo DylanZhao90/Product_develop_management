@@ -101,10 +101,14 @@ export default function Certifications() {
           <Input placeholder={t("certification.productId")} value={productId}
             onChange={(e) => { setProductId(e.target.value || undefined); setPage(1); }}
             prefix={<SearchOutlined />} style={{ width: 280 }} allowClear />
-          <Select placeholder={t("certification.type")} value={certType} onChange={(v) => { setCertType(v); setPage(1); }} allowClear style={{ width: 120 }}
-            options={["CE", "FCC", "UL", "RoHS"].map((v) => ({ label: v, value: v }))} />
-          <Select placeholder={t("common.status")} value={statusFilter} onChange={(v) => { setStatusFilter(v); setPage(1); }} allowClear style={{ width: 140 }}
+          <Select placeholder={t("certification.type")} value={certType} onChange={(v) => { setCertType(v); setPage(1); }} style={{ width: 120 }}
             options={[
+              { label: t("common.all"), value: undefined },
+              ...["CE", "FCC", "UL", "RoHS"].map((v) => ({ label: v, value: v })),
+            ]} />
+          <Select placeholder={t("common.status")} value={statusFilter} onChange={(v) => { setStatusFilter(v); setPage(1); }} style={{ width: 140 }}
+            options={[
+              { label: t("common.all"), value: undefined },
               { label: t("certification.statusValid"), value: "valid" },
               { label: t("certification.statusExpiringSoon"), value: "expiring_soon" },
               { label: t("certification.statusExpired"), value: "expired" },

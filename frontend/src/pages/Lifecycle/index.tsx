@@ -157,9 +157,9 @@ export default function Lifecycle() {
             placeholder={t("common.status")}
             value={statusFilter}
             onChange={(v) => { setStatusFilter(v); setPage(1); }}
-            allowClear
             style={{ width: 160 }}
             options={[
+              { label: t("common.all"), value: undefined },
               { label: t("product.status.in_development"), value: "in_development" },
               { label: t("product.status.trial_handover"), value: "trial_handover" },
               { label: t("product.status.on_sale"), value: "on_sale" },

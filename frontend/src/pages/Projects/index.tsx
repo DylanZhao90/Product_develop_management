@@ -155,9 +155,9 @@ export default function Projects() {
             placeholder={t("common.status")}
             value={statusFilter}
             onChange={(v) => { setStatusFilter(v); setPage(1); }}
-            allowClear
             style={{ width: 160 }}
             options={[
+              { label: t("common.all"), value: undefined },
               { label: t("project.status.pending_approval"), value: "pending_approval" },
               { label: t("project.status.approved"), value: "approved" },
               { label: t("project.status.in_progress"), value: "in_progress" },

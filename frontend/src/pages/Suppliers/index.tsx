@@ -32,8 +32,15 @@ export default function Suppliers() {
   const suppliers = data?.data?.data || [];
   const total = data?.data?.total || 0;
 
+  const statusFilterOptions = [
+    { label: t("common.all"), value: undefined },
+    { label: t("supplier.statusActive"), value: "active" },
+    { label: t("supplier.statusSuspended"), value: "suspended" },
+    { label: t("supplier.statusBlacklisted"), value: "blacklisted" },
+  ];
+
   const columns = [
-    { title: t("supplier.name"), dataIndex: "name", key: "name", ellipsis: true },
+    { title: t("supplier.name"), dataIndex: "name", key: "name", ellipsis: true, width: 160 },
     {
       title: t("supplier.type"),
       dataIndex: "type",
@@ -41,22 +48,48 @@ export default function Suppliers() {
       width: 120,
       render: (v: string) => <Tag color={supplierTypeColors[v] || "default"}>{v === "design" ? t("supplier.typeDesign") : v === "module_dev" ? t("supplier.typeModuleDev") : v}</Tag>,
     },
-    { title: t("supplier.contact"), dataIndex: "contact_name", key: "contact", width: 100, render: (v: string) => v || "-" },
+    {
+      title: t("common.status"),
+      dataIndex: "status",
+      key: "status",
+      width: 110,
+      render: (v: string) => <Tag color={statusColors[v]}>{v === "active" ? t("supplier.statusActive") : v === "suspended" ? t("supplier.statusSuspended") : v === "blacklisted" ? t("supplier.statusBlacklisted") : v}</Tag>,
+    },
+    { title: t("supplier.contactName"), dataIndex: "contact_name", key: "contact_name", width: 110, render: (v: string) => v || "-" },
+    { title: t("supplier.contactEmail"), dataIndex: "contact_email", key: "contact_email", width: 180, ellipsis: true, render: (v: string) => v || "-" },
+    {
+      title: t("supplier.onTimeDelivery"),
+      dataIndex: "on_time_delivery_rate",
+      key: "on_time_delivery_rate",
+      width: 110,
+      render: (v: number) => (v != null ? `${v}%` : "-"),
+    },
     {
       title: t("supplier.rating"),
       dataIndex: "rating",
       key: "rating",
       width: 80,
-      render: (v: number) => (v ? `${v}/5` : "-"),
+      render: (v: number) => (v != null ? `${v}/5` : "-"),
+    },
+    { title: t("supplier.notes"), dataIndex: "notes", key: "notes", ellipsis: true, render: (v: string) => v || "-" },
+    {
+      title: t("common.created"),
+      dataIndex: "created_at",
+      key: "created_at",
+      width: 170,
+      render: (v: string) => (v ? new Date(v).toLocaleString() : "-"),
     },
     {
-      title: t("common.status"),
-      dataIndex: "status",
-      key: "status",
-      width: 100,
-      render: (v: string) => <Tag color={statusColors[v]}>{v}</Tag>,
+      title: t("common.updated"),
+      dataIndex: "updated_at",
+      key: "updated_at",
+      width: 170,
+      render: (v: string) => (v ? new Date(v).toLocaleString() : "-"),
     },
   ];
+
+  // Check if common.updated exists, fallback to label
+  const updatedLabel = t("common.updated");
 
   return (
     <div>
@@ -147,13 +180,8 @@ export default function Suppliers() {
             placeholder={t("common.status")}
             value={statusFilter}
             onChange={(v) => { setStatusFilter(v); setPage(1); }}
-            allowClear
             style={{ width: 140 }}
-            options={[
-              { label: t("supplier.statusActive"), value: "active" },
-              { label: t("supplier.statusSuspended"), value: "suspended" },
-              { label: t("supplier.statusBlacklisted"), value: "blacklisted" },
-            ]}
+            options={statusFilterOptions}
           />
         </Space>
         <Table
@@ -161,6 +189,7 @@ export default function Suppliers() {
           dataSource={suppliers}
           rowKey="id"
           loading={isLoading}
+          scroll={{ x: "max-content" }}
           pagination={{ current: page, pageSize: 20, total, onChange: setPage, showTotal: (total: number) => t("common.total", { count: total }) }}
           onRow={(r: { id: string }) => ({ onClick: () => navigate(`/suppliers/${r.id}`), style: { cursor: "pointer" } })}
         />

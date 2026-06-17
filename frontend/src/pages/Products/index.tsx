@@ -218,9 +218,9 @@ export default function Products() {
             placeholder={t("common.status")}
             value={statusFilter}
             onChange={(v) => { setStatusFilter(v); setPage(1); }}
-            allowClear
             style={{ width: 140 }}
             options={[
+              { label: t("common.all"), value: undefined },
               { label: t("product.status.in_development"), value: "in_development" },
               { label: t("product.status.trial_handover"), value: "trial_handover" },
               { label: t("product.status.on_sale"), value: "on_sale" },
@@ -232,9 +232,9 @@ export default function Products() {
             placeholder={t("product.type")}
             value={typeFilter}
             onChange={(v) => { setTypeFilter(v); setPage(1); }}
-            allowClear
             style={{ width: 140 }}
             options={[
+              { label: t("common.all"), value: undefined },
               { label: "AC Charger", value: "ac_charger" },
               { label: "DC Charger", value: "dc_charger" },
               { label: "Portable", value: "portable" },

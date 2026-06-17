@@ -122,7 +122,7 @@ function LifecycleSankeyCanvas({ option }: { option: Record<string, unknown> }) 
     if (!ref.current) return;
     try {
       if (!chartRef.current) {
-        chartRef.current = echarts.init(ref.current, null, { height: 500 });
+        chartRef.current = echarts.init(ref.current, null, { height: 200 });
       }
       chartRef.current.setOption(option, true);
     } catch (e) {
@@ -137,7 +137,7 @@ function LifecycleSankeyCanvas({ option }: { option: Record<string, unknown> }) 
     };
   }, [option]);
 
-  return <div ref={ref} className="sankey-chart-container" style={{ height: 500 }} />;
+  return <div ref={ref} className="sankey-chart-container" style={{ height: 200 }} />;
 }
 
 // ── Enhanced Sankey with Flow Rates ──

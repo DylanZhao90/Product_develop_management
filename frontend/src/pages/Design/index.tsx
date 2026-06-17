@@ -168,9 +168,9 @@ export default function Design() {
             placeholder={t("design.fileType")}
             value={fileType}
             onChange={(v) => { setFileType(v); setPage(1); }}
-            allowClear
             style={{ width: 120 }}
             options={[
+              { label: t("common.all"), value: undefined },
               { label: "STEP", value: "step" },
               { label: "IGS", value: "igs" },
               { label: "PDF", value: "pdf" },
