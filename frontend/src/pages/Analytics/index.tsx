@@ -159,8 +159,6 @@ function LifecycleSankey({ flows, totalProducts, ec }: { flows: LifecycleAnalyti
     },
     series: [{
       type: "sankey" as const,
-      layout: "none" as const,
-      layoutIterations: 0,
       emphasis: { focus: "adjacency" as const },
       nodeAlign: "left" as const,
       nodeWidth: 28,
@@ -593,7 +591,11 @@ export default function Analytics() {
         {lifecycleData.flows.length > 0 ? (
           <div className="sankey-body">
             <div className="sankey-chart-container">
-              <LifecycleSankey flows={lifecycleData.flows} totalProducts={lifecycleData.total_products} ec={ec} />
+              <LifecycleSankey
+                flows={lifecycleData.flows.filter((f) => f.from !== "trial_handover" || f.to !== "in_development")}
+                totalProducts={lifecycleData.total_products}
+                ec={ec}
+              />
             </div>
             {/* Flow rate labels row */}
             <Row gutter={[16, 8]} style={{ marginTop: 12, borderTop: "1px solid var(--color-border-light)", paddingTop: 16 }}>
