@@ -120,11 +120,13 @@ function LifecycleSankeyCanvas({ option }: { option: Record<string, unknown> }) 
 
   useEffect(() => {
     if (!ref.current) return;
-    if (!chartRef.current) {
-      chartRef.current = echarts.init(ref.current, null, { height: 500 });
-      chartRef.current.setOption(option);
-    } else {
-      chartRef.current.setOption(option);
+    try {
+      if (!chartRef.current) {
+        chartRef.current = echarts.init(ref.current, null, { height: 500 });
+      }
+      chartRef.current.setOption(option, true);
+    } catch (e) {
+      console.warn("Sankey chart error:", e);
     }
     const onResize = () => chartRef.current?.resize();
     window.addEventListener("resize", onResize);
@@ -157,6 +159,8 @@ function LifecycleSankey({ flows, totalProducts, ec }: { flows: LifecycleAnalyti
     },
     series: [{
       type: "sankey" as const,
+      layout: "none" as const,
+      layoutIterations: 0,
       emphasis: { focus: "adjacency" as const },
       nodeAlign: "left" as const,
       nodeWidth: 28,
