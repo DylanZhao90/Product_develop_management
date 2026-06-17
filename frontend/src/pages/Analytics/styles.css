@@ -249,7 +249,22 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   Analytics Responsive — Mobile Overrides
+   Product Lifecycle Flow — Sankey Section
+   ═══════════════════════════════════════════════════════════════ */
+.sankey-body {
+  display: flex;
+  flex-direction: column;
+}
+.sankey-chart-container {
+  width: 100%;
+  min-height: 500px;
+}
+.sankey-chart-container .echarts-for-react {
+  height: 500px !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Product Detail Table Inside Cards
    ═══════════════════════════════════════════════════════════════ */
 
 @media (max-width: 768px) {
