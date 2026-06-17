@@ -124,8 +124,8 @@ export default function Logo({
       primary: "var(--color-primary, #4f6ef6)",
       accent: "#6366f1",
       highlight: "var(--color-primary-hover, #3b4fcf)",
-      ring: "rgba(255,255,255,0.08)",
-      ringActive: "rgba(255,255,255,0.25)",
+      ring: "rgba(255,255,255,0.25)",
+      ringActive: "rgba(255,255,255,0.5)",
     };
   }, [variant]);
 
