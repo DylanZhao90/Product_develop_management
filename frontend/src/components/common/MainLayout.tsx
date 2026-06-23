@@ -31,7 +31,7 @@ import {
 import Logo from "./Logo";
 import { useAuthStore } from "../../stores/authStore";
 import { useAppStore } from "../../stores/appStore";
-import { useLocale } from "../../locales";
+import { useLocale, localeMap } from "../../locales";
 import { themePresets } from "../../theme/presets";
 
 const { Header, Sider, Content } = Layout;
@@ -125,9 +125,20 @@ export default function MainLayout() {
       })),
     },
     {
-      key: "lang",
+      key: "lang-group",
       icon: <TranslationOutlined />,
-      label: language === "zh-CN" ? "Switch to English" : "切换到中文",
+      label: "Language / 语言",
+      children: Object.entries(localeMap).map(([code, info]) => ({
+        key: `lang:${code}`,
+        label: (
+          <Space size={8}>
+            <span>{info.name}</span>
+            {language === code && (
+              <CheckOutlined style={{ color: "var(--color-primary)", fontSize: 12, marginLeft: "auto" }} />
+            )}
+          </Space>
+        ),
+      })),
     },
     { type: "divider" as const },
     {
@@ -144,12 +155,14 @@ export default function MainLayout() {
       setTheme(id);
       return;
     }
+    if (key.startsWith("lang:")) {
+      const code = key.slice(5);
+      setLanguage(code as any);
+      return;
+    }
     switch (key) {
       case "settings":
         navigate("/settings");
-        break;
-      case "lang":
-        setLanguage(language === "zh-CN" ? "en-US" : "zh-CN");
         break;
       case "logout":
         logout();

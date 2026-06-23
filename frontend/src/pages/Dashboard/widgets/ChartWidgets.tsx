@@ -2,6 +2,7 @@
  * ChartWidgets — ECharts-based lifecycle pie chart and progress bar chart.
  */
 import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import ReactEChartsCore from "echarts-for-react/lib/core";
 import * as echarts from "echarts/core";
 import { PieChart, BarChart } from "echarts/charts";
@@ -12,6 +13,8 @@ import {
 } from "echarts/components";
 import { CanvasRenderer } from "echarts/renderers";
 import { useEChartsColors } from "../../../theme/echartsTheme";
+import { productApi } from "../../../services/api";
+import type { LifecycleStatus } from "../../../services/api-types";
 
 // Register ECharts components once
 echarts.use([PieChart, BarChart, GridComponent, TooltipComponent, LegendComponent, CanvasRenderer]);
@@ -36,39 +39,68 @@ function getStatusMeta(t: (key: string) => string): Record<string, { color: stri
   };
 }
 
+const STATUS_COLORS: Record<LifecycleStatus, string> = {
+  in_development: "#60A5FA",
+  trial_handover: "#FBBF24",
+  on_sale:        "#4ADE80",
+  discontinued:   "#F87171",
+  eol:            "#94A3B8",
+};
+
 // ── Lifecycle Pie Chart ──
 
 export function LifecycleChart({ ec, t }: { ec: ReturnType<typeof useEChartsColors>; t: (key: string) => string }) {
+  const { data: prodResp } = useQuery({
+    queryKey: ["lifecycle-chart-products"],
+    queryFn: () => productApi.list({ page: 1, page_size: 100 }),
+  });
+  const products = prodResp?.data?.data ?? [];
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const p of products) {
+      const status = p.lifecycle_status;
+      counts[status] = (counts[status] || 0) + 1;
+    }
+    return counts;
+  }, [products]);
+
   const meta = getStatusMeta(t);
-  const option = useMemo(() => ({
-    tooltip: {
-      trigger: "item" as const,
-      backgroundColor: "var(--color-bg-card)",
-      borderColor: "var(--color-border)",
-    },
-    legend: {
-      bottom: 0,
-      textStyle: { color: "var(--color-text-secondary)", fontSize: 11 },
-    },
-    series: [{
-      type: "pie",
-      radius: ["45%", "70%"],
-      avoidLabelOverlap: true,
-      itemStyle: { borderRadius: 4, borderColor: "var(--color-bg-page)", borderWidth: 2 },
-      label: { show: true, formatter: "{b}: {c}", fontSize: 11, fontWeight: 600, color: "var(--color-text)" },
-      emphasis: {
-        label: { show: true, fontSize: 14, fontWeight: "bold" },
-        itemStyle: { shadowBlur: 10, shadowColor: `${ec.primary}40` },
+
+  const option = useMemo(() => {
+    const dataKeys: LifecycleStatus[] = ["in_development", "trial_handover", "on_sale", "discontinued", "eol"];
+    const chartData = dataKeys
+      .filter((key) => (statusCounts[key] ?? 0) > 0)
+      .map((key) => ({
+        value: statusCounts[key] ?? 0,
+        name: meta[key].label,
+        itemStyle: { color: STATUS_COLORS[key] },
+      }));
+
+    return {
+      tooltip: {
+        trigger: "item" as const,
+        backgroundColor: "var(--color-bg-card)",
+        borderColor: "var(--color-border)",
       },
-      data: [
-        { value: 5, name: meta.in_development.label,  itemStyle: { color: "#60A5FA" } },
-        { value: 3, name: meta.trial_handover.label,   itemStyle: { color: "#FBBF24" } },
-        { value: 7, name: meta.on_sale.label,          itemStyle: { color: "#4ADE80" } },
-        { value: 2, name: meta.discontinued.label,     itemStyle: { color: "#F87171" } },
-        { value: 1, name: meta.eol.label,              itemStyle: { color: "#94A3B8" } },
-      ],
-    }],
-  }), [ec, meta]);
+      legend: {
+        bottom: 0,
+        textStyle: { color: "var(--color-text-secondary)", fontSize: 11 },
+      },
+      series: [{
+        type: "pie",
+        radius: ["45%", "70%"],
+        avoidLabelOverlap: true,
+        itemStyle: { borderRadius: 4, borderColor: "var(--color-bg-page)", borderWidth: 2 },
+        label: { show: true, formatter: "{b}: {c}", fontSize: 11, fontWeight: 600, color: "var(--color-text)" },
+        emphasis: {
+          label: { show: true, fontSize: 14, fontWeight: "bold" },
+          itemStyle: { shadowBlur: 10, shadowColor: `${ec.primary}40` },
+        },
+        data: chartData,
+      }],
+    };
+  }, [ec, meta, statusCounts]);
 
   return <ReactEChartsCore echarts={echarts} option={option} style={{ height: 220 }} />;
 }

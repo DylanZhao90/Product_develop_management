@@ -39,7 +39,7 @@ import {
   DashboardOutlined,
 } from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
-import { dashboardApi, analyticsApi } from "../../services/api";
+import { dashboardApi, analyticsApi, productApi, projectApi } from "../../services/api";
 import { useLocale } from "../../locales";
 import { useEChartsColors } from "../../theme/echartsTheme";
 import ReactEChartsCore from "echarts-for-react/lib/core";
@@ -57,7 +57,6 @@ import {
 } from "echarts/components";
 import { CanvasRenderer } from "echarts/renderers";
 import type { LifecycleAnalyticsData, LifecycleStatus, LifecycleStageAnalytics, DashboardStats } from "../../services/api-types";
-import { buildMockLifecycleAnalyticsData } from "../../services/__mocks__/lifecycleAnalytics";
 
 // ── Register ECharts components ──
 echarts.use([
@@ -851,7 +850,7 @@ function StageDeepDivePanel({
 
       {/* Row 3: Stage-specific enrichment charts */}
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        {getStageEnrichment(stageKey, stage)}
+        {getStageEnrichment(stageKey, stage, t)}
       </Row>
 
       {/* Row 4: Approval timeline */}
@@ -864,6 +863,7 @@ function StageDeepDivePanel({
 function getStageEnrichment(
   stageKey: LifecycleStatus,
   stage: LifecycleAnalyticsData[LifecycleStatus],
+  t: (key: string) => string,
 ) {
   const colors = [
     "#3b82f6", "#22c55e", "#f59e0b", "#ef4444",
@@ -1106,13 +1106,12 @@ function AnalyticsView() {
   const { t } = useLocale();
   const navigate = useNavigate();
   const [activeStage, setActiveStage] = useState<LifecycleStatus | null>(null);
-  const [lifecycleData, setLifecycleData] = useState<LifecycleAnalyticsData | null>(null);
 
-  useEffect(() => {
-    // Use mock data directly since the backend endpoint may not be available
-    const data = buildMockLifecycleAnalyticsData();
-    setLifecycleData(data);
-  }, []);
+  const { data: lifecycleResp } = useQuery({
+    queryKey: ["analytics-lifecycle"],
+    queryFn: () => analyticsApi.getLifecycleAnalytics(),
+  });
+  const lifecycleData = lifecycleResp?.data ?? null;
 
   if (!lifecycleData) {
     return (
@@ -1379,14 +1378,35 @@ export default function EnhancedDashboard() {
   const { data: statsResp, isLoading } = useQuery({
     queryKey: ["dashboard-stats"],
     queryFn: async () => {
-      // Return mock stats directly (no backend available)
+      // Compute stats from real product and project APIs
+      const [prodRes, projRes] = await Promise.all([
+        productApi.list({ page: 1, page_size: 100 }),
+        projectApi.list({ page: 1, page_size: 100 }),
+      ]);
+      const products = prodRes.data.data ?? [];
+      const projects = projRes.data.data ?? [];
+
+      // Active products: not discontinued or eol
+      const activeProducts = products.filter(
+        (p) => p.lifecycle_status !== 'discontinued' && p.lifecycle_status !== 'eol'
+      ).length;
+
+      // Active projects: status=in_progress
+      const activeProjects = projects.filter((p) => p.status === 'in_progress').length;
+
+      // Pending tasks: approval_status=pending
+      const pendingTasks = projects.filter((p) => p.approval_status === 'pending').length;
+
+      // Completed tasks: status=completed
+      const completedTasks = projects.filter((p) => p.status === 'completed').length;
+
       return {
         data: {
           data: {
-            active_products: 18,
-            active_projects: 12,
-            pending_tasks: 47,
-            completed_tasks: 36,
+            active_products: activeProducts,
+            active_projects: activeProjects,
+            pending_tasks: pendingTasks,
+            completed_tasks: completedTasks,
           } as DashboardStats,
         },
       };

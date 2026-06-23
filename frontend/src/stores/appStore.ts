@@ -4,18 +4,20 @@ import type { ThemePreset } from "../theme/presets";
 
 type ThemeId = string;
 
+type Lang = "zh-CN" | "en-US" | "ja-JP" | "ko-KR" | "de-DE" | "fr-FR" | "es-ES";
+
 interface AppState {
-  language: "zh-CN" | "en-US";
+  language: Lang;
   sidebarCollapsed: boolean;
   themeId: ThemeId;
-  setLanguage: (lang: "zh-CN" | "en-US") => void;
+  setLanguage: (lang: Lang) => void;
   toggleSidebar: () => void;
   setSidebarCollapsed: (v: boolean) => void;
   setTheme: (id: ThemeId) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
-  language: (localStorage.getItem("language") as "zh-CN" | "en-US") || "zh-CN",
+  language: (localStorage.getItem("language") as Lang) || "zh-CN",
   sidebarCollapsed: false,
   themeId: localStorage.getItem("theme") || defaultPresetId,
 
