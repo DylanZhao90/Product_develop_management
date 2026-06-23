@@ -11,6 +11,7 @@ import {
   Space,
   Table,
   Tag,
+  Timeline,
   Typography,
   message,
   DatePicker,
@@ -22,10 +23,14 @@ import {
   EditOutlined,
   WarningOutlined,
   UnorderedListOutlined,
+  CheckCircleFilled,
+  CloseCircleFilled,
+  ClockCircleFilled,
+  MinusCircleFilled,
 } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { projectApi } from "../../services/api";
-import type { ProjectTask } from "../../services/api-types";
+import { projectApi, approvalApi } from "../../services/api";
+import type { ProjectTask, ApprovalFlowInstance, ApprovalRecord } from "../../services/api-types";
 import { useLocale } from "../../locales";
 import dayjs from "dayjs";
 import { LoadingSkeleton } from "../../components/common/LoadingSkeleton";
@@ -154,11 +159,47 @@ export default function ProjectDetail() {
     },
   });
 
+  // ---- C-8: Approval flow ----
+  const [approvalComment, setApprovalComment] = useState("");
+
   const submitApprovalMutation = useMutation({
-    mutationFn: () => projectApi.submitApproval(id!),
-    onSuccess: () => {
-      message.success(t("project.approvalSubmitted"));
+    mutationFn: () => approvalApi.submitApproval(id!),
+    onSuccess: (res) => {
+      if (res.data.success) {
+        message.success(t("project.approvalSubmitted"));
+      } else {
+        message.warning(res.data.message || t("common.failed"));
+      }
       queryClient.invalidateQueries({ queryKey: ["project", id] });
+      queryClient.invalidateQueries({ queryKey: ["approval-flow", id] });
+    },
+  });
+
+  const { data: flowResp } = useQuery({
+    queryKey: ["approval-flow", id],
+    queryFn: () => approvalApi.getFlowStatus(id!),
+    enabled: !!id,
+  });
+
+  const approvalFlow = flowResp?.data?.data as ApprovalFlowInstance | null;
+
+  const { data: recordsResp } = useQuery({
+    queryKey: ["approval-records", approvalFlow?.id],
+    queryFn: () => approvalApi.getApprovalRecords(approvalFlow!.id),
+    enabled: !!approvalFlow?.id,
+  });
+
+  const approvalRecords = (recordsResp?.data?.data as ApprovalRecord[]) || [];
+
+  const processApprovalMutation = useMutation({
+    mutationFn: ({ recordId, action }: { recordId: string; action: 'approve' | 'reject' | 'return' }) =>
+      approvalApi.processApproval(recordId, action, approvalComment),
+    onSuccess: () => {
+      message.success(t("project.approvalProcessed"));
+      setApprovalComment("");
+      queryClient.invalidateQueries({ queryKey: ["project", id] });
+      queryClient.invalidateQueries({ queryKey: ["approval-flow", id] });
+      queryClient.invalidateQueries({ queryKey: ["approval-records"] });
     },
   });
 
@@ -262,7 +303,7 @@ export default function ProjectDetail() {
 
       {/* Action buttons */}
       <Space style={{ marginBottom: 16 }} wrap>
-        {["pending_approval", "approved"].includes(project.status) && (
+        {project.approval_status === 'draft' && (
           <Button
             type="primary"
             icon={<SendOutlined />}
@@ -305,6 +346,229 @@ export default function ProjectDetail() {
         />
       </Card>
 
+      {/* ---- C-8: Approval Status Card ---- */}
+      <Card
+        title={
+          <Space>
+            {t("project.approvalStatus")}
+            {(() => {
+              const colorMap: Record<string, string> = {
+                draft: "default",
+                pending: "processing",
+                pending_approval: "processing",
+                approved: "success",
+                rejected: "error",
+              };
+              const statusKey = project.approval_status === 'pending' ? 'pending_approval' : project.approval_status;
+              return <Tag color={colorMap[project.approval_status] || "default"}>{t(`project.status.${statusKey}`)}</Tag>;
+            })()}
+          </Space>
+        }
+        style={{ marginBottom: 16 }}
+      >
+        {project.approval_status === 'draft' && (
+          <div className="empty-state">
+            <SendOutlined style={{ fontSize: 40, color: "var(--color-text-muted)", marginBottom: 12 }} />
+            <Typography.Text type="secondary" style={{ fontSize: 14, display: 'block', marginBottom: 12 }}>
+              {t("project.noApprovalData")}
+            </Typography.Text>
+            <Button
+              type="primary"
+              icon={<SendOutlined />}
+              onClick={() => submitApprovalMutation.mutate()}
+              loading={submitApprovalMutation.isPending}
+            >
+              {t("project.submitApproval")}
+            </Button>
+          </div>
+        )}
+
+        {project.approval_status === 'pending' && approvalFlow && (
+          <div>
+            {(() => {
+              const pendingRecords = approvalRecords.filter(r => r.action === 'pending');
+              const currentRecord = pendingRecords.length > 0 ? pendingRecords[0] : null;
+
+              return (
+                <Timeline>
+                  {approvalRecords.map((rec) => {
+                    const isCurrent = rec.id === currentRecord?.id;
+                    const isCompleted = rec.action !== 'pending';
+
+                    let dot = null;
+                    let color: string = 'gray';
+                    if (isCompleted && rec.action === 'approve') {
+                      dot = <CheckCircleFilled style={{ color: '#22c55e', fontSize: 16 }} />;
+                      color = 'green';
+                    } else if (isCompleted && (rec.action === 'reject' || rec.action === 'return')) {
+                      dot = <CloseCircleFilled style={{ color: '#ef4444', fontSize: 16 }} />;
+                      color = 'red';
+                    } else if (isCurrent) {
+                      dot = <ClockCircleFilled style={{ color: '#1677ff', fontSize: 16 }} />;
+                      color = 'blue';
+                    } else {
+                      dot = <MinusCircleFilled style={{ color: '#d9d9d9', fontSize: 16 }} />;
+                    }
+
+                    const nodeLabel = rec.node_name || `Node ${rec.node_order}`;
+                    const statusLabel = rec.action === 'pending'
+                      ? t("project.waitingForApproval")
+                      : rec.action === 'approve'
+                        ? t("common.approve")
+                        : rec.action === 'reject'
+                          ? t("common.reject")
+                          : t("common.return");
+
+                    return (
+                      <Timeline.Item key={rec.id} dot={dot} color={color}>
+                        <div>
+                          <div style={{ fontWeight: isCurrent ? 600 : 400 }}>
+                            {nodeLabel}
+                            <Tag
+                              style={{ marginLeft: 8 }}
+                              color={isCompleted ? (rec.action === 'approve' ? 'green' : 'red') : isCurrent ? 'processing' : 'default'}
+                            >
+                              {statusLabel}
+                            </Tag>
+                          </div>
+                          {rec.approver_name && (
+                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                              {t("project.approver")}: {rec.approver_name}
+                            </Typography.Text>
+                          )}
+                          {rec.comment && (
+                            <div style={{ marginTop: 4, fontSize: 12, color: '#666' }}>
+                              {t("common.comment")}: {rec.comment}
+                            </div>
+                          )}
+                          {rec.created_at && (
+                            <div style={{ marginTop: 2, fontSize: 11, color: '#999' }}>
+                              {dayjs(rec.created_at).format("YYYY-MM-DD HH:mm")}
+                            </div>
+                          )}
+
+                          {/* Current node action buttons */}
+                          {isCurrent && (
+                            <div style={{ marginTop: 8 }}>
+                              <Input.TextArea
+                                rows={2}
+                                placeholder={t("project.approvalCommentPlaceholder")}
+                                value={approvalComment}
+                                onChange={(e) => setApprovalComment(e.target.value)}
+                                style={{ marginBottom: 8 }}
+                              />
+                              <Space>
+                                <Button
+                                  type="primary"
+                                  size="small"
+                                  loading={processApprovalMutation.isPending}
+                                  onClick={() => processApprovalMutation.mutate({ recordId: rec.id, action: 'approve' })}
+                                >
+                                  {t("common.approve")}
+                                </Button>
+                                <Button
+                                  danger
+                                  size="small"
+                                  loading={processApprovalMutation.isPending}
+                                  onClick={() => processApprovalMutation.mutate({ recordId: rec.id, action: 'reject' })}
+                                >
+                                  {t("common.reject")}
+                                </Button>
+                                <Button
+                                  size="small"
+                                  loading={processApprovalMutation.isPending}
+                                  onClick={() => processApprovalMutation.mutate({ recordId: rec.id, action: 'return' })}
+                                >
+                                  {t("common.return")}
+                                </Button>
+                              </Space>
+                            </div>
+                          )}
+                        </div>
+                      </Timeline.Item>
+                    );
+                  })}
+                </Timeline>
+              );
+            })()}
+          </div>
+        )}
+
+        {(project.approval_status === 'approved' || project.approval_status === 'rejected') && (
+          <div>
+            <div style={{ marginBottom: 12 }}>
+              <Tag
+                color={project.approval_status === 'approved' ? 'success' : 'error'}
+                style={{ fontSize: 14, padding: '4px 12px' }}
+              >
+                {project.approval_status === 'approved' ? (
+                  <><CheckCircleFilled style={{ marginRight: 4 }} />{t("project.approvalResult.approved")}</>
+                ) : (
+                  <><CloseCircleFilled style={{ marginRight: 4 }} />{t("project.approvalResult.rejected")}</>
+                )}
+              </Tag>
+            </div>
+            {approvalRecords.length > 0 && (
+              <Timeline>
+                {approvalRecords.map((rec) => {
+                  const isApproved = rec.action === 'approve';
+                  const isRejected = rec.action === 'reject' || rec.action === 'return';
+                  let dot = null;
+                  let color: string = 'gray';
+                  if (isApproved) {
+                    dot = <CheckCircleFilled style={{ color: '#22c55e', fontSize: 16 }} />;
+                    color = 'green';
+                  } else if (isRejected) {
+                    dot = <CloseCircleFilled style={{ color: '#ef4444', fontSize: 16 }} />;
+                    color = 'red';
+                  } else {
+                    dot = <MinusCircleFilled style={{ color: '#d9d9d9', fontSize: 16 }} />;
+                  }
+
+                  const actionLabel = rec.action === 'approve'
+                    ? t("common.approve")
+                    : rec.action === 'reject'
+                      ? t("common.reject")
+                      : rec.action === 'return'
+                        ? t("common.return")
+                        : t("project.waitingForApproval");
+
+                  return (
+                    <Timeline.Item key={rec.id} dot={dot} color={color}>
+                      <div>
+                        <div>
+                          {rec.node_name || `Node ${rec.node_order}`}
+                          <Tag style={{ marginLeft: 8 }} color={isApproved ? 'green' : isRejected ? 'red' : 'default'}>
+                            {actionLabel}
+                          </Tag>
+                        </div>
+                        {rec.approver_name && (
+                          <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                            {t("project.approver")}: {rec.approver_name}
+                          </Typography.Text>
+                        )}
+                        {rec.comment && (
+                          <div style={{ marginTop: 4, fontSize: 12, color: '#666' }}>
+                            {t("common.comment")}: {rec.comment}
+                          </div>
+                        )}
+                        {rec.created_at && (
+                          <div style={{ marginTop: 2, fontSize: 11, color: '#999' }}>
+                            {dayjs(rec.created_at).format("YYYY-MM-DD HH:mm")}
+                          </div>
+                        )}
+                      </div>
+                    </Timeline.Item>
+                  );
+                })}
+              </Timeline>
+            )}
+            {approvalRecords.length === 0 && (
+              <Typography.Text type="secondary">{t("common.noData")}</Typography.Text>
+            )}
+          </div>
+        )}
+      </Card>
       <Card
         title={t("project.wbsTaskTree")}
         extra={

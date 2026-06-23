@@ -29,6 +29,7 @@ export interface Product {
   model: string;
   name: string;
   type: ProductType | null;
+  power?: string | null;
   target_markets: string[] | null;
   certification_requirements: string[] | null;
   lifecycle_status: LifecycleStatus;
@@ -44,6 +45,7 @@ export interface ProductCreate {
   model: string;
   name: string;
   type?: ProductType;
+  power?: string;
   target_markets?: string[];
   certification_requirements?: string[];
   description?: string;
@@ -73,6 +75,9 @@ export interface Project {
   product_code?: string;
   name: string;
   type: "new_product" | "version_upgrade";
+  project_type_key: string;
+  approval_status: 'draft' | 'pending' | 'approved' | 'rejected';
+  approval_flow_id: string | null;
   feasibility_doc_url: string | null;
   approval_id: string | null;
   feishu_chat_id: string | null;
@@ -80,6 +85,26 @@ export interface Project {
   created_by: string | null;
   created_at: string;
   updated_at: string | null;
+}
+
+export interface ProjectCreate {
+  name: string;
+  type?: "new_product" | "version_upgrade";
+  project_type_key: string;
+  product_id: string;
+  description?: string;
+  start_date?: string;
+  end_date?: string;
+  owner?: string;
+  feasibility_doc_url?: string | null;
+}
+
+export interface ProjectTypeConfig {
+  id: string;
+  type_key: string;  // "new_product" | "version_upgrade" | "certification" | "other"
+  display_name: Record<string, string>;  // {"zh-CN":"新产品研发","en-US":"New Product"}
+  sort_order: number;
+  is_active: boolean;
 }
 
 export interface ProjectTask {
@@ -299,4 +324,44 @@ export interface LifecycleChangeLog {
 export interface LifecycleTransition {
   to_status: LifecycleStatus;
   reason?: string;
+}
+
+// ---- Approval Flow ----
+
+export interface ApprovalTemplate {
+  id: string
+  name: string  // "新产品审批流" / "迭代审批流"
+  project_type_key: string
+  nodes: ApprovalNodeDef[]
+  is_active: boolean
+  created_at: string
+}
+
+export interface ApprovalNodeDef {
+  id: string
+  order: number
+  node_name: string  // "项目经理审批", "技术总监审批", "总经理审批"
+  approver_role: string  // "pm" | "tech_director" | "general_manager"
+  can_skip: boolean
+}
+
+export interface ApprovalFlowInstance {
+  id: string
+  project_id: string
+  template_id: string
+  status: 'draft' | 'pending_approval' | 'approved' | 'rejected'
+  current_node_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface ApprovalRecord {
+  id: string
+  flow_id: string
+  node_order: number
+  node_name: string
+  approver_name: string
+  action: 'approve' | 'reject' | 'return' | 'pending'
+  comment: string
+  created_at: string
 }

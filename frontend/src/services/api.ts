@@ -11,6 +11,7 @@ import type {
   ProductUpdate,
   Project,
   ProjectTask,
+  ProjectTypeConfig,
   TechnicalIssue,
   Supplier,
   Certification,
@@ -22,6 +23,9 @@ import type {
   LifecycleChangeLog,
   LifecycleTransition,
   User,
+  ApprovalTemplate,
+  ApprovalFlowInstance,
+  ApprovalRecord,
 } from "./api-types";
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
@@ -185,7 +189,7 @@ export const productApi = {
     } catch {
       const newItem = {
         id: `mock-${Date.now()}`, project_id: data.project_id ?? "", code: data.model, model: data.model, name: data.name,
-        type: data.type ?? null, target_markets: data.target_markets ?? null,
+        type: data.type ?? null, power: data.power ?? null, target_markets: data.target_markets ?? null,
         certification_requirements: data.certification_requirements ?? null,
         lifecycle_status: "in_development", product_manager_id: null, thumbnail_url: null,
         description: data.description ?? null, created_at: new Date().toISOString(), updated_at: null,
@@ -302,16 +306,16 @@ export const dashboardApi = {
 // ---- Project API (with mock fallback) ----
 
 const MOCK_PROJECTS: Project[] = [
-  { id: "proj-1", product_id: "prod-1", name: "AC-220-EU Mass Production", type: "new_product", feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-1", created_at: "2025-05-01T00:00:00Z", updated_at: null },
-  { id: "proj-2", product_id: "prod-2", name: "DC-480-US Beta Testing", type: "version_upgrade", feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "approved", created_by: "user-1", created_at: "2025-05-15T00:00:00Z", updated_at: null },
-  { id: "proj-3", product_id: "prod-3", name: "PF-3.3-JP Feasibility Study", type: "new_product", feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "pending_approval", created_by: "user-2", created_at: "2025-06-01T00:00:00Z", updated_at: null },
-  { id: "proj-4", product_id: "prod-4", name: "AC-110-US Certification", type: "new_product", feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-3", created_at: "2025-04-10T00:00:00Z", updated_at: "2025-05-20T00:00:00Z" },
-  { id: "proj-5", product_id: "prod-5", name: "DC-200-CN Prototype", type: "version_upgrade", feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-1", created_at: "2025-03-20T00:00:00Z", updated_at: null },
-  { id: "proj-6", product_id: "prod-6", name: "AC-380-EU Design Review", type: "new_product", feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-2", created_at: "2025-06-05T00:00:00Z", updated_at: null },
-  { id: "proj-7", product_id: "prod-7", name: "PF-7.7-US Phase Out", type: "new_product", feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "closed", created_by: "user-3", created_at: "2024-08-01T00:00:00Z", updated_at: "2025-03-01T00:00:00Z" },
-  { id: "proj-8", product_id: "prod-8", name: "DC-1500-EU EOL Process", type: "version_upgrade", feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-1", created_at: "2023-10-01T00:00:00Z", updated_at: "2025-01-15T00:00:00Z" },
-  { id: "proj-9", product_id: "prod-9", name: "AC-220-AU Production Ramp", type: "new_product", feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-2", created_at: "2025-05-10T00:00:00Z", updated_at: null },
-  { id: "proj-10", product_id: "prod-10", name: "PF-2.2-KR Localization", type: "version_upgrade", feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "approved", created_by: "user-3", created_at: "2025-04-25T00:00:00Z", updated_at: null },
+  { id: "proj-1", product_id: "prod-1", name: "AC-220-EU Mass Production", type: "new_product", project_type_key: "new_product", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-1", created_at: "2025-05-01T00:00:00Z", updated_at: null },
+  { id: "proj-2", product_id: "prod-2", name: "DC-480-US Beta Testing", type: "version_upgrade", project_type_key: "version_upgrade", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "approved", created_by: "user-1", created_at: "2025-05-15T00:00:00Z", updated_at: null },
+  { id: "proj-3", product_id: "prod-3", name: "PF-3.3-JP Feasibility Study", type: "new_product", project_type_key: "new_product", approval_status: "pending", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "pending_approval", created_by: "user-2", created_at: "2025-06-01T00:00:00Z", updated_at: null },
+  { id: "proj-4", product_id: "prod-4", name: "AC-110-US Certification", type: "new_product", project_type_key: "new_product", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-3", created_at: "2025-04-10T00:00:00Z", updated_at: "2025-05-20T00:00:00Z" },
+  { id: "proj-5", product_id: "prod-5", name: "DC-200-CN Prototype", type: "version_upgrade", project_type_key: "version_upgrade", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-1", created_at: "2025-03-20T00:00:00Z", updated_at: null },
+  { id: "proj-6", product_id: "prod-6", name: "AC-380-EU Design Review", type: "new_product", project_type_key: "new_product", approval_status: "draft", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-2", created_at: "2025-06-05T00:00:00Z", updated_at: null },
+  { id: "proj-7", product_id: "prod-7", name: "PF-7.7-US Phase Out", type: "new_product", project_type_key: "other", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "closed", created_by: "user-3", created_at: "2024-08-01T00:00:00Z", updated_at: "2025-03-01T00:00:00Z" },
+  { id: "proj-8", product_id: "prod-8", name: "DC-1500-EU EOL Process", type: "version_upgrade", project_type_key: "version_upgrade", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-1", created_at: "2023-10-01T00:00:00Z", updated_at: "2025-01-15T00:00:00Z" },
+  { id: "proj-9", product_id: "prod-9", name: "AC-220-AU Production Ramp", type: "new_product", project_type_key: "new_product", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-2", created_at: "2025-05-10T00:00:00Z", updated_at: null },
+  { id: "proj-10", product_id: "prod-10", name: "PF-2.2-KR Localization", type: "version_upgrade", project_type_key: "version_upgrade", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "approved", created_by: "user-3", created_at: "2025-04-25T00:00:00Z", updated_at: null },
 ];
 
 const MOCK_TASKS: ProjectTask[] = [
@@ -369,6 +373,7 @@ export const projectApi = {
           success: true,
           data: _projects.find((p) => p.id === id) ?? {
             id, product_id: "prod-1", name: "Mock Project", type: "new_product",
+            project_type_key: "new_product", approval_status: "draft", approval_flow_id: null,
             feasibility_doc_url: null, approval_id: null, feishu_chat_id: null,
             status: "in_progress", created_by: "mock-user", created_at: new Date().toISOString(), updated_at: null,
           } as Project,
@@ -386,6 +391,8 @@ export const projectApi = {
      id: `mock-proj-${Date.now()}`, product_id: (data.product_id as string) || "prod-1",
      product_code: product?.code || null,
      name: (data.name as string) || "Mock Project", type: (data.type as "new_product" | "version_upgrade") ?? "new_product",
+     project_type_key: (data.project_type_key as string) || "new_product",
+     approval_status: "draft", approval_flow_id: null,
         feasibility_doc_url: null, approval_id: null, feishu_chat_id: null,
         status: "pending_approval", created_by: "mock-user", created_at: new Date().toISOString(), updated_at: null,
       } as Project;
@@ -509,6 +516,68 @@ export const projectApi = {
       }
       const existing = idx !== -1 ? _issues[idx] : _issues[0];
       return { data: { success: true, data: { ...existing, ...data } as unknown as TechnicalIssue } };
+    }
+  },
+};
+
+// ---- Project Type Config API (with mock fallback) ----
+
+const MOCK_PROJECT_TYPE_CONFIGS: ProjectTypeConfig[] = [
+  { id: "ptc-1", type_key: "new_product", display_name: { "zh-CN": "新产品研发", "en-US": "New Product R&D" }, sort_order: 1, is_active: true },
+  { id: "ptc-2", type_key: "version_upgrade", display_name: { "zh-CN": "老产品迭代升级", "en-US": "Version Upgrade" }, sort_order: 2, is_active: true },
+  { id: "ptc-3", type_key: "certification", display_name: { "zh-CN": "产品认证", "en-US": "Product Certification" }, sort_order: 3, is_active: true },
+  { id: "ptc-4", type_key: "other", display_name: { "zh-CN": "其他项目", "en-US": "Other" }, sort_order: 4, is_active: true },
+];
+
+let _projectTypeConfigs = [...MOCK_PROJECT_TYPE_CONFIGS];
+
+export const projectTypeConfigApi = {
+  list: async (): Promise<{ data: ApiResponse<ProjectTypeConfig[]> }> => {
+    try {
+      const res = await api.get<ApiResponse<ProjectTypeConfig[]>>("/project-type-configs");
+      return { data: res.data };
+    } catch {
+      return {
+        data: { success: true, data: [..._projectTypeConfigs] },
+      };
+    }
+  },
+  create: async (data: Record<string, unknown>): Promise<{ data: ApiResponse<ProjectTypeConfig> }> => {
+    try {
+      const res = await api.post<ApiResponse<ProjectTypeConfig>>("/project-type-configs", data);
+      return { data: res.data };
+    } catch {
+      const newItem: ProjectTypeConfig = {
+        id: `mock-ptc-${Date.now()}`,
+        type_key: (data.type_key as string) || "other",
+        display_name: (data.display_name as Record<string, string>) || { "zh-CN": "新建类型", "en-US": "New Type" },
+        sort_order: (data.sort_order as number) ?? _projectTypeConfigs.length + 1,
+        is_active: (data.is_active as boolean) ?? true,
+      };
+      _projectTypeConfigs.push(newItem);
+      return { data: { success: true, data: newItem } };
+    }
+  },
+  update: async (id: string, data: Record<string, unknown>): Promise<{ data: ApiResponse<ProjectTypeConfig> }> => {
+    try {
+      const res = await api.patch<ApiResponse<ProjectTypeConfig>>(`/project-type-configs/${id}`, data);
+      return { data: res.data };
+    } catch {
+      const idx = _projectTypeConfigs.findIndex((c) => c.id === id);
+      if (idx !== -1) {
+        _projectTypeConfigs[idx] = { ..._projectTypeConfigs[idx], ...data } as unknown as ProjectTypeConfig;
+      }
+      const existing = idx !== -1 ? _projectTypeConfigs[idx] : _projectTypeConfigs[0];
+      return { data: { success: true, data: { ...existing, ...data } as unknown as ProjectTypeConfig } };
+    }
+  },
+  delete: async (id: string): Promise<{ data: ApiResponse<{ message: string }> }> => {
+    try {
+      const res = await api.delete<ApiResponse<{ message: string }>>(`/project-type-configs/${id}`);
+      return { data: res.data };
+    } catch {
+      _projectTypeConfigs = _projectTypeConfigs.filter((c) => c.id !== id);
+      return { data: { success: true, data: { message: "ok" } } };
     }
   },
 };
@@ -1052,6 +1121,235 @@ export const certApi = {
         data: {
           success: true,
           data: _certifications.filter((c) => c.status === "expiring_soon" || c.status === "expired").slice(0, 3),
+        },
+      };
+    }
+  },
+};
+
+// ---- Approval Flow API (with mock fallback) ----
+
+const MOCK_APPROVAL_TEMPLATES: ApprovalTemplate[] = [
+  {
+    id: "atpl-1",
+    name: "新产品审批流",
+    project_type_key: "new_product",
+    is_active: true,
+    created_at: "2025-01-01T00:00:00Z",
+    nodes: [
+      { id: "atpl-1-node-1", order: 1, node_name: "项目经理审批", approver_role: "pm", can_skip: false },
+      { id: "atpl-1-node-2", order: 2, node_name: "技术总监审批", approver_role: "tech_director", can_skip: false },
+      { id: "atpl-1-node-3", order: 3, node_name: "总经理审批", approver_role: "general_manager", can_skip: false },
+    ],
+  },
+  {
+    id: "atpl-2",
+    name: "迭代审批流",
+    project_type_key: "version_upgrade",
+    is_active: true,
+    created_at: "2025-01-01T00:00:00Z",
+    nodes: [
+      { id: "atpl-2-node-1", order: 1, node_name: "项目经理审批", approver_role: "pm", can_skip: false },
+      { id: "atpl-2-node-2", order: 2, node_name: "技术总监审批", approver_role: "tech_director", can_skip: false },
+    ],
+  },
+  {
+    id: "atpl-3",
+    name: "认证审批流",
+    project_type_key: "certification",
+    is_active: true,
+    created_at: "2025-01-01T00:00:00Z",
+    nodes: [
+      { id: "atpl-3-node-1", order: 1, node_name: "项目经理审批", approver_role: "pm", can_skip: false },
+      { id: "atpl-3-node-2", order: 2, node_name: "认证主管审批", approver_role: "certification_manager", can_skip: false },
+      { id: "atpl-3-node-3", order: 3, node_name: "技术总监审批", approver_role: "tech_director", can_skip: false },
+    ],
+  },
+  {
+    id: "atpl-4",
+    name: "其他审批流",
+    project_type_key: "other",
+    is_active: true,
+    created_at: "2025-01-01T00:00:00Z",
+    nodes: [
+      { id: "atpl-4-node-1", order: 1, node_name: "项目经理审批", approver_role: "pm", can_skip: false },
+    ],
+  },
+];
+
+// In-memory mutable store for approval flow instances and records
+let _approvalFlowInstances: ApprovalFlowInstance[] = [];
+let _approvalRecords: ApprovalRecord[] = [];
+
+// Map project_type_key to template for easy lookup
+function _findTemplateByProjectType(projectTypeKey: string): ApprovalTemplate | undefined {
+  return MOCK_APPROVAL_TEMPLATES.find((t) => t.project_type_key === projectTypeKey && t.is_active);
+}
+
+export const approvalApi = {
+  /** Submit project for approval — create a flow instance and a pending record for the first node */
+  submitApproval: async (projectId: string): Promise<{ data: ApiResponse<ApprovalFlowInstance> }> => {
+    try {
+      const res = await api.post<ApiResponse<ApprovalFlowInstance>>(`/approval/projects/${projectId}/submit`);
+      return { data: res.data };
+    } catch {
+      const project = _projects.find((p) => p.id === projectId);
+      if (!project) {
+        return { data: { success: false, data: null as unknown as ApprovalFlowInstance, message: "Project not found" } };
+      }
+
+      // Find matching template by project_type_key
+      const template = _findTemplateByProjectType(project.project_type_key);
+      if (!template) {
+        return { data: { success: false, data: null as unknown as ApprovalFlowInstance, message: "No approval template found for project type" } };
+      }
+
+      const flowInstance: ApprovalFlowInstance = {
+        id: `flow-${Date.now()}`,
+        project_id: projectId,
+        template_id: template.id,
+        status: 'pending_approval',
+        current_node_order: 1,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      _approvalFlowInstances.push(flowInstance);
+
+      // Create initial pending approval record for the first node
+      const firstNode = template.nodes.find((n) => n.order === 1);
+      if (firstNode) {
+        const record: ApprovalRecord = {
+          id: `rec-${Date.now()}-1`,
+          flow_id: flowInstance.id,
+          node_order: 1,
+          node_name: firstNode.node_name,
+          approver_name: firstNode.approver_role,
+          action: 'pending',
+          comment: '',
+          created_at: new Date().toISOString(),
+        };
+        _approvalRecords.push(record);
+      }
+
+      // Update project's approval_flow_id
+      const projIdx = _projects.findIndex((p) => p.id === projectId);
+      if (projIdx !== -1) {
+        _projects[projIdx] = { ..._projects[projIdx], approval_flow_id: flowInstance.id, approval_status: 'pending', updated_at: new Date().toISOString() };
+      }
+
+      return { data: { success: true, data: flowInstance } };
+    }
+  },
+
+  /** Get the current approval flow status for a project */
+  getFlowStatus: async (projectId: string): Promise<{ data: ApiResponse<ApprovalFlowInstance | null> }> => {
+    try {
+      const res = await api.get<ApiResponse<ApprovalFlowInstance>>(`/approval/projects/${projectId}/status`);
+      return { data: res.data };
+    } catch {
+      const flow = _approvalFlowInstances.find((f) => f.project_id === projectId);
+      if (!flow) {
+        return { data: { success: true, data: null } };
+      }
+      return { data: { success: true, data: flow } };
+    }
+  },
+
+  /** Process an approval — approve, reject, or return */
+  processApproval: async (
+    recordId: string,
+    action: 'approve' | 'reject' | 'return',
+    comment: string,
+  ): Promise<{ data: ApiResponse<ApprovalFlowInstance> }> => {
+    try {
+      const res = await api.post<ApiResponse<ApprovalFlowInstance>>(`/approval/records/${recordId}/process`, { action, comment });
+      return { data: res.data };
+    } catch {
+      // Find the record
+      const recIdx = _approvalRecords.findIndex((r) => r.id === recordId);
+      if (recIdx === -1) {
+        return { data: { success: false, data: null as unknown as ApprovalFlowInstance, message: "Approval record not found" } };
+      }
+
+      const record = _approvalRecords[recIdx];
+      // Update the record
+      _approvalRecords[recIdx] = { ...record, action, comment };
+
+      // Find the flow instance
+      const flowIdx = _approvalFlowInstances.findIndex((f) => f.id === record.flow_id);
+      if (flowIdx === -1) {
+        return { data: { success: false, data: null as unknown as ApprovalFlowInstance, message: "Flow instance not found" } };
+      }
+
+      const flow = _approvalFlowInstances[flowIdx];
+
+      // Find the template
+      const template = MOCK_APPROVAL_TEMPLATES.find((t) => t.id === flow.template_id);
+      if (!template) {
+        return { data: { success: false, data: null as unknown as ApprovalFlowInstance, message: "Template not found" } };
+      }
+
+      if (action === 'reject') {
+        // Rejection terminates the flow
+        _approvalFlowInstances[flowIdx] = { ...flow, status: 'rejected', updated_at: new Date().toISOString() };
+        // Update project approval_status
+        const projIdx = _projects.findIndex((p) => p.id === flow.project_id);
+        if (projIdx !== -1) {
+          _projects[projIdx] = { ..._projects[projIdx], approval_status: 'rejected', updated_at: new Date().toISOString() };
+        }
+        return { data: { success: true, data: { ..._approvalFlowInstances[flowIdx] } } };
+      }
+
+      if (action === 'return') {
+        // Return goes back to the previous node (or stays at current if first node)
+        const prevOrder = Math.max(1, flow.current_node_order - 1);
+        _approvalFlowInstances[flowIdx] = { ...flow, current_node_order: prevOrder, updated_at: new Date().toISOString() };
+        return { data: { success: true, data: { ..._approvalFlowInstances[flowIdx] } } };
+      }
+
+      // action === 'approve' — advance to next node
+      const nextOrder = flow.current_node_order + 1;
+      const nextNode = template.nodes.find((n) => n.order === nextOrder);
+
+      if (!nextNode) {
+        // All nodes approved — flow complete
+        _approvalFlowInstances[flowIdx] = { ...flow, status: 'approved', current_node_order: nextOrder, updated_at: new Date().toISOString() };
+        const projIdx = _projects.findIndex((p) => p.id === flow.project_id);
+        if (projIdx !== -1) {
+          _projects[projIdx] = { ..._projects[projIdx], approval_status: 'approved', updated_at: new Date().toISOString() };
+        }
+      } else {
+        // Advance to the next node, create a pending record for it
+        _approvalFlowInstances[flowIdx] = { ...flow, current_node_order: nextOrder, updated_at: new Date().toISOString() };
+
+        const newRecord: ApprovalRecord = {
+          id: `rec-${Date.now()}-${nextOrder}`,
+          flow_id: flow.id,
+          node_order: nextOrder,
+          node_name: nextNode.node_name,
+          approver_name: nextNode.approver_role,
+          action: 'pending',
+          comment: '',
+          created_at: new Date().toISOString(),
+        };
+        _approvalRecords.push(newRecord);
+      }
+
+      return { data: { success: true, data: { ..._approvalFlowInstances[flowIdx] } } };
+    }
+  },
+
+  /** Get all approval records for a flow */
+  getApprovalRecords: async (flowId: string): Promise<{ data: ApiResponse<ApprovalRecord[]> }> => {
+    try {
+      const res = await api.get<ApiResponse<ApprovalRecord[]>>(`/approval/flows/${flowId}/records`);
+      return { data: res.data };
+    } catch {
+      return {
+        data: {
+          success: true,
+          data: _approvalRecords.filter((r) => r.flow_id === flowId).sort((a, b) => a.node_order - b.node_order),
         },
       };
     }
