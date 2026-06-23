@@ -24,6 +24,7 @@ export type LifecycleStatus = "in_development" | "trial_handover" | "on_sale" | 
 
 export interface Product {
   id: string;
+  project_id: string;
   code: string;
   model: string;
   name: string;
@@ -39,6 +40,7 @@ export interface Product {
 }
 
 export interface ProductCreate {
+  project_id: string;
   model: string;
   name: string;
   type?: ProductType;
@@ -51,6 +53,7 @@ export interface ProductUpdate {
   model?: string;
   name?: string;
   type?: ProductType;
+  project_id?: string;
   target_markets?: string[];
   certification_requirements?: string[];
   description?: string;

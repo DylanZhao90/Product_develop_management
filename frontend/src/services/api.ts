@@ -110,16 +110,16 @@ export const authApi = {
 // ---- Product API (with mock fallback) ----
 
 const MOCK_PRODUCTS: Product[] = [
-  { id: "prod-1", code: "AC-220-EU", model: "AC-220-EU", name: "AC Charger 220V EU", type: "ac_charger", target_markets: ["EU"], certification_requirements: ["CE","ROHS"], lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null, description: "Standard AC charger for EU", created_at: "2025-01-15T00:00:00Z", updated_at: "2025-06-01T00:00:00Z" },
-  { id: "prod-2", code: "DC-480-US", model: "DC-480-US", name: "DC Charger 480W US", type: "dc_charger", target_markets: ["US"], certification_requirements: ["UL","FCC"], lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2025-02-10T00:00:00Z", updated_at: null },
-  { id: "prod-3", code: "PF-3.3-JP", model: "PF-3.3-JP", name: "Portable Charger 3.3kW JP", type: "portable", target_markets: ["JP"], certification_requirements: ["PSE"], lifecycle_status: "in_development", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2025-03-01T00:00:00Z", updated_at: null },
-  { id: "prod-4", code: "AC-110-US", model: "AC-110-US", name: "AC Charger 110V US", type: "ac_charger", target_markets: ["US","CA"], certification_requirements: ["UL","FCC"], lifecycle_status: "trial_handover", product_manager_id: null, thumbnail_url: null, description: "US market AC charger", created_at: "2025-03-20T00:00:00Z", updated_at: "2025-05-15T00:00:00Z" },
-  { id: "prod-5", code: "DC-200-CN", model: "DC-200-CN", name: "DC Charger 200W CN", type: "dc_charger", target_markets: ["CN"], certification_requirements: ["CCC"], lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2024-11-05T00:00:00Z", updated_at: null },
-  { id: "prod-6", code: "AC-380-EU", model: "AC-380-EU", name: "AC Charger 380V EU", type: "ac_charger", target_markets: ["EU","UK"], certification_requirements: ["CE","UKCA"], lifecycle_status: "in_development", product_manager_id: null, thumbnail_url: null, description: "Three-phase AC charger", created_at: "2025-04-10T00:00:00Z", updated_at: null },
-  { id: "prod-7", code: "PF-7.7-US", model: "PF-7.7-US", name: "Portable Charger 7.7kW US", type: "portable", target_markets: ["US"], certification_requirements: ["UL","FCC"], lifecycle_status: "discontinued", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2024-06-01T00:00:00Z", updated_at: "2025-03-01T00:00:00Z" },
-  { id: "prod-8", code: "DC-1500-EU", model: "DC-1500-EU", name: "DC Charger 1500W EU", type: "dc_charger", target_markets: ["EU"], certification_requirements: ["CE","TUV"], lifecycle_status: "eol", product_manager_id: null, thumbnail_url: null, description: "High power DC (EOL)", created_at: "2023-09-15T00:00:00Z", updated_at: "2025-01-10T00:00:00Z" },
-  { id: "prod-9", code: "AC-220-AU", model: "AC-220-AU", name: "AC Charger 220V AU", type: "ac_charger", target_markets: ["AU","NZ"], certification_requirements: ["RCM"], lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null, description: "Australian standard", created_at: "2025-05-01T00:00:00Z", updated_at: null },
-  { id: "prod-10", code: "PF-2.2-KR", model: "PF-2.2-KR", name: "Portable Charger 2.2kW KR", type: "portable", target_markets: ["KR"], certification_requirements: ["KC"], lifecycle_status: "trial_handover", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2025-04-20T00:00:00Z", updated_at: null },
+  { id: "prod-1", project_id: "proj-1", code: "AC-220-EU", model: "AC-220-EU", name: "AC Charger 220V EU", type: "ac_charger", target_markets: ["EU"], certification_requirements: ["CE","ROHS"], lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null, description: "Standard AC charger for EU", created_at: "2025-01-15T00:00:00Z", updated_at: "2025-06-01T00:00:00Z" },
+  { id: "prod-2", project_id: "proj-2", code: "DC-480-US", model: "DC-480-US", name: "DC Charger 480W US", type: "dc_charger", target_markets: ["US"], certification_requirements: ["UL","FCC"], lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2025-02-10T00:00:00Z", updated_at: null },
+  { id: "prod-3", project_id: "proj-3", code: "PF-3.3-JP", model: "PF-3.3-JP", name: "Portable Charger 3.3kW JP", type: "portable", target_markets: ["JP"], certification_requirements: ["PSE"], lifecycle_status: "in_development", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2025-03-01T00:00:00Z", updated_at: null },
+  { id: "prod-4", project_id: "proj-4", code: "AC-110-US", model: "AC-110-US", name: "AC Charger 110V US", type: "ac_charger", target_markets: ["US","CA"], certification_requirements: ["UL","FCC"], lifecycle_status: "trial_handover", product_manager_id: null, thumbnail_url: null, description: "US market AC charger", created_at: "2025-03-20T00:00:00Z", updated_at: "2025-05-15T00:00:00Z" },
+  { id: "prod-5", project_id: "proj-5", code: "DC-200-CN", model: "DC-200-CN", name: "DC Charger 200W CN", type: "dc_charger", target_markets: ["CN"], certification_requirements: ["CCC"], lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2024-11-05T00:00:00Z", updated_at: null },
+  { id: "prod-6", project_id: "proj-6", code: "AC-380-EU", model: "AC-380-EU", name: "AC Charger 380V EU", type: "ac_charger", target_markets: ["EU","UK"], certification_requirements: ["CE","UKCA"], lifecycle_status: "in_development", product_manager_id: null, thumbnail_url: null, description: "Three-phase AC charger", created_at: "2025-04-10T00:00:00Z", updated_at: null },
+  { id: "prod-7", project_id: "proj-7", code: "PF-7.7-US", model: "PF-7.7-US", name: "Portable Charger 7.7kW US", type: "portable", target_markets: ["US"], certification_requirements: ["UL","FCC"], lifecycle_status: "discontinued", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2024-06-01T00:00:00Z", updated_at: "2025-03-01T00:00:00Z" },
+  { id: "prod-8", project_id: "proj-8", code: "DC-1500-EU", model: "DC-1500-EU", name: "DC Charger 1500W EU", type: "dc_charger", target_markets: ["EU"], certification_requirements: ["CE","TUV"], lifecycle_status: "eol", product_manager_id: null, thumbnail_url: null, description: "High power DC (EOL)", created_at: "2023-09-15T00:00:00Z", updated_at: "2025-01-10T00:00:00Z" },
+  { id: "prod-9", project_id: "proj-9", code: "AC-220-AU", model: "AC-220-AU", name: "AC Charger 220V AU", type: "ac_charger", target_markets: ["AU","NZ"], certification_requirements: ["RCM"], lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null, description: "Australian standard", created_at: "2025-05-01T00:00:00Z", updated_at: null },
+  { id: "prod-10", project_id: "proj-10", code: "PF-2.2-KR", model: "PF-2.2-KR", name: "Portable Charger 2.2kW KR", type: "portable", target_markets: ["KR"], certification_requirements: ["KC"], lifecycle_status: "trial_handover", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2025-04-20T00:00:00Z", updated_at: null },
 ];
 
 // In-memory mutable store for mock fallback — items created/updated in catch blocks persist here
@@ -138,7 +138,15 @@ export const productApi = {
         if (params?.type && p.type !== params.type) return false;
         if (params?.search) {
           const s = params.search.toLowerCase();
-          if (!p.code.toLowerCase().includes(s) && !p.name.toLowerCase().includes(s)) return false;
+          const marketsMatch = Array.isArray(p.target_markets) && p.target_markets.some((m) => m.toLowerCase().includes(s));
+          const certsMatch = Array.isArray(p.certification_requirements) && p.certification_requirements.some((c) => c.toLowerCase().includes(s));
+          if (
+            !p.code.toLowerCase().includes(s) &&
+            !p.name.toLowerCase().includes(s) &&
+            !p.model.toLowerCase().includes(s) &&
+            !marketsMatch &&
+            !certsMatch
+          ) return false;
         }
         return true;
       });
@@ -162,7 +170,7 @@ export const productApi = {
         data: {
           success: true,
           data: _products.find((p) => p.id === id) ?? (() => {
-            const fallback: Product = { id, code: "AC-220-EU", model: "AC-220-EU", name: "AC Charger 220V EU", type: "ac_charger", target_markets: ["EU"], certification_requirements: ["CE","ROHS"], lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2025-01-15T00:00:00Z", updated_at: null };
+            const fallback: Product = { id, project_id: "proj-1", code: "AC-220-EU", model: "AC-220-EU", name: "AC Charger 220V EU", type: "ac_charger", target_markets: ["EU"], certification_requirements: ["CE","ROHS"], lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2025-01-15T00:00:00Z", updated_at: null };
             _products.push(fallback);
             return fallback;
           })(),
@@ -176,7 +184,7 @@ export const productApi = {
       return { data: res.data };
     } catch {
       const newItem = {
-        id: `mock-${Date.now()}`, code: data.model, model: data.model, name: data.name,
+        id: `mock-${Date.now()}`, project_id: data.project_id ?? "", code: data.model, model: data.model, name: data.name,
         type: data.type ?? null, target_markets: data.target_markets ?? null,
         certification_requirements: data.certification_requirements ?? null,
         lifecycle_status: "in_development", product_manager_id: null, thumbnail_url: null,
@@ -200,7 +208,7 @@ export const productApi = {
       return {
         data: {
           success: true,
-          data: idx !== -1 ? _products[idx] : { id, ...data, lifecycle_status: "on_sale", created_at: "2025-01-15T00:00:00Z", updated_at: new Date().toISOString(), code: "AC-220-EU", model: "AC-220-EU", name: "AC Charger", type: "ac_charger", target_markets: null, certification_requirements: null, product_manager_id: null, thumbnail_url: null, description: null } as Product,
+          data: idx !== -1 ? _products[idx] : { id, project_id: "", ...data, lifecycle_status: "on_sale", created_at: "2025-01-15T00:00:00Z", updated_at: new Date().toISOString(), code: "AC-220-EU", model: "AC-220-EU", name: "AC Charger", type: "ac_charger", target_markets: null, certification_requirements: null, product_manager_id: null, thumbnail_url: null, description: null } as Product,
         },
       };
     }

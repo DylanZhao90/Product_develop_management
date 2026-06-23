@@ -22,7 +22,7 @@ import {
   SwapOutlined as TimelineIcon,
 } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { productApi } from "../../services/api";
+import { productApi, projectApi } from "../../services/api";
 import { useLocale } from "../../locales";
 import type { LifecycleStatus } from "../../services/api-types";
 import { LoadingSkeleton } from "../../components/common/LoadingSkeleton";
@@ -64,6 +64,16 @@ export default function ProductDetail() {
     queryKey: ["product-logs", id],
     queryFn: () => productApi.getLifecycleLogs(id!),
     enabled: !!id,
+  });
+
+  const { data: projectsResp } = useQuery({
+    queryKey: ["projects-all"],
+    queryFn: () => projectApi.list({ page_size: 200 }),
+  });
+
+  const projectMap = new Map<string, string>();
+  (projectsResp?.data?.data || []).forEach((p: any) => {
+    projectMap.set(p.id, p.name);
   });
 
   const updateMutation = useMutation({
@@ -118,9 +128,23 @@ export default function ProductDetail() {
       label: t("product.type"),
       children: (
         <Tag>
-          {product.type === "ac_charger" ? "AC" : product.type === "dc_charger" ? "DC" : product.type === "portable" ? "Portable" : product.type || "-"}
+          {t(`product.typeShort.${product.type}` as any) || product.type || "-"}
         </Tag>
       ),
+    },
+    {
+      key: "project",
+      label: t("common.project"),
+      children: (() => {
+        const projectName = projectMap.get(product.project_id);
+        return projectName ? (
+          <Button type="link" size="small" style={{ padding: 0 }} onClick={() => navigate(`/projects/${product.project_id}`)}>
+            {projectName}
+          </Button>
+        ) : (
+          product.project_id || "-"
+        );
+      })(),
     },
     {
       key: "status",
@@ -131,14 +155,14 @@ export default function ProductDetail() {
       key: "markets",
       label: t("product.targetMarkets"),
       children: Array.isArray(product.target_markets) && product.target_markets.length > 0
-        ? product.target_markets.map((m: string) => <Tag key={m}>{m}</Tag>)
+        ? <Space wrap size={4}>{product.target_markets.map((m: string) => <Tag key={m}>{m}</Tag>)}</Space>
         : "-",
     },
     {
       key: "certifications",
       label: t("product.certificationRequirements"),
       children: Array.isArray(product.certification_requirements) && product.certification_requirements.length > 0
-        ? product.certification_requirements.map((c: string) => <Tag key={c}>{c}</Tag>)
+        ? <Space wrap size={4}>{product.certification_requirements.map((c: string) => <Tag key={c}>{c}</Tag>)}</Space>
         : "-",
     },
     {
@@ -239,9 +263,9 @@ export default function ProductDetail() {
           <Form.Item name="type" label={t("product.type")}>
             <Select
               options={[
-                { label: "AC Charger", value: "ac_charger" },
-                { label: "DC Charger", value: "dc_charger" },
-                { label: "Portable", value: "portable" },
+                { label: t("product.type.ac_charger"), value: "ac_charger" },
+                { label: t("product.type.dc_charger"), value: "dc_charger" },
+                { label: t("product.type.portable"), value: "portable" },
               ]}
             />
           </Form.Item>

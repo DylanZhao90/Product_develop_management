@@ -4,7 +4,6 @@ import {
   Button,
   Card,
   Col,
-  Form,
   Input,
   Modal,
   ProTable,
@@ -16,11 +15,10 @@ import {
   Typography,
   message,
 } from "@/components/common/antd-imports";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { productApi } from "../../services/api";
+import { productApi, projectApi } from "../../services/api";
 import { useLocale } from "../../locales";
-import type { ProductCreate } from "../../services/api-types";
 
 const statusColors: Record<string, string> = {
   in_development: "blue",
@@ -36,6 +34,14 @@ const typeColors: Record<string, string> = {
   portable: "lime",
 };
 
+const stageColorsMap: Record<string, string> = {
+  in_development: "blue",
+  trial_handover: "orange",
+  on_sale: "green",
+  discontinued: "red",
+  eol: "default",
+};
+
 export default function Products() {
   const navigate = useNavigate();
   const { t } = useLocale();
@@ -44,8 +50,6 @@ export default function Products() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
   const [typeFilter, setTypeFilter] = useState<string | undefined>();
-  const [createModalOpen, setCreateModalOpen] = useState(false);
-  const [form] = Form.useForm();
 
   const { data, isLoading } = useQuery({
     queryKey: ["products", page, search, statusFilter, typeFilter],
@@ -59,19 +63,23 @@ export default function Products() {
       }),
   });
 
-  const createMutation = useMutation({
-    mutationFn: (values: Record<string, unknown>) => productApi.create(values as any),
+  const { data: projectsResp } = useQuery({
+    queryKey: ["projects-all"],
+    queryFn: () => projectApi.list({ page_size: 200 }),
+  });
+
+  const projectMap = new Map<string, string>();
+  (projectsResp?.data?.data || []).forEach((p: any) => {
+    projectMap.set(p.id, p.name);
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => productApi.delete(id),
     onSuccess: () => {
-      message.success(t("product.createdSuccess"));
-      setCreateModalOpen(false);
-      form.resetFields();
+      message.success(t("common.deleted"));
       queryClient.invalidateQueries({ queryKey: ["products"] });
     },
   });
-
-  const handleCreate = () => {
-    form.validateFields().then((values) => createMutation.mutate(values));
-  };
 
   const columns = [
     {
@@ -98,16 +106,107 @@ export default function Products() {
       key: "type",
       width: 100,
       render: (v: string) => (
-        <Tag color={typeColors[v] || "default"}>{v === "ac_charger" ? "AC" : v === "dc_charger" ? "DC" : v === "portable" ? "Portable" : v || "-"}</Tag>
+        <Tag color={typeColors[v] || "default"}>{t(`product.typeShort.${v}` as any) || v || "-"}</Tag>
       ),
     },
     {
-      title: t("common.status"),
+      title: t("product.targetMarkets"),
+      dataIndex: "target_markets",
+      key: "target_markets",
+      width: 180,
+      render: (v: string[] | null) =>
+        Array.isArray(v) && v.length > 0 ? (
+          <Space wrap size={4}>
+            {v.map((m) => (
+              <Tag key={m}>{m}</Tag>
+            ))}
+          </Space>
+        ) : (
+          "-"
+        ),
+    },
+    {
+      title: t("product.certificationRequirements"),
+      dataIndex: "certification_requirements",
+      key: "certification_requirements",
+      width: 200,
+      render: (v: string[] | null) =>
+        Array.isArray(v) && v.length > 0 ? (
+          <Space wrap size={4}>
+            {v.map((c) => (
+              <Tag key={c}>{c}</Tag>
+            ))}
+          </Space>
+        ) : (
+          "-"
+        ),
+    },
+    {
+      title: t("common.project"),
+      dataIndex: "project_id",
+      key: "project_id",
+      width: 200,
+      render: (v: string) => {
+        const name = projectMap.get(v);
+        return name ? (
+          <Button type="link" size="small" style={{ padding: 0 }} onClick={(e) => { e.stopPropagation(); navigate(`/projects/${v}`); }}>
+            {name}
+          </Button>
+        ) : (
+          v || "-"
+        );
+      },
+    },
+    {
+      title: t("product.status"),
       dataIndex: "lifecycle_status",
       key: "lifecycle_status",
-      width: 130,
-      render: (v: string) => (
-        <Tag color={statusColors[v] || "default"}>{t(`product.status.${v}`) || v}</Tag>
+      width: 120,
+      render: (v: string) => <Tag color={stageColorsMap[v]}>{t("product.status." + v)}</Tag>,
+    },
+    {
+      title: t("product.description"),
+      dataIndex: "description",
+      key: "description",
+      ellipsis: true,
+      render: (v: string) => v || "-",
+    },
+    {
+      title: t("common.created"),
+      dataIndex: "created_at",
+      key: "created_at",
+      width: 170,
+      render: (v: string) => (v ? new Date(v).toLocaleString() : "-"),
+    },
+    {
+      title: t("common.updated"),
+      dataIndex: "updated_at",
+      key: "updated_at",
+      width: 170,
+      render: (v: string) => (v ? new Date(v).toLocaleString() : "-"),
+    },
+    {
+      title: t("common.actions"),
+      key: "action",
+      width: 80,
+      render: (_: unknown, r: Record<string, unknown>) => (
+        <Button
+          size="small"
+          danger
+          onClick={(e) => {
+            e.stopPropagation();
+            Modal.confirm({
+              title: t("common.deleteConfirm"),
+              content: t("common.deleteWarning"),
+              okText: t("common.delete"),
+              cancelText: t("common.cancel"),
+              okButtonProps: { danger: true },
+              onOk: () => deleteMutation.mutate(r.id as string),
+            });
+          }}
+        >
+          {t("common.delete")}
+        </Button>
       ),
     },
   ];
@@ -140,32 +239,32 @@ export default function Products() {
             <Row gutter={[12, 12]}>
               <Col xs={12} sm={6} lg={3}>
                 <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Total" value={data?.data?.total || 0} valueStyle={{ color: "#4f6ef6", fontSize: 22, fontWeight: 700 }} />
+                  <Statistic title={t("common.total", { count: "" }).replace("{count}", "")} value={data?.data?.total || 0} valueStyle={{ color: "#4f6ef6", fontSize: 22, fontWeight: 700 }} />
                 </Card>
               </Col>
               <Col xs={12} sm={6} lg={3}>
                 <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="In Development" value={counts.in_development} valueStyle={{ color: "#1677ff", fontSize: 22, fontWeight: 700 }} />
+                  <Statistic title={t("product.status.in_development")} value={counts.in_development} valueStyle={{ color: "#1677ff", fontSize: 22, fontWeight: 700 }} />
                 </Card>
               </Col>
               <Col xs={12} sm={6} lg={3}>
                 <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Trial Handover" value={counts.trial_handover} valueStyle={{ color: "#fa8c16", fontSize: 22, fontWeight: 700 }} />
+                  <Statistic title={t("product.status.trial_handover")} value={counts.trial_handover} valueStyle={{ color: "#fa8c16", fontSize: 22, fontWeight: 700 }} />
                 </Card>
               </Col>
               <Col xs={12} sm={6} lg={3}>
                 <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="On Sale" value={counts.on_sale} valueStyle={{ color: "#22c55e", fontSize: 22, fontWeight: 700 }} />
+                  <Statistic title={t("product.status.on_sale")} value={counts.on_sale} valueStyle={{ color: "#22c55e", fontSize: 22, fontWeight: 700 }} />
                 </Card>
               </Col>
               <Col xs={12} sm={6} lg={3}>
                 <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Discontinued" value={counts.discontinued} valueStyle={{ color: "#ef4444", fontSize: 22, fontWeight: 700 }} />
+                  <Statistic title={t("product.status.discontinued")} value={counts.discontinued} valueStyle={{ color: "#ef4444", fontSize: 22, fontWeight: 700 }} />
                 </Card>
               </Col>
               <Col xs={12} sm={6} lg={3}>
                 <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="EOL" value={counts.eol} valueStyle={{ color: "#8c8c8c", fontSize: 22, fontWeight: 700 }} />
+                  <Statistic title={t("product.status.eol")} value={counts.eol} valueStyle={{ color: "#8c8c8c", fontSize: 22, fontWeight: 700 }} />
                 </Card>
               </Col>
             </Row>
@@ -198,13 +297,7 @@ export default function Products() {
         );
       })()}
 
-      <Card
-        extra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalOpen(true)}>
-            {t("common.create")}
-          </Button>
-        }
-      >
+      <Card>
         <Space style={{ marginBottom: 16 }} wrap>
           <Input
             placeholder={t("common.search")}
@@ -235,9 +328,9 @@ export default function Products() {
             style={{ width: 140 }}
             options={[
               { label: t("common.all"), value: undefined },
-              { label: "AC Charger", value: "ac_charger" },
-              { label: "DC Charger", value: "dc_charger" },
-              { label: "Portable", value: "portable" },
+              { label: t("product.type.ac_charger"), value: "ac_charger" },
+              { label: t("product.type.dc_charger"), value: "dc_charger" },
+              { label: t("product.type.portable"), value: "portable" },
             ]}
           />
         </Space>
@@ -259,35 +352,6 @@ export default function Products() {
           })}
         />
       </Card>
-
-      <Modal
-        title={`${t("common.create")} ${t("menu.products")}`}
-        open={createModalOpen}
-        onOk={handleCreate}
-        onCancel={() => setCreateModalOpen(false)}
-        confirmLoading={createMutation.isPending}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="model" label={t("product.model")} rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="name" label={t("product.name")} rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item name="type" label={t("product.type")}>
-            <Select
-              options={[
-                { label: "AC Charger", value: "ac_charger" },
-                { label: "DC Charger", value: "dc_charger" },
-                { label: "Portable", value: "portable" },
-              ]}
-            />
-          </Form.Item>
-          <Form.Item name="description" label={t("common.desc") || "Description"}>
-            <Input.TextArea rows={3} />
-          </Form.Item>
-        </Form>
-      </Modal>
     </div>
   );
 }
