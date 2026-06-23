@@ -103,12 +103,12 @@ import {
 // Shared Analytics Constants & Helpers
 // ═══════════════════════════════════════════════════════════════
 
-const STAGE_META: Record<LifecycleStatus, { color: string; icon: string; order: number; label: string }> = {
-  in_development:  { color: "#3b82f6", icon: "🔬", order: 0, label: "研发中" },
-  trial_handover:  { color: "#f59e0b", icon: "🧪", order: 1, label: "试产移交" },
-  on_sale:         { color: "#22c55e", icon: "🚀", order: 2, label: "在售" },
-  discontinued:    { color: "#ef4444", icon: "⏸️", order: 3, label: "停产" },
-  eol:             { color: "#6b7280", icon: "🏁", order: 4, label: "退市" },
+const STAGE_META: Record<LifecycleStatus, { color: string; icon: string; order: number; labelKey: string }> = {
+  in_development:  { color: "#3b82f6", icon: "🔬", order: 0, labelKey: "product.status.in_development" },
+  trial_handover:  { color: "#f59e0b", icon: "🧪", order: 1, labelKey: "product.status.trial_handover" },
+  on_sale:         { color: "#22c55e", icon: "🚀", order: 2, labelKey: "product.status.on_sale" },
+  discontinued:    { color: "#ef4444", icon: "⏸️", order: 3, labelKey: "product.status.discontinued" },
+  eol:             { color: "#6b7280", icon: "🏁", order: 4, labelKey: "product.status.eol" },
 };
 
 const STAGE_ORDER: LifecycleStatus[] = [
@@ -289,6 +289,7 @@ function StageStatCard({
   active: boolean;
   onClick: () => void;
 }) {
+  const { t } = useLocale();
   const meta = STAGE_META[status];
   return (
     <Col xs={12} sm={8} lg={4} xl={4}>
@@ -345,7 +346,7 @@ function StageStatCard({
             textAlign: "center",
           }}
         >
-          {meta.label}
+          {t(meta.labelKey)}
         </div>
         <Tag
           style={{
@@ -372,8 +373,9 @@ function LifecycleSankey({
   flows: LifecycleAnalyticsData["flows"];
   totalProducts: number;
 }) {
+  const { t } = useLocale();
   const nodes = STAGE_ORDER.map((s) => ({
-    name: STAGE_META[s].label,
+    name: t(STAGE_META[s].labelKey),
     itemStyle: { color: STAGE_META[s].color },
   }));
 
@@ -384,7 +386,7 @@ function LifecycleSankey({
         formatter: (p: { data: { source: string; target: string; value: number } }) => {
           const val = p.data.value;
           const rate = totalProducts > 0 ? ((val / totalProducts) * 100).toFixed(1) : "0";
-          return `${p.data.source} → ${p.data.target}<br/>${val} 个产品 (${rate}%)`;
+          return t("dashboard.stage.flowTooltip", { source: p.data.source, target: p.data.target, count: val, rate });
         },
       },
       series: [
@@ -394,16 +396,16 @@ function LifecycleSankey({
           layoutIterations: 0,
           emphasis: { focus: "adjacency" as const },
           nodeAlign: "left" as const,
-          nodeWidth: 18,
-          nodeGap: 8,
-          left: 20,
-          right: 20,
+          nodeWidth: 28,
+          nodeGap: 12,
+          left: 60,
+          right: 100,
           top: 10,
           bottom: 10,
           data: nodes,
           links: flows.map((f) => {
-            const fromName = STAGE_META[f.from].label;
-            const toName = STAGE_META[f.to].label;
+            const fromName = t(STAGE_META[f.from].labelKey);
+            const toName = t(STAGE_META[f.to].labelKey);
             const rate = totalProducts > 0
               ? ((f.count / totalProducts) * 100).toFixed(1)
               : "0";
@@ -421,7 +423,8 @@ function LifecycleSankey({
           }),
           label: {
             show: true,
-            fontSize: 13,
+            position: 'right',
+            fontSize: 14,
             fontWeight: 600,
           },
           lineStyle: { color: "gradient", curveness: 0.5, opacity: 0.6 },
@@ -448,6 +451,7 @@ function ApprovalTimeline({
   stageKey: LifecycleStatus;
   stage: LifecycleStageAnalytics;
 }) {
+  const { t } = useLocale();
   const nodes = STAGE_APPROVAL_NODES[stageKey];
   const meta = STAGE_META[stageKey];
   const products = stage.products || [];
@@ -469,10 +473,10 @@ function ApprovalTimeline({
         style={{ fontSize: 12, fontWeight: 600, marginBottom: 8, display: "flex", alignItems: "center", gap: 6 }}
       >
         <span style={{ width: 6, height: 6, borderRadius: "50%", background: meta.color, display: "inline-block" }} />
-        审批节点流程 ({products.length} 个产品)
+        {t("dashboard.stage.approvalFlow")} ({products.length} {t("lifecycle.panorama.products")})
       </div>
       {visibleProducts.length === 0 ? (
-        <Typography.Text type="secondary" style={{ fontSize: 12 }}>暂无产品数据</Typography.Text>
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>{t("dashboard.noProductData")}</Typography.Text>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
           {visibleProducts.map((product, pIdx) => {
@@ -483,7 +487,7 @@ function ApprovalTimeline({
                 background: "var(--color-bg-page)", border: "1px solid var(--color-border-light)",
               }}>
                 <div style={{ fontSize: 12, fontWeight: 600, marginBottom: 6, color: "var(--color-text)" }}>
-                  {product.code || product.name || `产品 #${pIdx + 1}`}
+                  {product.code || product.name || t("dashboard.productFallback", { idx: pIdx + 1 })}
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4, overflowX: "auto", paddingBottom: 4 }}>
                   {nodes.map((node, nIdx) => (
@@ -513,7 +517,7 @@ function ApprovalTimeline({
           })}
           {products.length > 6 && (
             <Typography.Text type="secondary" style={{ fontSize: 11, textAlign: "center" }}>
-              还有 {products.length - 6} 个产品...
+              {t("dashboard.productMore", { count: products.length - 6 })}
             </Typography.Text>
           )}
         </div>
@@ -530,6 +534,7 @@ function StageDeepDivePanel({
   data: LifecycleAnalyticsData;
   stageKey: LifecycleStatus;
 }) {
+  const { t } = useLocale();
   const stage = data[stageKey];
   const meta = STAGE_META[stageKey];
 
@@ -564,7 +569,7 @@ function StageDeepDivePanel({
             }}
           />
           <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-            {meta.icon} {meta.label}
+            {meta.icon} {t(meta.labelKey)}
           </h3>
           <span
             className="stage-count"
@@ -578,14 +583,14 @@ function StageDeepDivePanel({
               color: meta.color,
             }}
           >
-            0 个产品
+            {t("dashboard.stage.zeroProducts")}
           </span>
         </div>
         <div
           className="stage-empty"
           style={{ textAlign: "center", padding: "32px 0" }}
         >
-          <Typography.Text type="secondary">暂无数据</Typography.Text>
+          <Typography.Text type="secondary">{t("common.noData")}</Typography.Text>
         </div>
       </Card>
     );
@@ -646,7 +651,7 @@ function StageDeepDivePanel({
           }}
         />
         <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>
-          {meta.icon} {meta.label}
+          {meta.icon} {t(meta.labelKey)}
         </h3>
         <span
           className="stage-count"
@@ -660,7 +665,7 @@ function StageDeepDivePanel({
             color: meta.color,
           }}
         >
-          {stage.count} 个产品
+          {stage.count} {t("lifecycle.panorama.products")}
         </span>
       </div>
 
@@ -677,7 +682,7 @@ function StageDeepDivePanel({
             }}
           >
             <Statistic
-              title="产品数"
+              title={t("dashboard.stats.productCount")}
               value={stage.count}
               valueStyle={{ fontSize: 22, fontWeight: 700, color: meta.color }}
             />
@@ -693,12 +698,12 @@ function StageDeepDivePanel({
             }}
           >
             <Statistic
-              title="平均时长"
+              title={t("dashboard.stats.avgDuration")}
               value={avgDuration}
-              suffix="天"
+              suffix={t("dashboard.stats.avgDurationSuffix")}
               valueStyle={{ fontSize: 22, fontWeight: 700 }}
             />
-            <div style={{ fontSize: 11, marginTop: 2 }}>最长: {maxDuration}天</div>
+            <div style={{ fontSize: 11, marginTop: 2 }}>{t("dashboard.stats.maxDuration", { days: maxDuration })}</div>
           </div>
         </Col>
         <Col xs={12} sm={6}>
@@ -711,17 +716,17 @@ function StageDeepDivePanel({
             }}
           >
             <Statistic
-              title="月均新增"
+              title={t("dashboard.stats.monthlyAvg")}
               value={
                 entryMonths.length > 0
                   ? Math.round(totalEntries / entryMonths.length)
                   : 0
               }
-              suffix="/月"
+              suffix={t("dashboard.stats.monthlyAvgSuffix")}
               valueStyle={{ fontSize: 22, fontWeight: 700 }}
             />
             <div style={{ fontSize: 11, marginTop: 2 }}>
-              累计: {totalEntries}
+              {t("dashboard.stats.totalEntries", { count: totalEntries })}
             </div>
           </div>
         </Col>
@@ -735,7 +740,7 @@ function StageDeepDivePanel({
             }}
           >
             <Statistic
-              title="近期趋势"
+              title={t("dashboard.stats.recentTrend")}
               value={recentTrend >= 0 ? `+${recentTrend}` : `${recentTrend}`}
               valueStyle={{
                 fontSize: 22,
@@ -745,7 +750,7 @@ function StageDeepDivePanel({
               }}
               prefix={recentTrend >= 0 ? "↑" : "↓"}
             />
-            <div style={{ fontSize: 11, marginTop: 2 }}>vs 上月</div>
+            <div style={{ fontSize: 11, marginTop: 2 }}>{t("dashboard.stats.vsLastMonth")}</div>
           </div>
         </Col>
       </Row>
@@ -783,14 +788,14 @@ function StageDeepDivePanel({
                   display: "inline-block",
                 }}
               />
-              📈 {meta.label}月新增趋势
+              📈 {t("dashboard.chart.monthlyTrend", { stage: t(meta.labelKey) })}
             </div>
             <div style={{ width: "100%", height: 190 }}>
               <ReactEChartsCore
                 echarts={echarts}
                 option={makeLineOption(entryMonths, [
                   {
-                    name: meta.label,
+                    name: t(meta.labelKey),
                     data: entryCounts,
                     color: meta.color,
                   },
@@ -831,7 +836,7 @@ function StageDeepDivePanel({
                   display: "inline-block",
                 }}
               />
-              ⏱️ 时长分布
+              ⏱️ {t("dashboard.chart.durationDist")}
             </div>
             <div style={{ width: "100%", height: 190 }}>
               <ReactEChartsCore
@@ -895,7 +900,7 @@ function getStageEnrichment(
                 className="chart-title-sm"
                 style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}
               >
-                🔧 研发资源分配
+                🔧 {t("dashboard.chart.rndResourceAlloc")}
               </div>
               <div style={{ height: 190 }}>
                 <ReactEChartsCore
@@ -922,7 +927,7 @@ function getStageEnrichment(
                 className="chart-title-sm"
                 style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}
               >
-                📊 研发阶段分布
+                📊 {t("dashboard.chart.rndPhaseDist")}
               </div>
               <div style={{ height: 190 }}>
                 <ReactEChartsCore
@@ -962,7 +967,7 @@ function getStageEnrichment(
               className="chart-title-sm"
               style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}
             >
-              ✅ 移交成功率
+              ✅ {t("dashboard.chart.trialSuccessRate")}
             </div>
             <div style={{ height: 190 }}>
               <ReactEChartsCore
@@ -999,7 +1004,7 @@ function getStageEnrichment(
               className="chart-title-sm"
               style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}
             >
-              🔌 产品类型分布
+              🔌 {t("dashboard.chart.productTypeDist")}
             </div>
             <div style={{ height: 190 }}>
               <ReactEChartsCore
@@ -1038,7 +1043,7 @@ function getStageEnrichment(
               className="chart-title-sm"
               style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}
             >
-              ⛔ 停产原因分布
+              ⛔ {t("dashboard.chart.discontinueReasons")}
             </div>
             <div style={{ height: 190 }}>
               <ReactEChartsCore
@@ -1075,7 +1080,7 @@ function getStageEnrichment(
               className="chart-title-sm"
               style={{ fontSize: 13, fontWeight: 600, marginBottom: 8 }}
             >
-              🛟 退市产品售后状态
+              🛟 {t("dashboard.chart.eolSupportStatus")}
             </div>
             <div style={{ height: 190 }}>
               <ReactEChartsCore
@@ -1098,6 +1103,8 @@ function getStageEnrichment(
 
 // ── Full Analytics View ──
 function AnalyticsView() {
+  const { t } = useLocale();
+  const navigate = useNavigate();
   const [activeStage, setActiveStage] = useState<LifecycleStatus | null>(null);
   const [lifecycleData, setLifecycleData] = useState<LifecycleAnalyticsData | null>(null);
 
@@ -1120,6 +1127,10 @@ function AnalyticsView() {
     count: lifecycleData[s].count,
   }));
   const totalProducts = lifecycleData.total_products;
+  // Filter out DAG cycle (trial_handover → in_development breaks Sankey)
+  const filteredFlows = lifecycleData.flows.filter(
+    (f) => f.from !== "trial_handover" || f.to !== "in_development"
+  );
 
   return (
     <div style={{ marginTop: 16 }}>
@@ -1137,11 +1148,7 @@ function AnalyticsView() {
                   : "0%"
               }
               active={activeStage === s.status}
-              onClick={() =>
-                setActiveStage(
-                  activeStage === s.status ? null : s.status,
-                )
-              }
+              onClick={() => navigate("/lifecycle?stage=" + s.status)}
             />
           ))}
         </Row>
@@ -1189,13 +1196,13 @@ function AnalyticsView() {
               background: "var(--color-bg-page)",
             }}
           >
-            {lifecycleData.flows.length} 条流转
+            {filteredFlows.length} 条流转
           </span>
         </div>
-        {lifecycleData.flows.length > 0 ? (
+        {filteredFlows.length > 0 ? (
           <>
             <LifecycleSankey
-              flows={lifecycleData.flows}
+              flows={filteredFlows}
               totalProducts={lifecycleData.total_products}
             />
             <Row
@@ -1206,7 +1213,7 @@ function AnalyticsView() {
                 paddingTop: 16,
               }}
             >
-              {lifecycleData.flows.map((f, i) => {
+              {filteredFlows.map((f, i) => {
                 const rate =
                   totalProducts > 0
                     ? ((f.count / totalProducts) * 100).toFixed(1)
@@ -1227,11 +1234,11 @@ function AnalyticsView() {
                         style={{ fontSize: 12, fontWeight: 600, display: "block", marginBottom: 4 }}
                       >
                         <span style={{ color: STAGE_META[f.from].color }}>
-                          {STAGE_META[f.from].label}
+                          {t(STAGE_META[f.from].labelKey)}
                         </span>
                         <span style={{ margin: "0 4px" }}>→</span>
                         <span style={{ color: STAGE_META[f.to].color }}>
-                          {STAGE_META[f.to].label}
+                          {t(STAGE_META[f.to].labelKey)}
                         </span>
                       </span>
                       <span
@@ -1626,7 +1633,7 @@ export default function EnhancedDashboard() {
             label: (
               <span>
                 <DashboardOutlined style={{ marginRight: 6 }} />
-                总揽
+                {t("dashboard.tab.overview")}
               </span>
             ),
             children: overviewContent,
@@ -1636,7 +1643,7 @@ export default function EnhancedDashboard() {
             label: (
               <span>
                 <BarChartOutlined style={{ marginRight: 6 }} />
-                数据分析
+                {t("dashboard.tab.analytics")}
               </span>
             ),
             children: <AnalyticsView />,
