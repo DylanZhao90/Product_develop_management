@@ -23,8 +23,8 @@ src/theme/
 
 ```ts
 themePresets = [
-  { id: "tech-saas",      name: "科技蓝紫" },  // default
-  { id: "linear-dark",    name: "Linear 暗色" },
+  { id: "vercel-light",   name: "Vercel 明亮" },  // default
+  { id: "vercel-dark",    name: "Vercel 暗色" },
   { id: "forest-emerald", name: "自然翡翠" },
   { id: "sunset-amber",   name: "日落琥珀" },
   { id: "ocean-depth",    name: "深海蓝" },

@@ -171,9 +171,9 @@ function buildPreset(cfg: {
       Menu: {
         darkItemBg: sidebarBg,
         darkItemColor: neutral[400],
-        darkItemHoverBg: `${primary[500]}26`,
+        darkItemHoverBg: `${primary[500]}3D`,
         darkItemHoverColor: neutral[0],
-        darkItemSelectedBg: `${primary[500]}38`,
+        darkItemSelectedBg: `${primary[500]}52`,
         darkItemSelectedColor: neutral[0],
         darkSubMenuItemBg: sidebarBg,
         darkItemDisabledColor: neutral[600],
@@ -276,9 +276,9 @@ function buildPreset(cfg: {
             Menu: {
               darkItemBg: sidebarBg,
               darkItemColor: neutral[400],
-              darkItemHoverBg: `${primary[500]}26`,
+              darkItemHoverBg: `${primary[500]}3D`,
               darkItemHoverColor: neutral[0],
-              darkItemSelectedBg: `${primary[500]}38`,
+              darkItemSelectedBg: `${primary[500]}52`,
               darkItemSelectedColor: neutral[0],
               darkSubMenuItemBg: sidebarBg,
               darkItemDisabledColor: neutral[600],
@@ -481,70 +481,71 @@ function buildPreset(cfg: {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// 5 Theme Presets — v2: visually distinct, high contrast, polished
+// 5 Theme Presets — v2.1: Vercel-inspired default, 5 distinct visuals
 // ═══════════════════════════════════════════════════════════════
 
 export const themePresets: ThemePreset[] = [
-  // ── 1. Tech SaaS (default) — data-vis optimized ─────────────
-  // Sharp indigo primary, deep blue-grey sidebar, elevated cards
-  // with visible borders and refined shadows.
+  // ── 1. Vercel Light (default) — engineered clarity ──────────
+  // Near-monochrome with Vercel-blue link accent, crisp hairlines,
+  // stacked-shadow elevation, ink-on-white typographic precision.
+  // Following the Vercel DESIGN.md design system reference.
   buildPreset({
-    id: "tech-saas",
-    name: "Tech SaaS",
-    nameZh: "科技蓝紫",
-    description: "Modern, high-contrast, dark sidebar, data-viz optimized — inspired by Linear & Vercel",
+    id: "vercel-light",
+    name: "Vercel Light",
+    nameZh: "Vercel 明亮",
+    description: "Near-monochrome canvas, blue link accent, crisp hairlines, engineered clarity — inspired by Vercel",
     mode: "default",
     primary: {
-      50: "#eef2ff", 100: "#e0e7ff", 200: "#c7d2fe", 300: "#a5b4fc",
-      400: "#818cf8", 500: "#4f6ef6", 600: "#3b5de7", 700: "#334ed6",
-      800: "#2a3fb8", 900: "#1e2f8a",
+      50: "#e8f0fe", 100: "#d3e5ff", 200: "#a8c7fa", 300: "#7aa9f5",
+      400: "#4d8bf0", 500: "#0070f3", 600: "#0761d1", 700: "#0052b3",
+      800: "#003d82", 900: "#002856",
     },
     neutral: {
-      0: "#ffffff", 50: "#f4f7fc", 100: "#e9edf4", 200: "#dce1ea",
-      300: "#c5ccd9", 400: "#8f98a8", 500: "#5c6577", 600: "#3f4758",
-      700: "#2d3443", 800: "#1c212e", 900: "#11151f",
+      0: "#ffffff", 50: "#fafafa", 100: "#f5f5f5", 200: "#ebebeb",
+      300: "#d4d4d4", 400: "#888888", 500: "#4d4d4d", 600: "#333333",
+      700: "#1a1a1a", 800: "#171717", 900: "#0a0a0a",
     },
-    success: { 50: "#ecfdf3", 500: "#0aad7c", 700: "#06946a" },
-    warning: { 50: "#fffaeb", 500: "#f5a623", 700: "#d48c0e" },
-    error: { 50: "#fef2f2", 500: "#ef4444", 700: "#dc2626" },
-    info: { 50: "#eef2ff", 500: "#4f6ef6", 700: "#3b5de7" },
-    sidebarBg: "#0f172a",
-    // Deeper page bg for more contrast against white cards
-    bgPage: "#e4e9f2",
-    // Stronger card presence
-    cardShadow: "0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04)",
-    cardShadowHover: "0 6px 20px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.04)",
-    borderColor: "#dce1ea",
+    success: { 50: "#ecfdf3", 500: "#10b981", 700: "#047857" },
+    warning: { 50: "#ffefcf", 500: "#f5a623", 700: "#ab570a" },
+    error: { 50: "#fef2f2", 500: "#ee0000", 700: "#c50000" },
+    info: { 50: "#d3e5ff", 500: "#0070f3", 700: "#0761d1" },
+    sidebarBg: "#171717",
+    bgPage: "#fafafa",
+    // Vercel stacked-shadow: hairline + micro shadows
+    cardShadow: "0 0 0 1px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.04)",
+    cardShadowHover: "0 0 0 1px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.06)",
+    borderColor: "#ebebeb",
   }),
 
-  // ── 2. Linear Dark ─────────────────────────────────────────
-  // Full dark mode with green accents. Deeper blacks, crisp borders,
-  // elevated card surfaces with visible edges.
+  // ── 2. Vercel Dark — polarity-flip of Vercel Light ──────────
+  // Dark canvas with blue accent, crisp border-driven depth,
+  // high-contrast text, minimal shadows. Dark counterpart of
+  // Vercel Light following Vercel's inverted-color tokens.
   buildPreset({
-    id: "linear-dark",
-    name: "Linear Dark",
-    nameZh: "Linear 暗色",
-    description: "Full dark mode, green accents, minimalist — inspired by Linear",
+    id: "vercel-dark",
+    name: "Vercel Dark",
+    nameZh: "Vercel 暗色",
+    description: "Dark canvas, blue accent, crisp borders, high contrast — Vercel dark mode",
     mode: "dark",
     primary: {
-      50: "#e8f5ed", 100: "#c8e6d9", 200: "#94d1b3", 300: "#5fb88d",
-      400: "#35a36e", 500: "#1ea864", 600: "#198f54", 700: "#147644",
-      800: "#0f5d34", 900: "#0a4424",
+      50: "#002856", 100: "#003d82", 200: "#0052b3", 300: "#0761d1",
+      400: "#4d8bf0", 500: "#3b82f6", 600: "#60a5fa", 700: "#93bbfd",
+      800: "#bfdbfe", 900: "#dbeafe",
     },
     neutral: {
-      0: "#141414", 50: "#1a1a1a", 100: "#242424", 200: "#303030",
-      300: "#444444", 400: "#636363", 500: "#868686", 600: "#a3a3a3",
-      700: "#c4c4c4", 800: "#e0e0e0", 900: "#f2f2f2",
+      0: "#0a0a0a", 50: "#111111", 100: "#171717", 200: "#222222",
+      300: "#2a2a2a", 400: "#555555", 500: "#888888", 600: "#a3a3a3",
+      700: "#cccccc", 800: "#e8e8e8", 900: "#f5f5f5",
     },
-    success: { 50: "#0d2818", 500: "#39d353", 700: "#5ce670" },
-    warning: { 50: "#2d1f0a", 500: "#f0a030", 700: "#f4b950" },
-    error: { 50: "#2d0f0f", 500: "#f85149", 700: "#fa6e67" },
-    info: { 50: "#0d1d2d", 500: "#58a6ff", 700: "#79b8ff" },
-    sidebarBg: "#0f0f0f",
+    success: { 50: "#052e16", 500: "#22c55e", 700: "#4ade80" },
+    warning: { 50: "#2d1f0a", 500: "#f5a623", 700: "#fbbf24" },
+    error: { 50: "#2d0f0f", 500: "#ee0000", 700: "#ff3333" },
+    info: { 50: "#002856", 500: "#3b82f6", 700: "#60a5fa" },
+    sidebarBg: "#0a0a0a",
     bgPage: "#111111",
-    cardShadow: "0 1px 3px rgba(0,0,0,0.3), 0 1px 1px rgba(0,0,0,0.2)",
-    cardShadowHover: "0 8px 24px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.2)",
-    borderColor: "#303030",
+    cardShadow: "0 0 0 1px rgba(255,255,255,0.04), 0 1px 3px rgba(0,0,0,0.3)",
+    cardShadowHover: "0 0 0 1px rgba(255,255,255,0.06), 0 4px 12px rgba(0,0,0,0.4)",
+    borderColor: "#222222",
   }),
 
   // ── 3. Forest Emerald ──────────────────────────────────────
@@ -643,4 +644,4 @@ export const presetMap = Object.fromEntries(
   themePresets.map((p) => [p.id, p])
 ) as Record<string, ThemePreset>;
 
-export const defaultPresetId = "tech-saas";
+export const defaultPresetId = "vercel-light";

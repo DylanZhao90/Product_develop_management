@@ -57,7 +57,7 @@ const PROFILE_DEFAULTS: Record<string, unknown> = {
   email: "",
   avatarUrl: "",
   language: "zh-CN",
-  themeId: "tech-saas",
+  themeId: "vercel-light",
 };
 
 function loadProfile(): Record<string, unknown> {
