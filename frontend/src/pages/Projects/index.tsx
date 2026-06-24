@@ -210,32 +210,32 @@ export default function Projects() {
             <Row gutter={[12, 12]}>
               <Col xs={12} sm={6} lg={3}>
                 <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Total" value={data?.data?.total || 0} valueStyle={{ color: "#4f6ef6", fontSize: 22, fontWeight: 700 }} />
+                  <Statistic title={t("project.stat.total")} value={data?.data?.total || 0} valueStyle={{ color: "#4f6ef6", fontSize: 22, fontWeight: 700 }} />
                 </Card>
               </Col>
               <Col xs={12} sm={6} lg={3}>
                 <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Pending" value={counts.pending_approval} valueStyle={{ color: "#faad14", fontSize: 22, fontWeight: 700 }} />
+                  <Statistic title={t("project.stat.pending")} value={counts.pending_approval} valueStyle={{ color: "#faad14", fontSize: 22, fontWeight: 700 }} />
                 </Card>
               </Col>
               <Col xs={12} sm={6} lg={3}>
                 <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Approved" value={counts.approved} valueStyle={{ color: "#1677ff", fontSize: 22, fontWeight: 700 }} />
+                  <Statistic title={t("project.stat.approved")} value={counts.approved} valueStyle={{ color: "#1677ff", fontSize: 22, fontWeight: 700 }} />
                 </Card>
               </Col>
               <Col xs={12} sm={6} lg={3}>
                 <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="In Progress" value={counts.in_progress} valueStyle={{ color: "#1890ff", fontSize: 22, fontWeight: 700 }} />
+                  <Statistic title={t("project.stat.inProgress")} value={counts.in_progress} valueStyle={{ color: "#1890ff", fontSize: 22, fontWeight: 700 }} />
                 </Card>
               </Col>
               <Col xs={12} sm={6} lg={3}>
                 <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Completed" value={counts.completed} valueStyle={{ color: "#22c55e", fontSize: 22, fontWeight: 700 }} />
+                  <Statistic title={t("project.stat.completed")} value={counts.completed} valueStyle={{ color: "#22c55e", fontSize: 22, fontWeight: 700 }} />
                 </Card>
               </Col>
               <Col xs={12} sm={6} lg={3}>
                 <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Closed" value={counts.closed} valueStyle={{ color: "#8c8c8c", fontSize: 22, fontWeight: 700 }} />
+                  <Statistic title={t("project.stat.closed")} value={counts.closed} valueStyle={{ color: "#8c8c8c", fontSize: 22, fontWeight: 700 }} />
                 </Card>
               </Col>
             </Row>
