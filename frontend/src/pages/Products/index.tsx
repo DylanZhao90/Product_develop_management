@@ -105,9 +105,14 @@ export default function Products() {
       dataIndex: "type",
       key: "type",
       width: 100,
-      render: (v: string) => (
-        <Tag color={typeColors[v] || "default"}>{t(`product.typeShort.${v}` as any) || v || "-"}</Tag>
-      ),
+      render: (v: string) => {
+        const shortKey = v?.replace('_charger', '');
+        return (
+          <Tag color={typeColors[v] || typeColors[shortKey] || "default"}>
+            {t(`product.typeShort.${shortKey}` as any) || v || "-"}
+          </Tag>
+        );
+      },
     },
     {
       title: t("product.targetMarkets"),

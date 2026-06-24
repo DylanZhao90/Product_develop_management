@@ -35,6 +35,8 @@
   "common.loading": "加载中...",
   "common.noData": "暂无数据",
   "common.page": "第 {page} 页",
+  "product.name": "产品名称",
+  "product.status": "状态",
   "product.status.in_development": "研发中",
   "product.status.trial_handover": "试产移交",
   "product.status.on_sale": "在售",

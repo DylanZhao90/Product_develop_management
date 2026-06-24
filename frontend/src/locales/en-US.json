@@ -35,6 +35,8 @@
   "common.loading": "Loading...",
   "common.noData": "No Data",
   "common.page": "Page {page}",
+  "product.name": "Product Name",
+  "product.status": "Status",
   "product.status.in_development": "In Development",
   "product.status.trial_handover": "Trial Handover",
   "product.status.on_sale": "On Sale",
