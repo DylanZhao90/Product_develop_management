@@ -446,12 +446,12 @@
   "product.typeFull.dc_charger": "DC Charger",
   "product.typeFull.portable": "Portable Charger",
 
-  "project.stat.total": "Total",
-  "project.stat.pending": "Pending",
-  "project.stat.approved": "Approved",
-  "project.stat.inProgress": "In Progress",
-  "project.stat.completed": "Completed",
-  "project.stat.closed": "Closed",
+  "project.stat.total": "总计",
+  "project.stat.pending": "待审批",
+  "project.stat.approved": "已通过",
+  "project.stat.inProgress": "进行中",
+  "project.stat.completed": "已完成",
+  "project.stat.closed": "已关闭",
   "project.stat.newProduct": "New Product",
   "project.stat.versionUpgrade": "Version Upgrade"
 }
