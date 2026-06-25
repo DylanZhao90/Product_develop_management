@@ -71,10 +71,12 @@ export type IssueStatus = "open" | "investigating" | "resolved" | "closed";
 
 export interface Project {
   id: string;
-  product_id: string;
+  product_id?: string;
   product_code?: string;
+  supplier_id?: string;
+  supplier_name?: string;
   name: string;
-  type: "new_product" | "version_upgrade";
+  type: string;
   project_type_key: string;
   approval_status: 'draft' | 'pending' | 'approved' | 'rejected';
   approval_flow_id: string | null;
@@ -91,7 +93,9 @@ export interface ProjectCreate {
   name: string;
   type?: "new_product" | "version_upgrade";
   project_type_key: string;
-  product_id: string;
+  product_id?: string;
+  supplier_id?: string;
+  supplier_name?: string;
   description?: string;
   start_date?: string;
   end_date?: string;
@@ -105,6 +109,7 @@ export interface ProjectTypeConfig {
   display_name: Record<string, string>;  // {"zh-CN":"新产品研发","en-US":"New Product"}
   sort_order: number;
   is_active: boolean;
+  requires_approval: boolean;  // true=需审批流，false=创建后直接进入 in_progress
 }
 
 export interface ProjectTask {
@@ -151,6 +156,26 @@ export interface Supplier {
   rating: number | null;
   on_time_delivery_rate: number | null;
   status: SupplierStatus;
+  notes: string | null;
+  created_at: string;
+  updated_at: string | null;
+}
+
+export interface SupplierProfile {
+  id: string;
+  name: string;
+  type: string;  // "pcba_manufacturer" | "cable_assembler" | "power_module" | "component_distributor" | "ems_provider" | ...
+  contact_name: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  country: string | null;
+  qualification_files: string[] | null;
+  rating: number | null;       // 综合评分 1-5
+  on_time_delivery_rate: number | null;  // 准时交付率 0-100
+  quality_pass_rate: number | null;     // 质量合格率 0-100（新增）
+  health_score: number | null;          // 综合健康度 0-100（由 rating×delivery×quality 加权计算）
+  status: SupplierStatus;
+  current_phase: string | null;  // 当前所处的生命周期阶段 project_type_key
   notes: string | null;
   created_at: string;
   updated_at: string | null;

@@ -1,95 +1,164 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card, Col, Row, Statistic, Table, Tag, Typography, Space, Select, Input, Button, Modal, Form, message } from "antd";
-import { PlusOutlined, SearchOutlined } from "@ant-design/icons";
+import { Card, Col, Row, Statistic, Table, Tag, Typography, Space, Input, Button, Modal, message } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supplierApi } from "../../services/api";
+import { supplierProfileApi } from "../../services/api";
+import type { SupplierProfile } from "../../services/api-types";
 import { useLocale } from "../../locales";
 
 const statusColors: Record<string, string> = { active: "green", suspended: "orange", blacklisted: "red" };
-const supplierTypeColors: Record<string, string> = { design: "purple", module_dev: "cyan" };
+
+const typeColors: Record<string, string> = {
+  pcba_manufacturer: "purple",
+  cable_assembler: "cyan",
+  power_module: "geekblue",
+  component_distributor: "gold",
+  ems_provider: "volcano",
+};
+
+const phaseColors: Record<string, string> = {
+  supplier_research: "default",
+  supplier_evaluation: "blue",
+  supplier_onboarding: "cyan",
+  supplier_cooperation: "green",
+};
+
+function getHealthColor(score: number | null): string {
+  if (score == null) return "default";
+  if (score >= 80) return "green";
+  if (score >= 60) return "orange";
+  return "red";
+}
 
 export default function Suppliers() {
   const { t } = useLocale();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const [page, setPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<string | undefined>();
   const [search, setSearch] = useState("");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [form] = Form.useForm();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["suppliers", page, statusFilter, search],
-    queryFn: () => supplierApi.list({ page, page_size: 20, status: statusFilter, search: search || undefined }),
+    queryKey: ["supplierProfiles"],
+    queryFn: () => supplierProfileApi.list({ page_size: 100 }),
   });
 
-  const createMutation = useMutation({
-    mutationFn: (values: Record<string, unknown>) => supplierApi.create(values),
-    onSuccess: () => { message.success(t("supplier.createdSuccess")); setModalOpen(false); form.resetFields(); queryClient.invalidateQueries({ queryKey: ["suppliers"] }); },
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => supplierProfileApi.delete(id),
+    onSuccess: () => {
+      message.success(t("common.deleted"));
+      queryClient.invalidateQueries({ queryKey: ["supplierProfiles"] });
+    },
   });
 
-  const suppliers = data?.data?.data || [];
-  const total = data?.data?.total || 0;
+  const profiles: SupplierProfile[] = data?.data?.data || [];
+  const totalCount = profiles.length;
 
-  const statusFilterOptions = [
-    { label: t("common.all"), value: undefined },
-    { label: t("supplier.statusActive"), value: "active" },
-    { label: t("supplier.statusSuspended"), value: "suspended" },
-    { label: t("supplier.statusBlacklisted"), value: "blacklisted" },
-  ];
+  // Compute stats
+  const activeCount = profiles.filter((p) => p.status === "active").length;
+  const healthScores = profiles.map((p) => p.health_score).filter((s): s is number => s != null);
+  const avgHealthScore = healthScores.length > 0
+    ? (healthScores.reduce((a, b) => a + b, 0) / healthScores.length).toFixed(1)
+    : "-";
+  const highRiskCount = profiles.filter((p) => p.health_score != null && p.health_score < 60).length;
+
+  // Client-side search filter
+  const filtered = search
+    ? profiles.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+    : profiles;
 
   const columns = [
-    { title: t("supplier.name"), dataIndex: "name", key: "name", ellipsis: true, width: 160 },
+    {
+      title: t("supplier.name"),
+      dataIndex: "name",
+      key: "name",
+      ellipsis: true,
+      width: 180,
+      render: (v: string, r: SupplierProfile) => (
+        <a onClick={() => navigate(`/suppliers/${r.id}`)}>{v}</a>
+      ),
+    },
     {
       title: t("supplier.type"),
       dataIndex: "type",
       key: "type",
-      width: 120,
-      render: (v: string) => <Tag color={supplierTypeColors[v] || "default"}>{v === "design" ? t("supplier.typeDesign") : v === "module_dev" ? t("supplier.typeModuleDev") : v}</Tag>,
+      width: 160,
+      render: (v: string) => {
+        const key = `supplier.type.${v}`;
+        const label = t(key) !== key ? t(key) : v;
+        return <Tag color={typeColors[v] || "default"}>{label}</Tag>;
+      },
     },
     {
-      title: t("common.status"),
-      dataIndex: "status",
-      key: "status",
-      width: 110,
-      render: (v: string) => <Tag color={statusColors[v]}>{v === "active" ? t("supplier.statusActive") : v === "suspended" ? t("supplier.statusSuspended") : v === "blacklisted" ? t("supplier.statusBlacklisted") : v}</Tag>,
-    },
-    { title: t("supplier.contactName"), dataIndex: "contact_name", key: "contact_name", width: 110, render: (v: string) => v || "-" },
-    { title: t("supplier.contactEmail"), dataIndex: "contact_email", key: "contact_email", width: 180, ellipsis: true, render: (v: string) => v || "-" },
-    {
-      title: t("supplier.onTimeDelivery"),
-      dataIndex: "on_time_delivery_rate",
-      key: "on_time_delivery_rate",
-      width: 110,
-      render: (v: number) => (v != null ? `${v}%` : "-"),
+      title: t("supplier.currentPhase"),
+      dataIndex: "current_phase",
+      key: "current_phase",
+      width: 150,
+      render: (v: string | null) => {
+        if (!v) return "-";
+        const key = `supplier.phase.${v}`;
+        const label = t(key) !== key ? t(key) : v;
+        return <Tag color={phaseColors[v] || "default"}>{label}</Tag>;
+      },
     },
     {
       title: t("supplier.rating"),
       dataIndex: "rating",
       key: "rating",
       width: 80,
-      render: (v: number) => (v != null ? `${v}/5` : "-"),
-    },
-    { title: t("supplier.notes"), dataIndex: "notes", key: "notes", ellipsis: true, render: (v: string) => v || "-" },
-    {
-      title: t("common.created"),
-      dataIndex: "created_at",
-      key: "created_at",
-      width: 170,
-      render: (v: string) => (v ? new Date(v).toLocaleString() : "-"),
+      render: (v: number | null) => (v != null ? `${v}/5` : "-"),
     },
     {
-      title: t("common.updated"),
-      dataIndex: "updated_at",
-      key: "updated_at",
-      width: 170,
-      render: (v: string) => (v ? new Date(v).toLocaleString() : "-"),
+      title: t("supplier.onTimeDelivery"),
+      dataIndex: "on_time_delivery_rate",
+      key: "on_time_delivery_rate",
+      width: 110,
+      render: (v: number | null) => (v != null ? `${v}%` : "-"),
+    },
+    {
+      title: t("supplier.healthScore"),
+      dataIndex: "health_score",
+      key: "health_score",
+      width: 110,
+      render: (v: number | null) => (
+        <Tag color={getHealthColor(v)}>{v != null ? `${v}` : "-"}</Tag>
+      ),
+    },
+    {
+      title: t("common.status"),
+      dataIndex: "status",
+      key: "status",
+      width: 110,
+      render: (v: string) => (
+        <Tag color={statusColors[v]}>
+          {t(`supplier.status${v.charAt(0).toUpperCase() + v.slice(1)}`)}
+        </Tag>
+      ),
+    },
+    {
+      title: t("common.actions"),
+      key: "action",
+      width: 80,
+      render: (_: unknown, r: SupplierProfile) => (
+        <Button
+          size="small"
+          danger
+          onClick={(e) => {
+            e.stopPropagation();
+            Modal.confirm({
+              title: t("common.deleteConfirm"),
+              content: t("common.deleteWarning"),
+              okText: t("common.delete"),
+              cancelText: t("common.cancel"),
+              okButtonProps: { danger: true },
+              onOk: () => deleteMutation.mutate(r.id),
+            });
+          }}
+        >
+          {t("common.delete")}
+        </Button>
+      ),
     },
   ];
-
-  // Check if common.updated exists, fallback to label
-  const updatedLabel = t("common.updated");
 
   return (
     <div>
@@ -99,119 +168,77 @@ export default function Suppliers() {
           {t("menu.suppliers")}
         </Typography.Title>
         <Typography.Text className="page-header-desc">
-          {t("common.total", { count: total })}
+          {t("common.total", { count: totalCount })}
         </Typography.Text>
       </div>
 
       {/* Stat Summary Cards */}
-      {(() => {
-        const rows = suppliers;
-        const statusCounts = { active: 0, suspended: 0, blacklisted: 0 };
-        const typeCounts = { design: 0, module_dev: 0 };
-        let totalRating = 0;
-        let ratedCount = 0;
-        rows.forEach((r: any) => {
-          const s = r.status as string;
-          const t = r.type as string;
-          const rating = r.rating as number;
-          if (s in statusCounts) statusCounts[s as keyof typeof statusCounts]++;
-          if (t in typeCounts) typeCounts[t as keyof typeof typeCounts]++;
-          if (typeof rating === "number" && rating > 0) { totalRating += rating; ratedCount++; }
-        });
-        const avgRating = ratedCount > 0 ? (totalRating / ratedCount).toFixed(1) : "-";
-        return (
-          <div style={{ marginBottom: 16 }}>
-            <Row gutter={[12, 12]}>
-              <Col xs={12} sm={6} lg={3}>
-                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Total" value={total} valueStyle={{ color: "#4f6ef6", fontSize: 22, fontWeight: 700 }} />
-                </Card>
-              </Col>
-              <Col xs={12} sm={6} lg={3}>
-                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Active" value={statusCounts.active} valueStyle={{ color: "#22c55e", fontSize: 22, fontWeight: 700 }} />
-                </Card>
-              </Col>
-              <Col xs={12} sm={6} lg={3}>
-                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Suspended" value={statusCounts.suspended} valueStyle={{ color: "#fa8c16", fontSize: 22, fontWeight: 700 }} />
-                </Card>
-              </Col>
-              <Col xs={12} sm={6} lg={3}>
-                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Blacklisted" value={statusCounts.blacklisted} valueStyle={{ color: "#ef4444", fontSize: 22, fontWeight: 700 }} />
-                </Card>
-              </Col>
-              <Col xs={12} sm={6} lg={3}>
-                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Avg Rating" value={avgRating} suffix="/5" valueStyle={{ color: "#722ed1", fontSize: 22, fontWeight: 700 }} />
-                </Card>
-              </Col>
-            </Row>
-            <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
-              <Col xs={12} sm={6} lg={3}>
-                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Design" value={typeCounts.design} valueStyle={{ color: "#722ed1", fontSize: 22, fontWeight: 700 }} />
-                </Card>
-              </Col>
-              <Col xs={12} sm={6} lg={3}>
-                <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
-                  <Statistic title="Module Dev" value={typeCounts.module_dev} valueStyle={{ color: "#13c2c2", fontSize: 22, fontWeight: 700 }} />
-                </Card>
-              </Col>
-            </Row>
-          </div>
-        );
-      })()}
+      <div style={{ marginBottom: 16 }}>
+        <Row gutter={[12, 12]}>
+          <Col xs={12} sm={6} lg={4}>
+            <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+              <Statistic
+                title={t("supplier.stat.total")}
+                value={totalCount}
+                valueStyle={{ color: "#4f6ef6", fontSize: 22, fontWeight: 700 }}
+              />
+            </Card>
+          </Col>
+          <Col xs={12} sm={6} lg={4}>
+            <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+              <Statistic
+                title={t("supplier.stat.active")}
+                value={activeCount}
+                valueStyle={{ color: "#22c55e", fontSize: 22, fontWeight: 700 }}
+              />
+            </Card>
+          </Col>
+          <Col xs={12} sm={6} lg={4}>
+            <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+              <Statistic
+                title={t("supplier.stat.avgHealthScore")}
+                value={avgHealthScore}
+                suffix="/100"
+                valueStyle={{ color: "#722ed1", fontSize: 22, fontWeight: 700 }}
+              />
+            </Card>
+          </Col>
+          <Col xs={12} sm={6} lg={4}>
+            <Card size="small" styles={{ body: { padding: "12px 16px" } }}>
+              <Statistic
+                title={t("supplier.stat.highRisk")}
+                value={highRiskCount}
+                valueStyle={{ color: "#ef4444", fontSize: 22, fontWeight: 700 }}
+              />
+            </Card>
+          </Col>
+        </Row>
+      </div>
 
-      <Card
-        extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>{t("common.create")}</Button>}
-      >
+      <Card>
         <Space style={{ marginBottom: 16 }} wrap>
           <Input
             placeholder={t("common.search")}
             prefix={<SearchOutlined />}
             value={search}
-            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            onChange={(e) => setSearch(e.target.value)}
             style={{ width: 240 }}
             allowClear
-          />
-          <Select
-            placeholder={t("common.status")}
-            value={statusFilter}
-            onChange={(v) => { setStatusFilter(v); setPage(1); }}
-            style={{ width: 140 }}
-            options={statusFilterOptions}
           />
         </Space>
         <Table
           columns={columns}
-          dataSource={suppliers}
+          dataSource={filtered}
           rowKey="id"
           loading={isLoading}
           scroll={{ x: "max-content" }}
-          pagination={{ current: page, pageSize: 20, total, onChange: setPage, showTotal: (total: number) => t("common.total", { count: total }) }}
-          onRow={(r: { id: string }) => ({ onClick: () => navigate(`/suppliers/${r.id}`), style: { cursor: "pointer" } })}
+          pagination={{
+            pageSize: 20,
+            total: filtered.length,
+            showTotal: (total: number) => t("common.total", { count: total }),
+          }}
         />
       </Card>
-
-      <Modal
-        title={t("common.create")}
-        open={modalOpen}
-        onOk={() => form.validateFields().then((v) => createMutation.mutate(v))}
-        onCancel={() => { setModalOpen(false); form.resetFields(); }}
-        confirmLoading={createMutation.isPending}
-      >
-        <Form form={form} layout="vertical">
-          <Form.Item name="name" label={t("supplier.name")} rules={[{ required: true }]}><Input /></Form.Item>
-          <Form.Item name="type" label={t("supplier.type")} rules={[{ required: true }]}>
-            <Select options={[{ label: t("supplier.typeDesign"), value: "design" }, { label: t("supplier.typeModuleDev"), value: "module_dev" }]} />
-          </Form.Item>
-          <Form.Item name="contact_name" label={t("supplier.contactName")}><Input /></Form.Item>
-          <Form.Item name="contact_email" label={t("supplier.contactEmail")}><Input /></Form.Item>
-          <Form.Item name="notes" label={t("supplier.notes")}><Input.TextArea rows={2} /></Form.Item>
-        </Form>
-      </Modal>
     </div>
   );
 }

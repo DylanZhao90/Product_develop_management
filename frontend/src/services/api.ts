@@ -18,6 +18,7 @@ import type {
   ProjectTypeConfig,
   TechnicalIssue,
   Supplier,
+  SupplierProfile,
   Certification,
   AnalyticsOverview,
   TaskStats,
@@ -320,6 +321,13 @@ const MOCK_PROJECTS: Project[] = [
   { id: "proj-8", product_id: "prod-8", name: "DC-1500-EU EOL Process", type: "version_upgrade", project_type_key: "version_upgrade", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-1", created_at: "2023-10-01T00:00:00Z", updated_at: "2025-01-15T00:00:00Z" },
   { id: "proj-9", product_id: "prod-9", name: "AC-220-AU Production Ramp", type: "new_product", project_type_key: "new_product", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-2", created_at: "2025-05-10T00:00:00Z", updated_at: null },
   { id: "proj-10", product_id: "prod-10", name: "PF-2.2-KR Localization", type: "version_upgrade", project_type_key: "version_upgrade", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "approved", created_by: "user-3", created_at: "2025-04-25T00:00:00Z", updated_at: null },
+  // ---- Supplier Projects ----
+  { id: "proj-11", supplier_id: "supp-1", name: "Shenzhen PCBA Research", type: "supplier_research", project_type_key: "supplier_research", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-1", created_at: "2025-01-10T00:00:00Z", updated_at: "2025-02-15T00:00:00Z" },
+  { id: "proj-12", supplier_id: "supp-1", name: "Shenzhen PCBA Evaluation", type: "supplier_evaluation", project_type_key: "supplier_evaluation", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-1", created_at: "2025-02-20T00:00:00Z", updated_at: "2025-04-10T00:00:00Z" },
+  { id: "proj-13", supplier_id: "supp-1", name: "Shenzhen PCBA Onboarding", type: "supplier_onboarding", project_type_key: "supplier_onboarding", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-1", created_at: "2025-04-15T00:00:00Z", updated_at: "2025-06-01T00:00:00Z" },
+  { id: "proj-14", supplier_id: "supp-1", name: "Shenzhen PCBA Cooperation", type: "supplier_cooperation", project_type_key: "supplier_cooperation", approval_status: "draft", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-1", created_at: "2025-06-10T00:00:00Z", updated_at: null },
+  { id: "proj-15", supplier_id: "supp-3", name: "Delta Electronics Evaluation", type: "supplier_evaluation", project_type_key: "supplier_evaluation", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-2", created_at: "2025-03-01T00:00:00Z", updated_at: "2025-05-20T00:00:00Z" },
+  { id: "proj-16", supplier_id: "supp-5", name: "Jabil Quality Recovery", type: "supplier_evaluation", project_type_key: "supplier_evaluation", approval_status: "pending", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "pending_approval", created_by: "user-3", created_at: "2025-06-15T00:00:00Z", updated_at: null },
 ];
 
 const MOCK_TASKS: ProjectTask[] = [
@@ -356,9 +364,16 @@ export const projectApi = {
         if (params?.product_id && p.product_id !== params.product_id) return false;
         return true;
       });
+      const dataWithSupplierName = filtered.map((p) => {
+        if (p.supplier_id && p.supplier_name === undefined) {
+          const profile = MOCK_SUPPLIER_PROFILES.find((s) => s.id === p.supplier_id);
+          return { ...p, supplier_name: profile?.name ?? undefined };
+        }
+        return p;
+      });
       return {
         data: {
-          success: true, data: filtered,
+          success: true, data: dataWithSupplierName,
           total: filtered.length,
           page: params?.page ?? 1,
           page_size: params?.page_size ?? 20,
@@ -372,10 +387,15 @@ export const projectApi = {
       const res = await api.get<ApiResponse<Project>>(`/projects/${id}`);
       return { data: res.data };
     } catch {
+      const project = _projects.find((p) => p.id === id);
+      if (project && project.supplier_id && project.supplier_name === undefined) {
+        const profile = MOCK_SUPPLIER_PROFILES.find((s) => s.id === project.supplier_id);
+        project.supplier_name = profile?.name ?? undefined;
+      }
       return {
         data: {
           success: true,
-          data: _projects.find((p) => p.id === id) ?? {
+          data: project ?? {
             id, product_id: "prod-1", name: "Mock Project", type: "new_product",
             project_type_key: "new_product", approval_status: "draft", approval_flow_id: null,
             feasibility_doc_url: null, approval_id: null, feishu_chat_id: null,
@@ -390,13 +410,20 @@ export const projectApi = {
       const res = await api.post<ApiResponse<Project>>("/projects", data);
       return { data: res.data };
     } catch {
-   const product = _products.find((p) => p.id === data.product_id);
-   const newItem = {
-     id: `mock-proj-${Date.now()}`, product_id: (data.product_id as string) || "prod-1",
-     product_code: product?.code || null,
-     name: (data.name as string) || "Mock Project", type: (data.type as "new_product" | "version_upgrade") ?? "new_product",
-     project_type_key: (data.project_type_key as string) || "new_product",
-     approval_status: "draft", approval_flow_id: null,
+      const projectTypeKey = (data.project_type_key as string) || "";
+      const isSupplierType = projectTypeKey.startsWith("supplier_");
+      const supplierProfile = isSupplierType && data.supplier_id
+        ? MOCK_SUPPLIER_PROFILES.find((s) => s.id === data.supplier_id)
+        : undefined;
+      const newItem = {
+        id: `mock-proj-${Date.now()}`,
+        product_id: isSupplierType ? undefined : ((data.product_id as string) || "prod-1"),
+        supplier_id: isSupplierType ? (data.supplier_id as string) || undefined : undefined,
+        supplier_name: supplierProfile?.name ?? null,
+        product_code: isSupplierType ? undefined : (_products.find((p) => p.id === data.product_id)?.code || null),
+        name: (data.name as string) || "Mock Project", type: (data.type as "new_product" | "version_upgrade") ?? "new_product",
+        project_type_key: projectTypeKey || "new_product",
+        approval_status: "draft", approval_flow_id: null,
         feasibility_doc_url: null, approval_id: null, feishu_chat_id: null,
         status: "pending_approval", created_by: "mock-user", created_at: new Date().toISOString(), updated_at: null,
       } as Project;
@@ -527,10 +554,16 @@ export const projectApi = {
 // ---- Project Type Config API (with mock fallback) ----
 
 const MOCK_PROJECT_TYPE_CONFIGS: ProjectTypeConfig[] = [
-  { id: "ptc-1", type_key: "new_product", display_name: { "zh-CN": "新产品研发", "en-US": "New Product R&D" }, sort_order: 1, is_active: true },
-  { id: "ptc-2", type_key: "version_upgrade", display_name: { "zh-CN": "老产品迭代升级", "en-US": "Version Upgrade" }, sort_order: 2, is_active: true },
-  { id: "ptc-3", type_key: "certification", display_name: { "zh-CN": "产品认证", "en-US": "Product Certification" }, sort_order: 3, is_active: true },
-  { id: "ptc-4", type_key: "other", display_name: { "zh-CN": "其他项目", "en-US": "Other" }, sort_order: 4, is_active: true },
+  { id: "ptc-1", type_key: "new_product", display_name: { "zh-CN": "新产品研发", "en-US": "New Product R&D" }, sort_order: 1, is_active: true, requires_approval: true },
+  { id: "ptc-2", type_key: "version_upgrade", display_name: { "zh-CN": "老产品迭代升级", "en-US": "Version Upgrade" }, sort_order: 2, is_active: true, requires_approval: true },
+  { id: "ptc-3", type_key: "certification", display_name: { "zh-CN": "产品认证", "en-US": "Product Certification" }, sort_order: 3, is_active: true, requires_approval: true },
+  { id: "ptc-4", type_key: "other", display_name: { "zh-CN": "其他项目", "en-US": "Other" }, sort_order: 4, is_active: true, requires_approval: true },
+  { id: "ptc-5", type_key: "supplier_research", display_name: {"zh-CN":"供应商考察调研","en-US":"Supplier Research"}, sort_order: 5, is_active: true, requires_approval: true },
+  { id: "ptc-6", type_key: "supplier_evaluation", display_name: {"zh-CN":"供应商评估","en-US":"Supplier Evaluation"}, sort_order: 6, is_active: true, requires_approval: true },
+  { id: "ptc-7", type_key: "supplier_onboarding", display_name: {"zh-CN":"供应商导入","en-US":"Supplier Onboarding"}, sort_order: 7, is_active: true, requires_approval: true },
+  { id: "ptc-8", type_key: "supplier_cooperation", display_name: {"zh-CN":"合作管理","en-US":"Supplier Cooperation"}, sort_order: 8, is_active: true, requires_approval: false },
+  { id: "ptc-9", type_key: "supplier_termination", display_name: {"zh-CN":"终止合作","en-US":"Supplier Termination"}, sort_order: 9, is_active: true, requires_approval: true },
+  { id: "ptc-10", type_key: "supplier_blacklist", display_name: {"zh-CN":"退出/黑名单","en-US":"Supplier Blacklist"}, sort_order: 10, is_active: true, requires_approval: true },
 ];
 
 let _projectTypeConfigs = [...MOCK_PROJECT_TYPE_CONFIGS];
@@ -557,6 +590,7 @@ export const projectTypeConfigApi = {
         display_name: (data.display_name as Record<string, string>) || { "zh-CN": "新建类型", "en-US": "New Type" },
         sort_order: (data.sort_order as number) ?? _projectTypeConfigs.length + 1,
         is_active: (data.is_active as boolean) ?? true,
+        requires_approval: (data.requires_approval as boolean) ?? true,
       };
       _projectTypeConfigs.push(newItem);
       return { data: { success: true, data: newItem } };
@@ -684,6 +718,17 @@ const MOCK_SUPPLIERS: Supplier[] = [
   { id: "supp-6", name: "Mitsubishi Electric Components", type: "component_distributor", contact_name: "Takashi Yamamoto", contact_email: "t.yamamoto@mitsu-elec.jp", contact_feishu_id: null, qualification_files: null, rating: 4.7, on_time_delivery_rate: 96.5, status: "active", notes: null, created_at: "2024-09-01T00:00:00Z", updated_at: null },
 ];
 
+const MOCK_SUPPLIER_PROFILES: SupplierProfile[] = [
+  { id: "supp-1", name: "Shenzhen PCBA Tech Co., Ltd", type: "pcba_manufacturer", contact_name: "Zhang Wei", contact_email: "zhangwei@pcba-tech.cn", contact_phone: null, country: "CN", qualification_files: null, rating: 4.5, on_time_delivery_rate: 95.0, quality_pass_rate: 96.0, health_score: 92, status: "active", current_phase: "supplier_cooperation", notes: null, created_at: "2024-01-15T00:00:00Z", updated_at: null },
+  { id: "supp-2", name: "Foxlink Electronics", type: "cable_assembler", contact_name: "James Liu", contact_email: "james.liu@foxlink.com", contact_phone: null, country: "CN", qualification_files: null, rating: 4.2, on_time_delivery_rate: 88.5, quality_pass_rate: 90.0, health_score: 85, status: "active", current_phase: "supplier_cooperation", notes: "Preferred cable supplier", created_at: "2024-03-01T00:00:00Z", updated_at: null },
+  { id: "supp-3", name: "Delta Electronics Inc.", type: "power_module", contact_name: "Emily Chen", contact_email: "emily.chen@delta.com", contact_phone: null, country: "US", qualification_files: null, rating: 4.8, on_time_delivery_rate: 98.0, quality_pass_rate: 99.0, health_score: 97, status: "active", current_phase: "supplier_cooperation", notes: null, created_at: "2023-11-20T00:00:00Z", updated_at: null },
+  { id: "supp-4", name: "Würth Elektronik GmbH", type: "component_distributor", contact_name: "Klaus Schmidt", contact_email: "k.schmidt@we-online.de", contact_phone: null, country: "DE", qualification_files: null, rating: 4.6, on_time_delivery_rate: 93.0, quality_pass_rate: 95.0, health_score: 91, status: "active", current_phase: "supplier_onboarding", notes: null, created_at: "2024-06-10T00:00:00Z", updated_at: null },
+  { id: "supp-5", name: "Jabil Circuit Sdn Bhd", type: "ems_provider", contact_name: "Ahmad Razak", contact_email: "ahmad@jabil.my", contact_phone: null, country: "MY", qualification_files: null, rating: 3.9, on_time_delivery_rate: 82.0, quality_pass_rate: 78.0, health_score: 63, status: "suspended", current_phase: "supplier_cooperation", notes: "Quality issues - under review", created_at: "2024-02-15T00:00:00Z", updated_at: "2025-04-01T00:00:00Z" },
+  { id: "supp-6", name: "Mitsubishi Electric Components", type: "component_distributor", contact_name: "Takashi Yamamoto", contact_email: "t.yamamoto@mitsu-elec.jp", contact_phone: null, country: "JP", qualification_files: null, rating: 4.7, on_time_delivery_rate: 96.5, quality_pass_rate: 97.0, health_score: 95, status: "active", current_phase: "supplier_evaluation", notes: null, created_at: "2024-09-01T00:00:00Z", updated_at: null },
+];
+
+let _supplierProfiles = [...MOCK_SUPPLIER_PROFILES];
+
 const MOCK_OUTSOURCE_TASKS: Record<string, unknown>[] = [
   { id: "ost-1", supplier_id: "supp-1", project_id: "proj-1", name: "PCBA Prototype Run (100 pcs)", status: "completed", quantity: 100, unit_price: 12.5, total_cost: 1250, started_at: "2025-05-01", completed_at: "2025-05-20", notes: null },
   { id: "ost-2", supplier_id: "supp-1", project_id: "proj-1", name: "PCBA Pre-Production (500 pcs)", status: "in_progress", quantity: 500, unit_price: 11.2, total_cost: 5600, started_at: "2025-06-01", completed_at: null, notes: null },
@@ -804,6 +849,87 @@ export const supplierApi = {
       return { data: res.data as unknown as ApiResponse<Record<string, unknown>> };
     } catch {
       return { data: { success: true, data: { id: taskId, supplier_id: supplierId, ...data, reviewed_at: new Date().toISOString() } } };
+    }
+  },
+};
+
+// ---- Supplier Profile API (with mock fallback) ----
+
+export const supplierProfileApi = {
+  list: async (params?: Record<string, unknown>): Promise<{ data: PaginatedResponse<SupplierProfile> }> => {
+    try {
+      const res = await api.get<PaginatedResponse<SupplierProfile>>("/suppliers/profiles", { params });
+      return { data: res.data };
+    } catch {
+      return {
+        data: {
+          success: true, data: _supplierProfiles,
+          total: _supplierProfiles.length,
+          page: (params?.page as number) ?? 1,
+          page_size: (params?.page_size as number) ?? 20,
+          total_pages: 1,
+        },
+      };
+    }
+  },
+  getById: async (id: string): Promise<{ data: ApiResponse<SupplierProfile> }> => {
+    try {
+      const res = await api.get<ApiResponse<SupplierProfile>>(`/suppliers/profiles/${id}`);
+      return { data: res.data };
+    } catch {
+      return {
+        data: {
+          success: true,
+          data: _supplierProfiles.find((s) => s.id === id) ?? {
+            id, name: "Mock Supplier Profile", type: "unknown", contact_name: null, contact_email: null,
+            contact_phone: null, country: null, qualification_files: null, rating: null,
+            on_time_delivery_rate: null, quality_pass_rate: null, health_score: null,
+            status: "active", current_phase: null, notes: null, created_at: new Date().toISOString(), updated_at: null,
+          } as SupplierProfile,
+        },
+      };
+    }
+  },
+  create: async (data: Record<string, unknown>): Promise<{ data: ApiResponse<SupplierProfile> }> => {
+    try {
+      const res = await api.post<ApiResponse<SupplierProfile>>("/suppliers/profiles", data);
+      return { data: res.data };
+    } catch {
+      const newItem = {
+        id: `mock-supp-prof-${Date.now()}`,
+        name: (data.name as string) || "Mock Supplier Profile",
+        type: (data.type as string) || "unknown",
+        contact_name: null, contact_email: null, contact_phone: null, country: null,
+        qualification_files: null, rating: null, on_time_delivery_rate: null,
+        quality_pass_rate: null, health_score: null, status: "active", current_phase: null,
+        notes: null, created_at: new Date().toISOString(), updated_at: null,
+      } as SupplierProfile;
+      _supplierProfiles.push(newItem);
+      return {
+        data: { success: true, data: newItem },
+      };
+    }
+  },
+  update: async (id: string, data: Record<string, unknown>): Promise<{ data: ApiResponse<SupplierProfile> }> => {
+    try {
+      const res = await api.patch<ApiResponse<SupplierProfile>>(`/suppliers/profiles/${id}`, data);
+      return { data: res.data };
+    } catch {
+      const idx = _supplierProfiles.findIndex((s) => s.id === id);
+      if (idx !== -1) {
+        _supplierProfiles[idx] = { ..._supplierProfiles[idx], ...data, updated_at: new Date().toISOString() } as unknown as SupplierProfile;
+      }
+      const existing = idx !== -1 ? _supplierProfiles[idx] : _supplierProfiles[0];
+      return { data: { success: true, data: { ...existing, ...data, updated_at: new Date().toISOString() } as unknown as SupplierProfile } };
+    }
+  },
+  delete: async (id: string): Promise<{ data: ApiResponse<{ message: string }> }> => {
+    try {
+      const res = await api.delete<ApiResponse<{ message: string }>>(`/suppliers/profiles/${id}`);
+      return { data: res.data };
+    } catch {
+      _supplierProfiles = _supplierProfiles.filter((s) => s.id !== id);
+      return { data: { success: true, data: { message: "ok" } } };
     }
   },
 };
@@ -1177,6 +1303,66 @@ const MOCK_APPROVAL_TEMPLATES: ApprovalTemplate[] = [
     created_at: "2025-01-01T00:00:00Z",
     nodes: [
       { id: "atpl-4-node-1", order: 1, node_name: "项目经理审批", approver_role: "pm", can_skip: false },
+    ],
+  },
+  // ---- Supplier Approval Templates ----
+  {
+    id: "atpl-5",
+    name: "供应商考察调研审批流",
+    project_type_key: "supplier_research",
+    is_active: true,
+    created_at: "2025-01-01T00:00:00Z",
+    nodes: [
+      { id: "atpl-5-node-1", order: 1, node_name: "采购经理审批", approver_role: "procurement_manager", can_skip: false },
+    ],
+  },
+  {
+    id: "atpl-6",
+    name: "供应商评估审批流",
+    project_type_key: "supplier_evaluation",
+    is_active: true,
+    created_at: "2025-01-01T00:00:00Z",
+    nodes: [
+      { id: "atpl-6-node-1", order: 1, node_name: "采购审核", approver_role: "procurement", can_skip: false },
+      { id: "atpl-6-node-2", order: 2, node_name: "技术审核", approver_role: "tech_director", can_skip: false },
+      { id: "atpl-6-node-3", order: 3, node_name: "质量审核", approver_role: "quality_manager", can_skip: false },
+    ],
+  },
+  {
+    id: "atpl-7",
+    name: "供应商导入审批流",
+    project_type_key: "supplier_onboarding",
+    is_active: true,
+    created_at: "2025-01-01T00:00:00Z",
+    nodes: [
+      { id: "atpl-7-node-1", order: 1, node_name: "采购审核", approver_role: "procurement", can_skip: false },
+      { id: "atpl-7-node-2", order: 2, node_name: "法务审核", approver_role: "legal", can_skip: false },
+      { id: "atpl-7-node-3", order: 3, node_name: "财务审核", approver_role: "finance", can_skip: false },
+    ],
+  },
+  {
+    id: "atpl-9",
+    name: "终止合作审批流",
+    project_type_key: "supplier_termination",
+    is_active: true,
+    created_at: "2025-01-01T00:00:00Z",
+    nodes: [
+      { id: "atpl-9-node-1", order: 1, node_name: "采购审核", approver_role: "procurement", can_skip: false },
+      { id: "atpl-9-node-2", order: 2, node_name: "技术审核", approver_role: "tech_director", can_skip: false },
+      { id: "atpl-9-node-3", order: 3, node_name: "财务审核", approver_role: "finance", can_skip: false },
+      { id: "atpl-9-node-4", order: 4, node_name: "总经理审批", approver_role: "general_manager", can_skip: false },
+    ],
+  },
+  {
+    id: "atpl-10",
+    name: "退出/黑名单审批流",
+    project_type_key: "supplier_blacklist",
+    is_active: true,
+    created_at: "2025-01-01T00:00:00Z",
+    nodes: [
+      { id: "atpl-10-node-1", order: 1, node_name: "采购审核", approver_role: "procurement", can_skip: false },
+      { id: "atpl-10-node-2", order: 2, node_name: "法务审核", approver_role: "legal", can_skip: false },
+      { id: "atpl-10-node-3", order: 3, node_name: "总经理审批", approver_role: "general_manager", can_skip: false },
     ],
   },
 ];

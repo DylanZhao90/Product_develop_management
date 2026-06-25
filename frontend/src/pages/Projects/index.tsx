@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Badge, Button, Card, Col, Form, Input, Modal, Row, Select, Space, Statistic, Table, Tag, Tabs, Typography, message } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { projectApi, productApi, projectTypeConfigApi } from "../../services/api";
+import { projectApi, productApi, projectTypeConfigApi, supplierProfileApi } from "../../services/api";
 import { useLocale } from "../../locales";
 import type { ProductCreate } from "../../services/api-types";
 
@@ -24,6 +24,20 @@ const PRODUCT_TYPE_OPTIONS = [
 const MARKET_OPTIONS = ["US", "EU", "CN", "JP", "KR", "AU", "CA", "UK", "NZ"];
 const CERT_OPTIONS = ["CE", "UL", "FCC", "CCC", "ROHS", "PSE", "UKCA", "TUV", "RCM", "KC"];
 
+const SUPPLIER_TYPE_OPTIONS = [
+  { labelKey: "supplier.type.pcba_manufacturer", value: "pcba_manufacturer" },
+  { labelKey: "supplier.type.cable_assembler", value: "cable_assembler" },
+  { labelKey: "supplier.type.power_module", value: "power_module" },
+  { labelKey: "supplier.type.component_distributor", value: "component_distributor" },
+  { labelKey: "supplier.type.ems_provider", value: "ems_provider" },
+  { labelKey: "supplier.type.other", value: "other" },
+];
+
+const SUPPLIER_SOURCE_OPTIONS = [
+  { labelKey: "supplier.source.existing", value: "existing" },
+  { labelKey: "supplier.source.new", value: "new" },
+];
+
 export default function Projects() {
   const navigate = useNavigate();
   const { t, lang } = useLocale();
@@ -33,8 +47,15 @@ export default function Projects() {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [productSubModalOpen, setProductSubModalOpen] = useState(false);
+  const [supplierSubModalOpen, setSupplierSubModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [productForm] = Form.useForm();
+  const [supplierForm] = Form.useForm();
+
+  const projectTypeKey = Form.useWatch("project_type_key", form);
+  const isSupplierType = projectTypeKey?.startsWith("supplier_") ?? false;
+
+  const supplierSource = Form.useWatch("supplier_source", form);
 
   const { data, isLoading } = useQuery({
     queryKey: ["projects", page, statusFilter],
@@ -56,6 +77,15 @@ export default function Projects() {
 
   const typeConfigs = typeConfigsData?.data?.data || [];
   const projectTypeConfigMap = new Map(typeConfigs.map((c) => [c.type_key, c]));
+
+  // ---- Supplier profiles ----
+  const { data: suppliersData } = useQuery({
+    queryKey: ["supplier-profiles"],
+    queryFn: () => supplierProfileApi.list({ page_size: 100 }),
+    enabled: isSupplierType,
+  });
+
+  const supplierProfiles = suppliersData?.data?.data || [];
 
   // ---- C-7: Tab-filtered projects ----
   const allProjects = data?.data?.data || [];
@@ -101,6 +131,23 @@ export default function Projects() {
     },
   });
 
+  // ---- Supplier profile sub-create mutation ----
+  const createSupplierProfileMutation = useMutation({
+    mutationFn: (values: Record<string, unknown>) => supplierProfileApi.create(values),
+    onSuccess: (res) => {
+      message.success(t("common.created"));
+      setSupplierSubModalOpen(false);
+      supplierForm.resetFields();
+      queryClient.invalidateQueries({ queryKey: ["supplier-profiles"] });
+      // Auto-select the newly created supplier
+      const newSupplierId = (res as any)?.data?.data?.id;
+      if (newSupplierId) {
+        form.setFieldValue("supplier_id", newSupplierId);
+        form.setFieldValue("supplier_source", "existing");
+      }
+    },
+  });
+
   // ---- Columns ----
   const columns = [
     { title: t("project.name"), dataIndex: "name", key: "name", ellipsis: true },
@@ -112,6 +159,16 @@ export default function Projects() {
       render: (v: string) => {
         const config = projectTypeConfigMap.get(v);
         return config?.display_name?.[lang] || v;
+      },
+    },
+    {
+      title: t("project.supplierName") || t("project.productId"),
+      key: "product_or_supplier",
+      width: 160,
+      render: (_: unknown, r: Record<string, unknown>) => {
+        if (r.supplier_name) return r.supplier_name as string;
+        if (r.product_code) return r.product_code as string;
+        return "-";
       },
     },
     {
@@ -321,14 +378,23 @@ export default function Projects() {
         />
       </Card>
 
-      {/* ---- C-5 + C-6: Create Project Modal ---- */}
+      {/* ---- Create Project Modal ---- */}
       <Modal
         title={`${t("common.create")} ${t("project.name")}`}
         open={createModalOpen}
         onOk={() =>
           form.validateFields().then((v) => {
-            const selected = products.find((p) => p.id === v.product_id);
-            createMutation.mutate({ ...v, project_type_key: v.project_type_key, product_code: selected?.code || null });
+            if (isSupplierType) {
+              // Supplier project — no approval flow, go directly
+              createMutation.mutate({
+                ...v,
+                project_type_key: v.project_type_key,
+              });
+            } else {
+              // Product project — include product_code
+              const selected = products.find((p) => p.id === v.product_id);
+              createMutation.mutate({ ...v, project_type_key: v.project_type_key, product_code: selected?.code || null });
+            }
           })
         }
         onCancel={() => setCreateModalOpen(false)}
@@ -352,30 +418,69 @@ export default function Projects() {
             />
           </Form.Item>
 
-          {/* Product selection — with "new product" action */}
-          <Form.Item label={t("project.productId")} required>
-            <Space.Compact style={{ width: "100%" }}>
-              <Form.Item name="product_id" noStyle rules={[{ required: true, message: t("project.enterProductUUID") }]}>
-                <Select
-                  showSearch
-                  placeholder={t("project.enterProductUUID")}
-                  optionFilterProp="label"
-                  style={{ width: "calc(100% - 120px)" }}
-                  options={products.map((p) => ({
-                    label: `${p.code} - ${p.name}`,
-                    value: p.id,
-                  }))}
-                />
+          {isSupplierType ? (
+            <>
+              {/* Supplier info section */}
+              <Form.Item label={t("project.supplier")} required>
+                <Space.Compact style={{ width: "100%" }}>
+                  <Form.Item name="supplier_source" noStyle initialValue="existing" rules={[{ required: true }]}>
+                    <Select
+                      style={{ width: 160 }}
+                      options={SUPPLIER_SOURCE_OPTIONS.map((o) => ({
+                        label: t(o.labelKey),
+                        value: o.value,
+                      }))}
+                    />
+                  </Form.Item>
+                  {supplierSource === "existing" ? (
+                    <Form.Item name="supplier_id" noStyle rules={[{ required: true, message: t("project.selectSupplier") }]}>
+                      <Select
+                        showSearch
+                        style={{ width: "calc(100% - 160px)" }}
+                        placeholder={t("project.selectSupplier")}
+                        optionFilterProp="label"
+                        options={supplierProfiles.map((s) => ({
+                          label: `${s.name} (${s.type})`,
+                          value: s.id,
+                        }))}
+                      />
+                    </Form.Item>
+                  ) : (
+                    <Button style={{ width: "calc(100% - 160px)" }} onClick={() => setSupplierSubModalOpen(true)}>
+                      {t("supplier.createTitle")}
+                    </Button>
+                  )}
+                </Space.Compact>
               </Form.Item>
-              <Button onClick={() => setProductSubModalOpen(true)}>
-                {t("project.createNewProduct")}
-              </Button>
-            </Space.Compact>
-          </Form.Item>
+            </>
+          ) : (
+            <>
+              {/* Product selection — with "new product" action */}
+              <Form.Item label={t("project.productId")} required>
+                <Space.Compact style={{ width: "100%" }}>
+                  <Form.Item name="product_id" noStyle rules={[{ required: true, message: t("project.enterProductUUID") }]}>
+                    <Select
+                      showSearch
+                      placeholder={t("project.enterProductUUID")}
+                      optionFilterProp="label"
+                      style={{ width: "calc(100% - 120px)" }}
+                      options={products.map((p) => ({
+                        label: `${p.code} - ${p.name}`,
+                        value: p.id,
+                      }))}
+                    />
+                  </Form.Item>
+                  <Button onClick={() => setProductSubModalOpen(true)}>
+                    {t("project.createNewProduct")}
+                  </Button>
+                </Space.Compact>
+              </Form.Item>
+            </>
+          )}
         </Form>
       </Modal>
 
-      {/* ---- C-6: New Product sub-Modal ---- */}
+      {/* ---- New Product sub-Modal ---- */}
       <Modal
         title={t("product.createTitle")}
         open={productSubModalOpen}
@@ -421,6 +526,48 @@ export default function Projects() {
               placeholder={t("product.certificationRequirements")}
               options={CERT_OPTIONS.map((c) => ({ label: c, value: c }))}
             />
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* ---- New Supplier sub-Modal ---- */}
+      <Modal
+        title={t("supplier.createTitle")}
+        open={supplierSubModalOpen}
+        onOk={() =>
+          supplierForm.validateFields().then((v) => {
+            createSupplierProfileMutation.mutate(v);
+          })
+        }
+        onCancel={() => {
+          setSupplierSubModalOpen(false);
+          supplierForm.resetFields();
+        }}
+        confirmLoading={createSupplierProfileMutation.isPending}
+      >
+        <Form form={supplierForm} layout="vertical">
+          <Form.Item name="name" label={t("supplier.name")} rules={[{ required: true }]}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="type" label={t("supplier.type")} rules={[{ required: true }]}>
+            <Select
+              options={SUPPLIER_TYPE_OPTIONS.map((opt) => ({
+                label: t(opt.labelKey),
+                value: opt.value,
+              }))}
+            />
+          </Form.Item>
+          <Form.Item name="contact_name" label={t("supplier.contactName")}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="contact_email" label={t("supplier.contactEmail")}>
+            <Input type="email" />
+          </Form.Item>
+          <Form.Item name="contact_phone" label={t("supplier.contactPhone")}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="country" label={t("supplier.country")}>
+            <Input />
           </Form.Item>
         </Form>
       </Modal>
