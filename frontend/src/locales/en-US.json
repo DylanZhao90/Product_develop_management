@@ -468,5 +468,6 @@
   "project.stat.completed": "Completed",
   "project.stat.closed": "Closed",
   "project.stat.newProduct": "New Product",
-  "project.stat.versionUpgrade": "Version Upgrade"
+  "project.stat.versionUpgrade": "Version Upgrade",
+  "project.supplierName": "Supplier / Product"
 }

@@ -468,5 +468,6 @@
   "project.stat.completed": "已完成",
   "project.stat.closed": "已关闭",
   "project.stat.newProduct": "New Product",
-  "project.stat.versionUpgrade": "Version Upgrade"
+  "project.stat.versionUpgrade": "Version Upgrade",
+  "project.supplierName": "供应商/产品"
 }
