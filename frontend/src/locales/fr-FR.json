@@ -234,6 +234,7 @@
   "certification.expiringTitle": "Expiration imminente",
   "certification.addCertification": "Ajouter une certification",
   "certification.productId": "ID produit",
+  "certification.productName": "Nom du produit",
   "certification.remindBeforeDays": "Rappeler avant (jours)",
   "certification.statusValid": "Valide",
   "certification.statusExpiringSoon": "Expiration imminente",

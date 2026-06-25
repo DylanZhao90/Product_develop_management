@@ -118,7 +118,7 @@ export const authApi = {
 
 // ---- Product API (with mock fallback) ----
 
-const MOCK_PRODUCTS: Product[] = [
+export const MOCK_PRODUCTS: Product[] = [
   { id: "prod-1", project_id: "proj-1", code: "AC-220-EU", model: "AC-220-EU", name: "AC Charger 220V EU", type: "ac_charger", target_markets: ["EU"], certification_requirements: ["CE","ROHS"], lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null, description: "Standard AC charger for EU", created_at: "2025-01-15T00:00:00Z", updated_at: "2025-06-01T00:00:00Z" },
   { id: "prod-2", project_id: "proj-2", code: "DC-480-US", model: "DC-480-US", name: "DC Charger 480W US", type: "dc_charger", target_markets: ["US"], certification_requirements: ["UL","FCC"], lifecycle_status: "on_sale", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2025-02-10T00:00:00Z", updated_at: null },
   { id: "prod-3", project_id: "proj-3", code: "PF-3.3-JP", model: "PF-3.3-JP", name: "Portable Charger 3.3kW JP", type: "portable", target_markets: ["JP"], certification_requirements: ["PSE"], lifecycle_status: "in_development", product_manager_id: null, thumbnail_url: null, description: null, created_at: "2025-03-01T00:00:00Z", updated_at: null },
@@ -321,13 +321,10 @@ const MOCK_PROJECTS: Project[] = [
   { id: "proj-8", product_id: "prod-8", name: "DC-1500-EU EOL Process", type: "version_upgrade", project_type_key: "version_upgrade", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-1", created_at: "2023-10-01T00:00:00Z", updated_at: "2025-01-15T00:00:00Z" },
   { id: "proj-9", product_id: "prod-9", name: "AC-220-AU Production Ramp", type: "new_product", project_type_key: "new_product", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-2", created_at: "2025-05-10T00:00:00Z", updated_at: null },
   { id: "proj-10", product_id: "prod-10", name: "PF-2.2-KR Localization", type: "version_upgrade", project_type_key: "version_upgrade", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "approved", created_by: "user-3", created_at: "2025-04-25T00:00:00Z", updated_at: null },
-  // ---- Supplier Projects ----
-  { id: "proj-11", supplier_id: "supp-1", name: "Shenzhen PCBA Research", type: "supplier_research", project_type_key: "supplier_research", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-1", created_at: "2025-01-10T00:00:00Z", updated_at: "2025-02-15T00:00:00Z" },
-  { id: "proj-12", supplier_id: "supp-1", name: "Shenzhen PCBA Evaluation", type: "supplier_evaluation", project_type_key: "supplier_evaluation", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-1", created_at: "2025-02-20T00:00:00Z", updated_at: "2025-04-10T00:00:00Z" },
-  { id: "proj-13", supplier_id: "supp-1", name: "Shenzhen PCBA Onboarding", type: "supplier_onboarding", project_type_key: "supplier_onboarding", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-1", created_at: "2025-04-15T00:00:00Z", updated_at: "2025-06-01T00:00:00Z" },
-  { id: "proj-14", supplier_id: "supp-1", name: "Shenzhen PCBA Cooperation", type: "supplier_cooperation", project_type_key: "supplier_cooperation", approval_status: "draft", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-1", created_at: "2025-06-10T00:00:00Z", updated_at: null },
-  { id: "proj-15", supplier_id: "supp-3", name: "Delta Electronics Evaluation", type: "supplier_evaluation", project_type_key: "supplier_evaluation", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "completed", created_by: "user-2", created_at: "2025-03-01T00:00:00Z", updated_at: "2025-05-20T00:00:00Z" },
-  { id: "proj-16", supplier_id: "supp-5", name: "Jabil Quality Recovery", type: "supplier_evaluation", project_type_key: "supplier_evaluation", approval_status: "pending", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "pending_approval", created_by: "user-3", created_at: "2025-06-15T00:00:00Z", updated_at: null },
+  // ---- Supplier Projects (unified lifecycle) ----
+  { id: "proj-11", supplier_id: "supp-1", supplier_name: "Shenzhen PCBA Tech Co., Ltd", name: "Shenzhen PCBA — Cooperation Management", type: "supplier_management", project_type_key: "supplier_management", lifecycle_phase: "cooperation", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-1", created_at: "2025-01-10T00:00:00Z", updated_at: "2025-06-10T00:00:00Z" },
+  { id: "proj-12", supplier_id: "supp-3", supplier_name: "Delta Electronics Inc.", name: "Delta Electronics — Evaluation", type: "supplier_management", project_type_key: "supplier_management", lifecycle_phase: "evaluation", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-2", created_at: "2025-03-01T00:00:00Z", updated_at: "2025-05-20T00:00:00Z" },
+  { id: "proj-13", supplier_id: "supp-6", supplier_name: "Mitsubishi Electric Components", name: "Mitsubishi Components — Onboarding", type: "supplier_management", project_type_key: "supplier_management", lifecycle_phase: "onboarding", approval_status: "approved", approval_flow_id: null, feasibility_doc_url: null, approval_id: null, feishu_chat_id: null, status: "in_progress", created_by: "user-3", created_at: "2025-04-20T00:00:00Z", updated_at: null },
 ];
 
 const MOCK_TASKS: ProjectTask[] = [
@@ -411,7 +408,7 @@ export const projectApi = {
       return { data: res.data };
     } catch {
       const projectTypeKey = (data.project_type_key as string) || "";
-      const isSupplierType = projectTypeKey.startsWith("supplier_");
+      const isSupplierType = projectTypeKey === "supplier_management";
       const supplierProfile = isSupplierType && data.supplier_id
         ? MOCK_SUPPLIER_PROFILES.find((s) => s.id === data.supplier_id)
         : undefined;
@@ -420,6 +417,7 @@ export const projectApi = {
         product_id: isSupplierType ? undefined : ((data.product_id as string) || "prod-1"),
         supplier_id: isSupplierType ? (data.supplier_id as string) || undefined : undefined,
         supplier_name: supplierProfile?.name ?? null,
+        lifecycle_phase: isSupplierType ? "research" : undefined,
         product_code: isSupplierType ? undefined : (_products.find((p) => p.id === data.product_id)?.code || null),
         name: (data.name as string) || "Mock Project", type: (data.type as "new_product" | "version_upgrade") ?? "new_product",
         project_type_key: projectTypeKey || "new_product",
@@ -558,12 +556,7 @@ const MOCK_PROJECT_TYPE_CONFIGS: ProjectTypeConfig[] = [
   { id: "ptc-2", type_key: "version_upgrade", display_name: { "zh-CN": "老产品迭代升级", "en-US": "Version Upgrade" }, sort_order: 2, is_active: true, requires_approval: true },
   { id: "ptc-3", type_key: "certification", display_name: { "zh-CN": "产品认证", "en-US": "Product Certification" }, sort_order: 3, is_active: true, requires_approval: true },
   { id: "ptc-4", type_key: "other", display_name: { "zh-CN": "其他项目", "en-US": "Other" }, sort_order: 4, is_active: true, requires_approval: true },
-  { id: "ptc-5", type_key: "supplier_research", display_name: {"zh-CN":"供应商考察调研","en-US":"Supplier Research"}, sort_order: 5, is_active: true, requires_approval: true },
-  { id: "ptc-6", type_key: "supplier_evaluation", display_name: {"zh-CN":"供应商评估","en-US":"Supplier Evaluation"}, sort_order: 6, is_active: true, requires_approval: true },
-  { id: "ptc-7", type_key: "supplier_onboarding", display_name: {"zh-CN":"供应商导入","en-US":"Supplier Onboarding"}, sort_order: 7, is_active: true, requires_approval: true },
-  { id: "ptc-8", type_key: "supplier_cooperation", display_name: {"zh-CN":"合作管理","en-US":"Supplier Cooperation"}, sort_order: 8, is_active: true, requires_approval: false },
-  { id: "ptc-9", type_key: "supplier_termination", display_name: {"zh-CN":"终止合作","en-US":"Supplier Termination"}, sort_order: 9, is_active: true, requires_approval: true },
-  { id: "ptc-10", type_key: "supplier_blacklist", display_name: {"zh-CN":"退出/黑名单","en-US":"Supplier Blacklist"}, sort_order: 10, is_active: true, requires_approval: true },
+  { id: "ptc-5", type_key: "supplier_management", display_name: {"zh-CN":"供应商管理","en-US":"Supplier Management"}, sort_order: 5, is_active: true, requires_approval: false },
 ];
 
 let _projectTypeConfigs = [...MOCK_PROJECT_TYPE_CONFIGS];
@@ -1158,14 +1151,14 @@ export const adminApi = {
 // ---- Certification API (with mock fallback) ----
 
 const MOCK_CERTIFICATIONS: Certification[] = [
-  { id: "cert-1", product_id: "prod-1", cert_type: "CE", cert_number: "CE-2025-001-AC220", issued_by: "TÜV Rheinland", issue_date: "2025-03-01", expiry_date: "2028-03-01", cert_file_url: null, status: "valid", remind_before_days: 90, created_at: "2025-03-01T00:00:00Z", updated_at: null },
-  { id: "cert-2", product_id: "prod-1", cert_type: "ROHS", cert_number: "RoHS-2025-0042", issued_by: "SGS", issue_date: "2025-02-15", expiry_date: "2026-02-15", cert_file_url: null, status: "valid", remind_before_days: 60, created_at: "2025-02-15T00:00:00Z", updated_at: null },
-  { id: "cert-3", product_id: "prod-2", cert_type: "UL", cert_number: "UL-E483921", issued_by: "Underwriters Laboratories", issue_date: "2025-04-10", expiry_date: "2028-04-10", cert_file_url: null, status: "valid", remind_before_days: 90, created_at: "2025-04-10T00:00:00Z", updated_at: null },
-  { id: "cert-4", product_id: "prod-2", cert_type: "FCC", cert_number: "FCC-ID: 2A9HR-DC480", issued_by: "FCC", issue_date: "2025-04-15", expiry_date: "2028-04-15", cert_file_url: null, status: "valid", remind_before_days: 90, created_at: "2025-04-15T00:00:00Z", updated_at: null },
-  { id: "cert-5", product_id: "prod-3", cert_type: "PSE", cert_number: "PSE-JP-2025-0331", issued_by: "JET", issue_date: "2025-05-20", expiry_date: "2025-08-20", cert_file_url: null, status: "expiring_soon", remind_before_days: 60, created_at: "2025-05-20T00:00:00Z", updated_at: null },
-  { id: "cert-6", product_id: "prod-4", cert_type: "UL", cert_number: "UL-E491032", issued_by: "Underwriters Laboratories", issue_date: "2025-03-01", expiry_date: "2025-07-01", cert_file_url: null, status: "expiring_soon", remind_before_days: 30, created_at: "2025-03-01T00:00:00Z", updated_at: null },
-  { id: "cert-7", product_id: "prod-5", cert_type: "CCC", cert_number: "CCC-2024-11223", issued_by: "CQC", issue_date: "2024-12-01", expiry_date: "2025-06-15", cert_file_url: null, status: "expiring_soon", remind_before_days: 45, created_at: "2024-12-01T00:00:00Z", updated_at: null },
-  { id: "cert-8", product_id: "prod-8", cert_type: "CE", cert_number: "CE-2023-001-DC1500", issued_by: "TÜV SÜD", issue_date: "2023-10-01", expiry_date: "2024-10-01", cert_file_url: null, status: "expired", remind_before_days: 90, created_at: "2023-10-01T00:00:00Z", updated_at: "2024-10-02T00:00:00Z" },
+  { id: "cert-1", product_id: "prod-1", product_name: "AC Charger 220V EU", cert_type: "CE", cert_number: "CE-2025-001-AC220", issued_by: "TÜV Rheinland", issue_date: "2025-03-01", expiry_date: "2028-03-01", cert_file_url: null, status: "valid", remind_before_days: 90, created_at: "2025-03-01T00:00:00Z", updated_at: null },
+  { id: "cert-2", product_id: "prod-1", product_name: "AC Charger 220V EU", cert_type: "ROHS", cert_number: "RoHS-2025-0042", issued_by: "SGS", issue_date: "2025-02-15", expiry_date: "2026-02-15", cert_file_url: null, status: "valid", remind_before_days: 60, created_at: "2025-02-15T00:00:00Z", updated_at: null },
+  { id: "cert-3", product_id: "prod-2", product_name: "DC Charger 480W US", cert_type: "UL", cert_number: "UL-E483921", issued_by: "Underwriters Laboratories", issue_date: "2025-04-10", expiry_date: "2028-04-10", cert_file_url: null, status: "valid", remind_before_days: 90, created_at: "2025-04-10T00:00:00Z", updated_at: null },
+  { id: "cert-4", product_id: "prod-2", product_name: "DC Charger 480W US", cert_type: "FCC", cert_number: "FCC-ID: 2A9HR-DC480", issued_by: "FCC", issue_date: "2025-04-15", expiry_date: "2028-04-15", cert_file_url: null, status: "valid", remind_before_days: 90, created_at: "2025-04-15T00:00:00Z", updated_at: null },
+  { id: "cert-5", product_id: "prod-3", product_name: "Portable Charger 3.3kW JP", cert_type: "PSE", cert_number: "PSE-JP-2025-0331", issued_by: "JET", issue_date: "2025-05-20", expiry_date: "2025-08-20", cert_file_url: null, status: "expiring_soon", remind_before_days: 60, created_at: "2025-05-20T00:00:00Z", updated_at: null },
+  { id: "cert-6", product_id: "prod-4", product_name: "AC Charger 110V US", cert_type: "UL", cert_number: "UL-E491032", issued_by: "Underwriters Laboratories", issue_date: "2025-03-01", expiry_date: "2025-07-01", cert_file_url: null, status: "expiring_soon", remind_before_days: 30, created_at: "2025-03-01T00:00:00Z", updated_at: null },
+  { id: "cert-7", product_id: "prod-5", product_name: "DC Charger 200W CN", cert_type: "CCC", cert_number: "CCC-2024-11223", issued_by: "CQC", issue_date: "2024-12-01", expiry_date: "2025-06-15", cert_file_url: null, status: "expiring_soon", remind_before_days: 45, created_at: "2024-12-01T00:00:00Z", updated_at: null },
+  { id: "cert-8", product_id: "prod-8", product_name: "DC Charger 1500W EU", cert_type: "CE", cert_number: "CE-2023-001-DC1500", issued_by: "TÜV SÜD", issue_date: "2023-10-01", expiry_date: "2024-10-01", cert_file_url: null, status: "expired", remind_before_days: 90, created_at: "2023-10-01T00:00:00Z", updated_at: "2024-10-02T00:00:00Z" },
 ];
 
 let _certifications = [...MOCK_CERTIFICATIONS];
@@ -1176,10 +1169,25 @@ export const certApi = {
       const res = await api.get<PaginatedResponse<Certification>>("/certifications", { params });
       return { data: res.data };
     } catch {
+      let filtered = _certifications;
+      if (params?.product_id) {
+        const pid = String(params.product_id).toLowerCase();
+        filtered = filtered.filter((c) => c.product_id.toLowerCase().includes(pid));
+      }
+      if (params?.product_name) {
+        const pname = String(params.product_name).toLowerCase();
+        filtered = filtered.filter((c) => c.product_name.toLowerCase().includes(pname));
+      }
+      if (params?.cert_type) {
+        filtered = filtered.filter((c) => c.cert_type === params.cert_type);
+      }
+      if (params?.status) {
+        filtered = filtered.filter((c) => c.status === params.status);
+      }
       return {
         data: {
-          success: true, data: _certifications,
-          total: _certifications.length,
+          success: true, data: filtered,
+          total: filtered.length,
           page: (params?.page as number) ?? 1,
           page_size: (params?.page_size as number) ?? 20,
           total_pages: 1,
@@ -1196,7 +1204,7 @@ export const certApi = {
         data: {
           success: true,
           data: _certifications.find((c) => c.id === id) ?? {
-            id, product_id: "prod-1", cert_type: "Mock Cert", cert_number: null, issued_by: null,
+            id, product_id: "prod-1", product_name: "AC Charger 220V EU", cert_type: "Mock Cert", cert_number: null, issued_by: null,
             issue_date: null, expiry_date: null, cert_file_url: null, status: "valid",
             remind_before_days: 90, created_at: new Date().toISOString(), updated_at: null,
           } as Certification,
@@ -1209,8 +1217,15 @@ export const certApi = {
       const res = await api.post<ApiResponse<Certification>>("/certifications", data);
       return { data: res.data };
     } catch {
+      const productId = (data.product_id as string) || "prod-1";
+      let productName = (data.product_name as string) || "";
+      if (!productName && productId) {
+        const product = MOCK_PRODUCTS.find((p) => p.id === productId);
+        if (product) productName = product.name;
+      }
       const newItem = {
-        id: `mock-cert-${Date.now()}`, product_id: (data.product_id as string) || "prod-1",
+        id: `mock-cert-${Date.now()}`, product_id: productId,
+        product_name: productName,
         cert_type: (data.cert_type as string) || "CE", cert_number: null, issued_by: null,
         issue_date: null, expiry_date: null, cert_file_url: null, status: "valid",
         remind_before_days: 90, created_at: new Date().toISOString(), updated_at: null,

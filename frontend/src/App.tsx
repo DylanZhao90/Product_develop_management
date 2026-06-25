@@ -14,9 +14,8 @@ import Design from "./pages/Design";
 import Suppliers from "./pages/Suppliers";
 import SupplierDetail from "./pages/Suppliers/SupplierDetail";
 import Lifecycle from "./pages/Lifecycle";
-import Firmware from "./pages/Firmware";
+import SupplierLifecycle from "./pages/SupplierLifecycle";
 import Analytics from "./pages/Analytics";
-import Admin from "./pages/Admin";
 import Login from "./pages/Login";
 import AuthCallback from "./pages/Login/AuthCallback";
 import Certifications from "./pages/Certifications";
@@ -83,9 +82,8 @@ export default function App() {
         <Route path="suppliers" element={<Suppliers />} />
         <Route path="suppliers/:id" element={<SupplierDetail />} />
         <Route path="lifecycle" element={<Lifecycle />} />
-        <Route path="firmware" element={<Firmware />} />
+        <Route path="lifecycle/supplier" element={<SupplierLifecycle />} />
         <Route path="analytics" element={<Analytics />} />
-        <Route path="admin" element={<Admin />} />
         <Route path="certifications" element={<Certifications />} />
         <Route path="settings" element={<Settings />} />
       </Route>

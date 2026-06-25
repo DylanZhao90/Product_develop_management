@@ -234,6 +234,7 @@
   "certification.expiringTitle": "期限切れ間近",
   "certification.addCertification": "認証追加",
   "certification.productId": "製品ID",
+  "certification.productName": "製品名",
   "certification.remindBeforeDays": "事前通知（日数）",
   "certification.statusValid": "有効",
   "certification.statusExpiringSoon": "期限間近",

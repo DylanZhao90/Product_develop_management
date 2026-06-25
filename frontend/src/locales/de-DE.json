@@ -234,6 +234,7 @@
   "certification.expiringTitle": "Läuft bald ab",
   "certification.addCertification": "Zertifikat hinzufügen",
   "certification.productId": "Produkt-ID",
+  "certification.productName": "Produktname",
   "certification.remindBeforeDays": "Erinnern vor (Tage)",
   "certification.statusValid": "Gültig",
   "certification.statusExpiringSoon": "Läuft bald ab",

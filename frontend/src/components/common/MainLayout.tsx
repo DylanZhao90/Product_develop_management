@@ -17,7 +17,6 @@ import {
   FileImageOutlined,
   TeamOutlined,
   NodeIndexOutlined,
-  CloudUploadOutlined,
   SafetyCertificateOutlined,
   SettingOutlined,
   LogoutOutlined,
@@ -38,27 +37,53 @@ const { Header, Sider, Content } = Layout;
 
 const menuItems = [
   { key: "/", icon: <DashboardOutlined />, label: "" },
-  { key: "/products", icon: <AppstoreOutlined />, label: "" },
   { key: "/projects", icon: <ProjectOutlined />, label: "" },
-  { key: "/design", icon: <FileImageOutlined />, label: "" },
+  { key: "/products", icon: <AppstoreOutlined />, label: "" },
   { key: "/suppliers", icon: <TeamOutlined />, label: "" },
-  { key: "/lifecycle", icon: <NodeIndexOutlined />, label: "" },
-  { key: "/firmware", icon: <CloudUploadOutlined />, label: "" },
-  { key: "/admin", icon: <SettingOutlined />, label: "" },
+  {
+    key: "lifecycle",
+    icon: <NodeIndexOutlined />,
+    label: "",
+    children: [
+      { key: "/lifecycle", label: "" },           // 产品生命周期看板
+      { key: "/lifecycle/supplier", label: "" },   // 供应商生命周期看板
+    ],
+  },
+  { key: "/design", icon: <FileImageOutlined />, label: "" },
   { key: "/certifications", icon: <SafetyCertificateOutlined />, label: "" },
+  { key: "/settings", icon: <SettingOutlined />, label: "" },
 ];
 
 const menuLabelKeys: Record<string, string> = {
   "/": "menu.dashboard",
   "/products": "menu.products",
   "/projects": "menu.projects",
-  "/design": "menu.design",
   "/suppliers": "menu.suppliers",
-  "/lifecycle": "menu.lifecycle",
-  "/firmware": "menu.firmware",
-  "/admin": "menu.admin",
+  "lifecycle": "menu.lifecycle",
+  "/lifecycle": "menu.lifecycleProduct",
+  "/lifecycle/supplier": "menu.lifecycleSupplier",
+  "/design": "menu.design",
   "/certifications": "menu.certifications",
+  "/settings": "menu.settings",
 };
+
+function renderMenuItem(
+  item: (typeof menuItems)[number],
+  translate: (key: string) => string
+): any {
+  const label = translate(menuLabelKeys[item.key] || item.key);
+  if ("children" in item && item.children) {
+    return {
+      ...item,
+      label,
+      children: item.children.map((child) => ({
+        ...child,
+        label: translate(menuLabelKeys[child.key] || child.key),
+      })),
+    };
+  }
+  return { ...item, label };
+}
 
 export default function MainLayout() {
   const [collapsed, setCollapsed] = useState(false);
@@ -207,10 +232,7 @@ export default function MainLayout() {
           theme="dark"
           mode="inline"
           selectedKeys={[selectedKey]}
-          items={menuItems.map((item) => ({
-            ...item,
-            label: t(menuLabelKeys[item.key] || item.key),
-          }))}
+          items={menuItems.map((item) => renderMenuItem(item, t))}
           onClick={({ key }) => navigate(key)}
           style={{
             background: "transparent",

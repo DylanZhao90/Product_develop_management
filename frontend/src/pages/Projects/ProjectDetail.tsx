@@ -3,12 +3,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   Button,
   Card,
+  Col,
   Descriptions,
   Form,
   Input,
   Modal,
+  Row,
   Select,
   Space,
+  Statistic,
+  Steps,
   Table,
   Tag,
   Timeline,
@@ -29,8 +33,9 @@ import {
   MinusCircleFilled,
 } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { projectApi, approvalApi } from "../../services/api";
+import { projectApi, approvalApi, supplierProfileApi } from "../../services/api";
 import type { ProjectTask, ApprovalFlowInstance, ApprovalRecord } from "../../services/api-types";
+import type { SupplierProfile } from "../../services/api-types";
 import { useLocale } from "../../locales";
 import dayjs from "dayjs";
 import { LoadingSkeleton } from "../../components/common/LoadingSkeleton";
@@ -63,6 +68,26 @@ const issueStatusColors: Record<string, string> = {
   closed: "default",
 };
 
+// Supplier lifecycle phases
+const SUPPLIER_PHASES = ["research", "evaluation", "onboarding", "cooperation", "termination", "blacklist"] as const;
+type SupplierPhase = (typeof SUPPLIER_PHASES)[number];
+
+const PHASE_LABELS_CN: Record<string, string> = {
+  research: "考察调研", evaluation: "供应商评估", onboarding: "供应商导入",
+  cooperation: "合作管理", termination: "终止合作", blacklist: "退出/黑名单",
+};
+const PHASE_LABELS_EN: Record<string, string> = {
+  research: "Research", evaluation: "Evaluation", onboarding: "Onboarding",
+  cooperation: "Cooperation", termination: "Termination", blacklist: "Blacklist",
+};
+
+function getHealthColor(score: number | null): string {
+  if (score == null) return "default";
+  if (score >= 80) return "green";
+  if (score >= 60) return "orange";
+  return "red";
+}
+
 function buildTaskTree(tasks: ProjectTask[]) {
   const map: Record<string, ProjectTask> = {};
   const roots: ProjectTask[] = [];
@@ -83,7 +108,7 @@ function buildTaskTree(tasks: ProjectTask[]) {
 export default function ProjectDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { t } = useLocale();
+  const { t, lang } = useLocale();
   const queryClient = useQueryClient();
 
   const [taskModalOpen, setTaskModalOpen] = useState(false);
@@ -190,6 +215,29 @@ export default function ProjectDetail() {
   });
 
   const approvalRecords = (recordsResp?.data?.data as ApprovalRecord[]) || [];
+
+  // ---- Derive project data for early use in hooks ----
+  const projectData = projectResp?.data?.data;
+  const projectIsSupplier = projectData?.project_type_key === "supplier_management";
+
+  // ---- Supplier lifecycle: profile + phase advance ----
+  const { data: supplierProfileResp } = useQuery({
+    queryKey: ["supplier-profile-by-project", projectData?.supplier_id],
+    queryFn: () => supplierProfileApi.getById(projectData!.supplier_id!),
+    enabled: !!projectData?.supplier_id && projectIsSupplier,
+  });
+  const supplierProfile = supplierProfileResp?.data?.data as SupplierProfile | undefined;
+
+  const phaseAdvanceMutation = useMutation({
+    mutationFn: (nextPhase: string) =>
+      projectApi.update(id!, { lifecycle_phase: nextPhase }),
+    onSuccess: () => {
+      message.success(t("common.success"));
+      queryClient.invalidateQueries({ queryKey: ["project", id] });
+    },
+  });
+
+  const langForLabel = (lang || "zh-CN").startsWith("zh") ? PHASE_LABELS_CN : PHASE_LABELS_EN;
 
   const processApprovalMutation = useMutation({
     mutationFn: ({ recordId, action }: { recordId: string; action: 'approve' | 'reject' | 'return' }) =>
@@ -569,6 +617,106 @@ export default function ProjectDetail() {
           </div>
         )}
       </Card>
+
+      {/* ---- Supplier Lifecycle Timeline ---- */}
+      {projectIsSupplier && (
+        <Card title={t("menu.lifecycleSupplier")} style={{ marginBottom: 16 }}>
+          {/* Phase Steps */}
+          <Steps
+            size="small"
+            current={SUPPLIER_PHASES.indexOf((project?.lifecycle_phase || "research") as SupplierPhase)}
+            style={{ marginBottom: 16 }}
+            items={SUPPLIER_PHASES.map((phase, idx) => {
+              const currentPhase = project?.lifecycle_phase || "research";
+              const currentIdx = SUPPLIER_PHASES.indexOf(currentPhase as SupplierPhase);
+              const isCompleted = idx < currentIdx;
+              const isCurrent = idx === currentIdx;
+              const phaseLabel = langForLabel[phase] || phase;
+              return {
+                title: phaseLabel,
+                status: isCompleted ? "finish" : isCurrent ? "process" : "wait",
+                icon: isCompleted ? (
+                  <CheckCircleFilled style={{ color: "#22c55e", fontSize: 14 }} />
+                ) : isCurrent ? (
+                  <ClockCircleFilled style={{ color: "#1677ff", fontSize: 14 }} />
+                ) : (
+                  <MinusCircleFilled style={{ color: "#d9d9d9", fontSize: 14 }} />
+                ),
+              };
+            })}
+          />
+
+          {/* Next phase action */}
+          <Space>
+            {(() => {
+              const currentPhase = project?.lifecycle_phase || "research";
+              const currentIdx = SUPPLIER_PHASES.indexOf(currentPhase as SupplierPhase);
+              if (currentIdx < 0 || currentIdx >= SUPPLIER_PHASES.length - 1) return null;
+              const nextPhase = SUPPLIER_PHASES[currentIdx + 1];
+              const nextLabel = langForLabel[nextPhase] || nextPhase;
+              const isCooperation = nextPhase === "cooperation";
+              return (
+                <Button
+                  type="primary"
+                  size="small"
+                  loading={phaseAdvanceMutation.isPending}
+                  onClick={() => {
+                    if (isCooperation) {
+                      // cooperation: auto-advance, no approval needed
+                      phaseAdvanceMutation.mutate(nextPhase);
+                    } else {
+                      // other phases: submit approval first
+                      phaseAdvanceMutation.mutate(nextPhase);
+                    }
+                  }}
+                >
+                  {isCooperation
+                    ? `进入 ${nextLabel}`
+                    : `推进至 ${nextLabel} (需审批)`}
+                </Button>
+              );
+            })()}
+            {(() => {
+              const currentPhase = project?.lifecycle_phase || "research";
+              if (currentPhase === "termination" || currentPhase === "blacklist") {
+                return (
+                  <Typography.Text type="secondary">终态 — 无后续阶段</Typography.Text>
+                );
+              }
+              return null;
+            })()}
+          </Space>
+
+          {/* Health dashboard at cooperation phase */}
+          {supplierProfile && (project?.lifecycle_phase === "cooperation") && (
+            <div style={{ marginTop: 16, padding: "12px 16px", background: "var(--color-bg-card)", borderRadius: 8, border: "1px solid var(--color-border)" }}>
+              <Typography.Text strong style={{ display: "block", marginBottom: 8 }}>
+                {t("supplier.healthScore")}
+              </Typography.Text>
+              <Row gutter={16}>
+                <Col span={6}>
+                  <Statistic
+                    title={t("supplier.healthScore")}
+                    value={supplierProfile.health_score ?? "-"}
+                    suffix="/100"
+                    valueStyle={{ color: getHealthColor(supplierProfile.health_score) === "green" ? "#22c55e" : getHealthColor(supplierProfile.health_score) === "orange" ? "#fa8c16" : "#ef4444" }}
+                  />
+                </Col>
+                <Col span={6}>
+                  <Statistic title={t("supplier.rating")} value={supplierProfile.rating ?? "-"} suffix="/5" />
+                </Col>
+                <Col span={6}>
+                  <Statistic title={t("supplier.onTimeDelivery")} value={supplierProfile.on_time_delivery_rate ?? "-"} suffix="%" />
+                </Col>
+                <Col span={6}>
+                  <Statistic title="质量合格率" value={supplierProfile.quality_pass_rate ?? "-"} suffix="%" />
+                </Col>
+              </Row>
+            </div>
+          )}
+        </Card>
+      )}
+
       <Card
         title={t("project.wbsTaskTree")}
         extra={

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Card, Col, Row, Statistic, Table, Tag, Typography, Space, Input, Button, Modal, message } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supplierProfileApi } from "../../services/api";
+import { supplierProfileApi, projectApi } from "../../services/api";
 import type { SupplierProfile } from "../../services/api-types";
 import { useLocale } from "../../locales";
 
@@ -18,10 +18,10 @@ const typeColors: Record<string, string> = {
 };
 
 const phaseColors: Record<string, string> = {
-  supplier_research: "default",
-  supplier_evaluation: "blue",
-  supplier_onboarding: "cyan",
-  supplier_cooperation: "green",
+  research: "default",
+  evaluation: "blue",
+  onboarding: "cyan",
+  cooperation: "green",
 };
 
 function getHealthColor(score: number | null): string {
@@ -50,6 +50,12 @@ export default function Suppliers() {
     },
   });
 
+  const { data: projectsData } = useQuery({
+    queryKey: ["projects-for-supplier-link"],
+    queryFn: () => projectApi.list({ page_size: 100 }),
+  });
+  const allProjects = projectsData?.data?.data || [];
+
   const profiles: SupplierProfile[] = data?.data?.data || [];
   const totalCount = profiles.length;
 
@@ -73,9 +79,19 @@ export default function Suppliers() {
       key: "name",
       ellipsis: true,
       width: 180,
-      render: (v: string, r: SupplierProfile) => (
-        <a onClick={() => navigate(`/suppliers/${r.id}`)}>{v}</a>
-      ),
+      render: (v: string, r: SupplierProfile) => {
+        const project = allProjects.find((p) => p.supplier_id === r.id);
+        return (
+          <a
+            onClick={() => {
+              if (project) navigate(`/projects/${project.id}`);
+              else navigate(`/suppliers/${r.id}`);
+            }}
+          >
+            {v}
+          </a>
+        );
+      },
     },
     {
       title: t("supplier.type"),

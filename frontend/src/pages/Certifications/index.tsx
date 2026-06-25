@@ -2,26 +2,33 @@ import { useState } from "react";
 import { Card, Table, Tag, Typography, Space, Select, Input, Button, Modal, Form, DatePicker, message } from "antd";
 import { PlusOutlined, SearchOutlined, WarningOutlined } from "@ant-design/icons";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { certApi } from "../../services/api";
+import { MOCK_PRODUCTS } from "../../services/api";
 import { useLocale } from "../../locales";
 import dayjs from "dayjs";
 
 const statusColors: Record<string, string> = { valid: "green", expiring_soon: "orange", expired: "red" };
 const certTypeLabels: Record<string, string> = { CE: "CE", FCC: "FCC", UL: "UL", RoHS: "RoHS" };
 
+const productOptions = MOCK_PRODUCTS.map((p) => ({
+  label: `${p.name} (${p.model})`,
+  value: p.id,
+}));
+
 export default function Certifications() {
   const { t } = useLocale();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
-  const [productId, setProductId] = useState<string | undefined>();
+  const [searchText, setSearchText] = useState<string | undefined>();
   const [certType, setCertType] = useState<string | undefined>();
   const [statusFilter, setStatusFilter] = useState<string | undefined>();
   const [modalOpen, setModalOpen] = useState(false);
   const [form] = Form.useForm();
 
   const { data, isLoading } = useQuery({
-    queryKey: ["certifications", page, productId, certType, statusFilter],
-    queryFn: () => certApi.list({ page, page_size: 20, product_id: productId, cert_type: certType, status: statusFilter }),
+    queryKey: ["certifications", page, searchText, certType, statusFilter],
+    queryFn: () => certApi.list({ page, page_size: 20, product_name: searchText, cert_type: certType, status: statusFilter }),
   });
 
   const { data: expiringResp } = useQuery({
@@ -38,6 +45,16 @@ export default function Certifications() {
   const total = data?.data?.total || 0;
   const expiring = expiringResp?.data?.data || [];
 
+  const handleProductSelect = (_value: string, option?: { label: string; value: string } | { label: string; value: string }[]) => {
+    const opt = Array.isArray(option) ? option[0] : option;
+    if (opt) {
+      const product = MOCK_PRODUCTS.find((p) => p.id === opt.value);
+      if (product) {
+        form.setFieldValue("product_name", product.name);
+      }
+    }
+  };
+
   const columns = [
     {
       title: t("certification.type"),
@@ -45,6 +62,14 @@ export default function Certifications() {
       key: "cert_type",
       width: 80,
       render: (v: string) => <Tag>{certTypeLabels[v] || v}</Tag>,
+    },
+    {
+      title: t("certification.productName"),
+      dataIndex: "product_name",
+      key: "product_name",
+      width: 200,
+      render: (v: string, record: { product_id: string }) =>
+        v ? <Link to={`/products/${record.product_id}`}>{v}</Link> : "-",
     },
     { title: t("certification.number"), dataIndex: "cert_number", key: "cert_number", width: 140, render: (v: string) => v || "-" },
     { title: t("certification.issuedBy"), dataIndex: "issued_by", key: "issued_by", width: 120, render: (v: string) => v || "-" },
@@ -98,8 +123,8 @@ export default function Certifications() {
         extra={<Button type="primary" icon={<PlusOutlined />} onClick={() => setModalOpen(true)}>{t("certification.addCertification")}</Button>}
       >
         <Space style={{ marginBottom: 16 }} wrap>
-          <Input placeholder={t("certification.productId")} value={productId}
-            onChange={(e) => { setProductId(e.target.value || undefined); setPage(1); }}
+          <Input placeholder={t("certification.productName")} value={searchText}
+            onChange={(e) => { setSearchText(e.target.value || undefined); setPage(1); }}
             prefix={<SearchOutlined />} style={{ width: 280 }} allowClear />
           <Select placeholder={t("certification.type")} value={certType} onChange={(v) => { setCertType(v); setPage(1); }} style={{ width: 120 }}
             options={[
@@ -122,7 +147,20 @@ export default function Certifications() {
         onOk={() => form.validateFields().then((v) => createMutation.mutate({ ...v, issue_date: v.issue_date?.format("YYYY-MM-DD"), expiry_date: v.expiry_date?.format("YYYY-MM-DD") }))}
         onCancel={() => { setModalOpen(false); form.resetFields(); }} confirmLoading={createMutation.isPending}>
         <Form form={form} layout="vertical">
-          <Form.Item name="product_id" label={t("certification.productId")} rules={[{ required: true }]}><Input /></Form.Item>
+          <Form.Item name="product_id" label={t("certification.productName")} rules={[{ required: true }]}>
+            <Select
+              showSearch
+              placeholder={t("certification.productName")}
+              options={productOptions}
+              filterOption={(input, option) =>
+                (option?.label as string ?? "").toLowerCase().includes(input.toLowerCase())
+              }
+              onChange={(value: any, option?: any) => { handleProductSelect(value, option); }}
+            />
+          </Form.Item>
+          <Form.Item name="product_name" hidden>
+            <Input />
+          </Form.Item>
           <Form.Item name="cert_type" label={t("certification.type")} rules={[{ required: true }]}>
             <Select options={["CE", "FCC", "UL", "RoHS"].map((v) => ({ label: v, value: v }))} />
           </Form.Item>

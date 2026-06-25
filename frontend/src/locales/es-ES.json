@@ -234,6 +234,7 @@
   "certification.expiringTitle": "Próximo a vencer",
   "certification.addCertification": "Añadir certificación",
   "certification.productId": "ID del producto",
+  "certification.productName": "Nombre del producto",
   "certification.remindBeforeDays": "Recordar antes (días)",
   "certification.statusValid": "Válido",
   "certification.statusExpiringSoon": "Próximo a vencer",

@@ -234,6 +234,7 @@
   "certification.expiringTitle": "만료 예정",
   "certification.addCertification": "인증 추가",
   "certification.productId": "제품 ID",
+  "certification.productName": "제품명",
   "certification.remindBeforeDays": "사전 알림(일)",
   "certification.statusValid": "유효",
   "certification.statusExpiringSoon": "만료 예정",

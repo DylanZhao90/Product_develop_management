@@ -78,6 +78,7 @@ export interface Project {
   name: string;
   type: string;
   project_type_key: string;
+  lifecycle_phase?: string;  // supplier_management: research|evaluation|onboarding|cooperation|termination|blacklist
   approval_status: 'draft' | 'pending' | 'approved' | 'rejected';
   approval_flow_id: string | null;
   feasibility_doc_url: string | null;
@@ -188,6 +189,7 @@ export type CertStatus = "valid" | "expiring_soon" | "expired";
 export interface Certification {
   id: string;
   product_id: string;
+  product_name: string;
   cert_type: string;
   cert_number: string | null;
   issued_by: string | null;
@@ -198,6 +200,18 @@ export interface Certification {
   remind_before_days: number;
   created_at: string;
   updated_at: string | null;
+}
+
+export interface CertificationCreate {
+  product_id: string;
+  product_name: string;
+  cert_type: string;
+  cert_number?: string;
+  issued_by?: string;
+  issue_date?: string;
+  expiry_date?: string;
+  cert_file_url?: string;
+  remind_before_days?: number;
 }
 
 // ---- Firmware ----
